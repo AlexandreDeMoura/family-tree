@@ -1,0 +1,23 @@
+{
+  "name": "family-tree",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=10 <11"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @family-tree/family-core build && pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm --filter @family-tree/family-core build && pnpm -r typecheck",
+    "lint": "pnpm --filter @family-tree/web lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "devDependencies": {
+    "supabase": "2.117.0",
+    "typescript": "~5.9.3",
+    "vitest": "5.0.0"
+  }
+}
