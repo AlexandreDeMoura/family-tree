@@ -1,14 +1,21 @@
-# User-visible or machine-facing doors into the product.
-# Example:
-# - id: door-http-api
-#   name: HTTP API
-#   status: shipped
-#   why: "Lets clients invoke application capabilities."
-#   code:
-#     - path: src/api/routes.ts
-#       symbol: router
-#   verified_by: []
-#   relies_on: [part-api]
-#   doors: []
-#   open_questions: []
-#   last_verified: abc1234
+- id: door-web-shell
+  name: Starter web page
+  status: shipped
+  why: Provides the initial Family Tree page on the Vite development server at port 5173.
+  code: [apps/web/index.html, apps/web/src/App.tsx, apps/web/src/main.tsx]
+  verified_by: []
+  relies_on: [part-web]
+  doors: []
+  open_questions: ["Visual and browser acceptance remain manual."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: door-api-health
+  name: GET /health
+  status: shipped
+  why: Reports API liveness as HTTP 200 with a JSON status of ok, independently of database readiness.
+  code: [apps/api/src/app.ts, apps/api/src/server.ts]
+  verified_by: [apps/api/src/app.test.ts]
+  relies_on: [part-api]
+  doors: []
+  open_questions: []
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715

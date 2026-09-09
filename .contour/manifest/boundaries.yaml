@@ -1,12 +1,44 @@
-# Runtime parts and ownership boundaries.
-# Example:
-# - id: part-api
-#   name: Application API
-#   status: shipped
-#   why: "Owns server-side application behavior."
-#   code: [src/api/]
-#   verified_by: []
-#   relies_on: []
-#   doors: [door-http-api]
-#   open_questions: []
-#   last_verified: abc1234
+# Code and non-UI checks reviewed at the current HEAD; UI QA remains manual.
+- id: part-web
+  name: Web application shell
+  status: shipped
+  why: Hosts the React starter with Router and Query providers and Tailwind styling.
+  code: [apps/web/src/, apps/web/vite.config.ts, apps/web/tsconfig.app.json, apps/web/tsconfig.node.json]
+  verified_by: []
+  relies_on: [part-family-core]
+  doors: [door-web-shell]
+  open_questions: ["The organizer performs manual UI QA; product screens follow in later commits."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: part-api
+  name: Fastify API foundation
+  status: shipped
+  why: Owns the health endpoint, configured CORS, startup environment validation, and server-only Supabase client.
+  code: [apps/api/src/, apps/api/package.json]
+  verified_by: [apps/api/src/app.test.ts]
+  relies_on: [part-family-core, part-supabase]
+  doors: [door-api-health]
+  open_questions: ["Organizer authorization and family endpoints are not implemented yet."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: part-family-core
+  name: Pure shared package scaffold
+  status: shipped
+  why: Provides an ESM and declaration build consumed through workspace dependencies by both apps.
+  code: [packages/family-core/, pnpm-workspace.yaml, tsconfig.base.json]
+  verified_by: []
+  relies_on: []
+  doors: []
+  open_questions: ["The entry point is intentionally empty until domain implementation in commit 02."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: part-supabase
+  name: Local Supabase foundation
+  status: shipped
+  why: Configures local PostgreSQL, Auth redirects with public signup disabled, and Storage provisioning.
+  code: [supabase/config.toml, supabase/migrations/, apps/api/scripts/setup-supabase.mjs]
+  verified_by: []
+  relies_on: []
+  doors: []
+  open_questions: ["Application SQL, RLS, and grants follow in commit 03; organizer provisioning is manual."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715

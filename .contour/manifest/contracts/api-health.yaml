@@ -1,0 +1,20 @@
+id: contract-api-health
+name: API liveness and browser origin policy
+status: shipped
+part: part-api
+why: Allows callers to check process liveness while keeping the browser CORS policy limited to the configured frontend origin.
+accepts:
+  - GET /health without authentication.
+guarantees:
+  - The health endpoint returns HTTP 200 and a JSON body containing status equal to ok.
+  - Access-Control-Allow-Origin is the configured web origin, rather than a reflected request origin.
+rules:
+  - Health does not query PostgreSQL or Storage and is not a readiness check.
+  - API construction is separate from environment loading and port binding so injection tests need no credentials.
+  - CORS is a browser policy and does not replace future endpoint authorization.
+code: [apps/api/src/app.ts, apps/api/src/server.ts]
+verified_by: [apps/api/src/app.test.ts]
+relies_on: []
+doors: [door-api-health]
+open_questions: []
+last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715

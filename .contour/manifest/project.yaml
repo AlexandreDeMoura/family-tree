@@ -9,9 +9,10 @@
 # stale_after_commits: 30
 
 purpose: >-
-  A private, shareable family tree. Organizers model people and their
-  relationships with enforced graph invariants, attach photos and rich person
-  cards, and read the result through an automatic multi-generation layout.
+  A private, shareable family tree for one organizer and read-only relatives.
+  Commit 01 provides the pnpm workspace, web shell, API health endpoint, and
+  local Supabase setup. Family schemas, graph validation, authorization,
+  photos, and automatic layout remain subsequent work in the PRD commit plan.
 
 tech:
   - TypeScript

@@ -4,6 +4,11 @@ Run the steps below yourself, in order, from macOS Terminal (zsh). The starting 
 
 Run each block separately and stop if it fails. File-writing blocks are intended for this initial setup and overwrite the named files; do not rerun them over later implementation work.
 
+**Existing checkout:** Steps 1–9 have been completed for this repository. Use the
+[root README](README.md) for daily commands and validation. Keep your populated
+local environment files and provisioned organizer/bucket; do not repeat the
+scaffolding blocks. Steps 10–11 are optional hosted setup, outside commit 01.
+
 ## 1. Install prerequisites
 
 Use Node.js 24 and pnpm 10 for this project. Node 24 meets Vite's documented Node requirements; this guide deliberately selects pnpm 10 so its workspace/build-script configuration is consistent. [Vite prerequisites](https://vite.dev/guide/), [pnpm installation and compatibility](https://pnpm.io/installation).
@@ -455,7 +460,11 @@ curl --fail http://localhost:3001/health
 
 Expected response: `{"status":"ok"}`. This endpoint proves API liveness; the script in step 8 checks database and Storage connectivity. Manually open `http://localhost:5173` to QA the starter page.
 
-The root `test` command is ready for the domain/API/layout tests added in the plan. Before test files exist, `pnpm test` reports no tests and exits unsuccessfully; do not treat initialization as tested product behavior.
+The raw scaffold above has no tests. The completed commit 01 foundation adds
+Fastify injection tests for health and CORS, and `pnpm test` fails if no tests are
+discovered. Run `pnpm validate` on the completed checkout for lint, typecheck,
+tests, production builds, and the installed Contour manifest check. Domain and
+product behavior remain unimplemented at this stage.
 
 After this setup you have the workspace, dependencies, development servers, local PostgreSQL/Auth/Storage, one organizer account, and a private bucket. The family data schema and application features remain the work in commits 02 onward.
 

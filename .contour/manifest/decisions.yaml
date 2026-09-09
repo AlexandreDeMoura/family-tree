@@ -1,12 +1,21 @@
-# Durable product and architecture decisions; do not infer unknown history.
-# Example:
-# - id: dec-use-sqlite
-#   name: Store local data in SQLite
-#   status: shipped
-#   why: "The product needs durable local storage without a service dependency."
-#   code: [src/storage/]
-#   verified_by: []
-#   relies_on: [part-storage]
-#   doors: []
-#   open_questions: []
-#   last_verified: abc1234
+- id: decision-shared-esm-build
+  name: Compile the pure shared workspace package before its consumers
+  status: shipped
+  why: Both Vite and the compiled Node API resolve JavaScript and declarations without custom source aliases.
+  code: [package.json, packages/family-core/package.json, packages/family-core/tsconfig.json, apps/api/package.json, apps/web/package.json]
+  verified_by: []
+  relies_on: [part-family-core]
+  doors: []
+  open_questions: []
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: decision-private-storage-api
+  name: Provision one private photo bucket through the Storage API
+  status: shipped
+  why: Keeps bucket operations in a repeatable server-side script and reserves SQL migrations for application schema.
+  code: [apps/api/scripts/setup-supabase.mjs, SETUP.md]
+  verified_by: []
+  relies_on: [part-supabase]
+  doors: []
+  open_questions: ["Signed photo operations and persisted storage paths follow in commit 09."]
+  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715

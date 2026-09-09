@@ -11,11 +11,11 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm --filter @family-tree/family-core build && pnpm -r typecheck",
     "lint": "pnpm --filter @family-tree/web lint",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "test:watch": "vitest",
     "check:manifest": "contour check",
     "view:repo": "contour serve",
-    "validate": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run check:manifest"
+    "validate": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run check:manifest"
   },
   "packageManager": "pnpm@10.34.5",
   "devDependencies": {

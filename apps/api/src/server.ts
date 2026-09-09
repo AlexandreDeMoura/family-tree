@@ -1,10 +1,7 @@
-import Fastify from 'fastify';
-import cors from '@fastify/cors';
+import { buildApp } from './app.js';
 import { env } from './lib/env.js';
 
-const app = Fastify({ logger: true });
-await app.register(cors, { origin: env.WEB_ORIGIN });
-app.get('/health', async () => ({ status: 'ok' }));
+const app = buildApp({ webOrigin: env.WEB_ORIGIN, logger: true });
 await app.listen({ port: env.PORT, host: env.HOST });
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
