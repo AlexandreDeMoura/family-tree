@@ -19,7 +19,7 @@
   },
   "packageManager": "pnpm@10.34.5",
   "devDependencies": {
-    "@trompetteman/contour": "^0.1.0",
+    "@trompetteman/contour": "^0.2.0",
     "supabase": "2.117.0",
     "typescript": "~5.9.3",
     "vitest": "5.0.0"
