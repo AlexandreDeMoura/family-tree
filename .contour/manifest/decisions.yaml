@@ -19,3 +19,25 @@
   doors: []
   open_questions: ["Signed photo operations and persisted storage paths follow in commit 09."]
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: decision-pure-graph-validation
+  name: Validate proposed snapshots with an explicit current year
+  status: shipped
+  why: Keeps shared validation deterministic and rechecks all connected birth years on person edits, with iterative DFS for deep ancestry and no infrastructure dependencies.
+  code: [packages/family-core/src/schemas.ts, packages/family-core/src/graph.ts, packages/family-core/src/invariants.ts, packages/family-core/README.md]
+  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts]
+  relies_on: [part-family-core]
+  doors: []
+  open_questions: []
+  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+
+- id: decision-known-parent-siblings
+  name: Derive siblings exclusively from shared known parent IDs
+  status: shipped
+  why: Implements PRD section 10.3 literally; two shared parents means full siblings and exactly one means half, independently of adoption and completeness flags, without inventing unknown parents.
+  code: [packages/family-core/src/relationships.ts, packages/family-core/src/schemas.ts]
+  verified_by: [packages/family-core/src/relationships.test.ts]
+  relies_on: [part-family-core]
+  doors: []
+  open_questions: []
+  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f

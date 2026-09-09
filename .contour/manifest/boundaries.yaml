@@ -22,15 +22,15 @@
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
 
 - id: part-family-core
-  name: Pure shared package scaffold
+  name: Pure shared person and family graph domain
   status: shipped
-  why: Provides an ESM and declaration build consumed through workspace dependencies by both apps.
+  why: Provides Zod schemas, person and graph invariant checks, and immediate-family projections through an ESM and declaration build consumed by both apps.
   code: [packages/family-core/, pnpm-workspace.yaml, tsconfig.base.json]
-  verified_by: []
+  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
   relies_on: []
   doors: []
-  open_questions: ["The entry point is intentionally empty until domain implementation in commit 02."]
-  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+  open_questions: ["API services must enforce these rules inside tree-locked transactions in subsequent commits; main-photo ownership checks follow with persistence/photos."]
+  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
 
 - id: part-supabase
   name: Local Supabase foundation

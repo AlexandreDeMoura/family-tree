@@ -1,11 +1,11 @@
 # Family Tree
 
 A private, shareable family tree for one organizer and read-only relatives.
-This repository currently implements commit 01 of the
+This repository currently implements commits 01–02 of the
 [MVP plan](family_tree_constrained_mvp_prd.md#28-implementation-commit-plan):
-the development foundation and a starter page with an API health endpoint.
-Family schemas, graph rules, authorization, tree rendering, and photo workflows
-are subsequent commits.
+the development foundation, shared person schemas, and family graph rules.
+The applications still expose a starter page and API health endpoint;
+authorization, family persistence, tree rendering, and photo workflows follow.
 
 ## Local development
 
@@ -36,7 +36,7 @@ Hosted Supabase is optional and documented in setup steps 10–11.
 | --- | --- |
 | `apps/web` | React/Vite/Tailwind shell with Router and Query providers; browser Supabase client for future Auth and signed uploads. |
 | `apps/api` | Fastify health endpoint, CORS, validated server environment, and server-only Supabase client. |
-| `packages/family-core` | Pure shared package scaffold, emitted as ESM and TypeScript declarations; domain rules follow in commit 02. |
+| `packages/family-core` | Pure Zod schemas, person/graph validation, and immediate-family derivation, emitted as ESM and TypeScript declarations. See its [usage guide](packages/family-core/README.md). |
 | `supabase` | Local CLI configuration and tracked migration directory; application SQL follows in commit 03. |
 
 Both apps declare `@family-tree/family-core` as a workspace dependency. Recursive
@@ -50,8 +50,9 @@ placeholders and local defaults; real `.env` files are ignored.
 pnpm validate
 ```
 
-Runs web lint, workspace typecheck, API injection tests, ordered production builds,
-and the installed Contour manifest check. Tests cover API liveness and configured
+Runs web lint, workspace typecheck, domain and API injection tests, ordered production
+builds, and the installed Contour manifest check. Tests cover person invariants,
+graph mutations, ancestry DFS, sibling derivation, API liveness, and configured
 CORS without requiring local Supabase. `pnpm test` fails if no tests are discovered.
 The manifest check validates repository references and metadata, not product behavior.
 

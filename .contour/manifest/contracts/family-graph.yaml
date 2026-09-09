@@ -1,0 +1,28 @@
+id: contract-family-graph
+name: Pure person and family graph validation
+status: shipped
+part: part-family-core
+why: Defines shared correctness rules for subsequent frontend validation and authoritative API mutations.
+accepts:
+  - Person and graph snapshots with an explicitly supplied integer current year.
+  - Proposed parent or partnership additions and complete person replacements against a graph snapshot.
+  - Validated graphs for immediate-family projections.
+guarantees:
+  - Graph validation rejects inconsistent birth/death data, future death years, and living people with death years.
+  - Graph validation rejects self-links, duplicate people or edges, missing or cross-tree people, more than two parents, ancestry cycles, and parents born after their children.
+  - Person edits revalidate both existing parents and children; equal and unknown birth years are accepted.
+  - Multiple partnerships are supported and unordered pairs are canonicalized without mutating input.
+  - Full siblings share two known parent IDs; half-siblings share exactly one, including when each has only one known parent.
+  - Completeness flags preserve unknown versus known absence, and adoption remains person metadata.
+rules:
+  - Domain code does not read the clock, access storage, or depend on application frameworks.
+  - The graph schema validates shape and person fields; validateFamilyGraph is required for topology checks.
+  - Ancestry traversal uses iterative DFS and checks disconnected components.
+  - Relationship projections do not invent parents, infer partnerships from children, or infer parenthood from partners.
+  - Persistence, authorization, transaction locking, and main-photo ownership checks are outside this implementation.
+code: [packages/family-core/src/, packages/family-core/README.md]
+verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
+relies_on: []
+doors: []
+open_questions: []
+last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f

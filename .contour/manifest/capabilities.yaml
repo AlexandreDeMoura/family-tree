@@ -8,3 +8,14 @@
   doors: [door-web-shell, door-api-health]
   open_questions: ["This foundation does not yet create, persist, or display family graphs."]
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: cap-family-graph-rules
+  name: Validate and derive a family graph
+  status: shipped
+  why: Lets future organizer forms and API services share person validation, proposed mutation checks, and immediate-family views without persisting derived relationships.
+  code: [packages/family-core/src/, packages/family-core/README.md]
+  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
+  relies_on: [part-family-core]
+  doors: []
+  open_questions: ["Application endpoints and persistence are future commits; the core does not provide transaction locks or authorization."]
+  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
