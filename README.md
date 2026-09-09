@@ -1,11 +1,12 @@
 # Family Tree
 
 A private, shareable family tree for one organizer and read-only relatives.
-This repository currently implements commits 01–02 of the
+This repository currently implements commits 01–03 of the
 [MVP plan](family_tree_constrained_mvp_prd.md#28-implementation-commit-plan):
-the development foundation, shared person schemas, and family graph rules.
+the development foundation, shared person schemas, family graph rules,
+and the private SQL schema with a tree-locking transaction helper.
 The applications still expose a starter page and API health endpoint;
-authorization, family persistence, tree rendering, and photo workflows follow.
+authorization endpoints, family editing, tree rendering, and photo workflows follow.
 
 ## Local development
 
@@ -35,9 +36,9 @@ Hosted Supabase is optional and documented in setup steps 10–11.
 | Package | Responsibility |
 | --- | --- |
 | `apps/web` | React/Vite/Tailwind shell with Router and Query providers; browser Supabase client for future Auth and signed uploads. |
-| `apps/api` | Fastify health endpoint, CORS, validated server environment, and server-only Supabase client. |
+| `apps/api` | Fastify health endpoint, CORS, validated server environment, server-only Supabase client, and PostgreSQL transaction helper. |
 | `packages/family-core` | Pure Zod schemas, person/graph validation, and immediate-family derivation, emitted as ESM and TypeScript declarations. See its [usage guide](packages/family-core/README.md). |
-| `supabase` | Local CLI configuration and tracked migration directory; application SQL follows in commit 03. |
+| `supabase` | Local CLI configuration, family schema migrations, row constraints, and private access boundaries. See the [persistence guide](supabase/README.md). |
 
 Both apps declare `@family-tree/family-core` as a workspace dependency. Recursive
 production builds build it first. The API keeps application credentials server-side;
@@ -55,6 +56,11 @@ builds, and the installed Contour manifest check. Tests cover person invariants,
 graph mutations, ancestry DFS, sibling derivation, API liveness, and configured
 CORS without requiring local Supabase. `pnpm test` fails if no tests are discovered.
 The manifest check validates repository references and metadata, not product behavior.
+
+For database changes, also run `pnpm test:db` against local Supabase. It applies
+the migrations and tests constraints, browser-role denial, and transaction locks
+in a disposable database without resetting your existing data. Apply the schema
+to your everyday local instance with `pnpm exec supabase migration up --local`.
 
 With the API running, check the actual HTTP endpoint separately:
 

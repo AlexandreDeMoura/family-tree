@@ -13,9 +13,9 @@
 - id: part-api
   name: Fastify API foundation
   status: shipped
-  why: Owns the health endpoint, configured CORS, startup environment validation, and server-only Supabase client.
+  why: Owns the health endpoint, configured CORS, startup environment validation, server-only Supabase client, and pooled PostgreSQL tree transactions.
   code: [apps/api/src/, apps/api/package.json]
-  verified_by: [apps/api/src/app.test.ts]
+  verified_by: [apps/api/src/app.test.ts, apps/api/src/lib/database.db.test.ts]
   relies_on: [part-family-core, part-supabase]
   doors: [door-api-health]
   open_questions: ["Organizer authorization and family endpoints are not implemented yet."]
@@ -33,12 +33,12 @@
   last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
 
 - id: part-supabase
-  name: Local Supabase foundation
+  name: Supabase schema and private persistence
   status: shipped
-  why: Configures local PostgreSQL, Auth redirects with public signup disabled, and Storage provisioning.
-  code: [supabase/config.toml, supabase/migrations/, apps/api/scripts/setup-supabase.mjs]
-  verified_by: []
+  why: Configures local Supabase and defines family tables, row constraints, ownership foreign keys, deletion cascades, and default-deny browser access.
+  code: [supabase/config.toml, supabase/migrations/, supabase/README.md, apps/api/scripts/setup-supabase.mjs]
+  verified_by: [apps/api/src/lib/database.db.test.ts]
   relies_on: []
   doors: []
-  open_questions: ["Application SQL, RLS, and grants follow in commit 03; organizer provisioning is manual."]
+  open_questions: ["Organizer provisioning remains manual; graph-wide validation and ownership authorization must be wired into locked API services in commits 04–05.", "Storage object cleanup follows in commit 09; SQL cascades delete metadata only."]
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715

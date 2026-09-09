@@ -2,7 +2,7 @@
   name: Run the local development foundation
   status: shipped
   why: Starts the shared package and application watchers against the user's provisioned local Supabase instance.
-  code: [package.json, pnpm-workspace.yaml, README.md, SETUP.md, apps/api/.env.example, apps/web/.env.example, .gitignore]
+  code: [package.json, pnpm-workspace.yaml, README.md, SETUP.md, vitest.config.ts, vitest.database.config.ts, apps/api/.env.example, apps/web/.env.example, .gitignore]
   verified_by: [apps/api/src/app.test.ts]
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-web-shell, door-api-health]
@@ -17,5 +17,16 @@
   verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
   relies_on: [part-family-core]
   doors: []
-  open_questions: ["Application endpoints and persistence are future commits; the core does not provide transaction locks or authorization."]
+  open_questions: ["Application endpoints are future commits; the API now supplies the transaction helper, while the core remains free of persistence and authorization."]
   last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+
+- id: cap-private-family-persistence
+  name: Store family records behind private access boundaries
+  status: shipped
+  why: Provides constrained SQL persistence and a common tree-row lock for future authoritative graph mutations.
+  code: [supabase/migrations/, supabase/README.md, apps/api/src/lib/database.ts, vitest.database.config.ts]
+  verified_by: [apps/api/src/lib/database.db.test.ts]
+  relies_on: [part-supabase, part-api, part-family-core]
+  doors: []
+  open_questions: ["No family endpoints exist yet; commits 04–05 must authorize and run shared graph rules inside the locked callback."]
+  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e

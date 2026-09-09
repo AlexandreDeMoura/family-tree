@@ -1,0 +1,29 @@
+id: contract-private-family-persistence
+name: SQL integrity and private transaction boundary
+status: shipped
+capability: cap-private-family-persistence
+why: Defines the persistence guarantees available to upcoming organizer services.
+accepts:
+  - Family records with UUID identifiers and an existing organizer user.
+  - Server-side work callbacks using a pooled PostgreSQL client and an existing tree ID.
+guarantees:
+  - Row constraints reject invalid life statuses, death before birth, living death years, future death years, and malformed or excessive fun facts.
+  - Composite foreign keys reject cross-tree relationships and photos; a main photo belongs to the same person and tree.
+  - Parent edges are unique and reject self-links; partnerships require canonical distinct UUID pairs and permit multiple partners.
+  - Photo records require one supported age bucket and the exact private JPEG path derived from tree, person, and photo IDs.
+  - All family tables enable RLS without policies and revoke direct browser-role reads and mutations.
+  - Tree transactions acquire the tree row lock before invoking work, commit successful work, roll back failures, and release the connection.
+  - Deleting a photo clears its main-photo reference; deleting a person or tree cascades dependent metadata; organizer deletion is restricted while trees exist.
+rules:
+  - Future graph writes must authorize and validate the graph inside withTreeTransaction using the supplied client for every read and write.
+  - Ancestry cycles, the two-parent limit, and connected birth-year ordering use shared validators in future API services; SQL row constraints alone do not enforce them.
+  - Tree creation authorizes the organizer before inserting; there is no preexisting tree row to lock.
+  - No derived siblings, layout artifacts, or sharing secrets are stored in the family tables.
+  - Storage provisioning remains on the Storage API and migrations add no public Storage policies; SQL cascades do not delete Storage objects.
+code: [supabase/migrations/, apps/api/src/lib/database.ts, supabase/README.md]
+verified_by: [apps/api/src/lib/database.db.test.ts]
+relies_on: [part-api, part-supabase, part-family-core]
+doors: []
+open_questions:
+  - Organizer authorization and graph mutation services follow in commits 04–05; signed photos and Storage cleanup follow in commit 09.
+last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e

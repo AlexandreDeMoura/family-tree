@@ -17,7 +17,7 @@
   verified_by: []
   relies_on: [part-supabase]
   doors: []
-  open_questions: ["Signed photo operations and persisted storage paths follow in commit 09."]
+  open_questions: ["Photo metadata now stores constrained private paths; signed photo operations and object cleanup follow in commit 09."]
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
 
 - id: decision-pure-graph-validation
@@ -30,6 +30,28 @@
   doors: []
   open_questions: []
   last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+
+- id: decision-private-sql-boundary
+  name: Deny browser SQL access and serialize graph mutations per tree
+  status: shipped
+  why: Revoked browser grants plus RLS with no policies keep family access on Fastify; one READ COMMITTED tree-row lock lets later services validate fresh graphs atomically using plain pg.
+  code: [supabase/migrations/, apps/api/src/lib/database.ts, supabase/README.md]
+  verified_by: [apps/api/src/lib/database.db.test.ts]
+  relies_on: [part-api, part-supabase, part-family-core]
+  doors: []
+  open_questions: ["Authorization and topology validation are the responsibility of services added in commits 04–05, not the transaction helper or row constraints."]
+  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e
+
+- id: decision-photo-ownership-deletion
+  name: Bind portraits by composite foreign keys and cascade metadata explicitly
+  status: shipped
+  why: A main photo must belong to its person and tree; photo deletion clears the portrait reference, person/tree deletion cascades metadata, and organizer deletion is restricted while trees exist.
+  code: [supabase/migrations/, supabase/README.md]
+  verified_by: [apps/api/src/lib/database.db.test.ts]
+  relies_on: [part-supabase]
+  doors: []
+  open_questions: ["Storage objects require service-level cleanup in commit 09; database cascades do not remove files."]
+  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e
 
 - id: decision-known-parent-siblings
   name: Derive siblings exclusively from shared known parent IDs

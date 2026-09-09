@@ -488,13 +488,17 @@ Replace `YOUR_PROJECT_REF`. Complete the login flow and enter the database passw
 
 ## 11. Apply application migrations and provision hosted Storage
 
-The application schema is introduced in commit 03. During that commit, create a migration and implement its SQL before applying it:
+The application schema is tracked in commit 03. In an existing checkout, apply
+the supplied migration; do not create a duplicate schema migration. See the
+[persistence guide](supabase/README.md) for constraints and database tests.
+For subsequent schema changes, create a new migration:
 
 ```sh
-pnpm exec supabase migration new create_family_schema
+pnpm exec supabase migration new describe_your_schema_change
 ```
 
-Edit the generated `supabase/migrations/<timestamp>_create_family_schema.sql` according to the commit plan, including constraints, grants, and RLS. Do not apply an empty file as if the schema were complete. Then apply and generate types locally:
+Implement any new migration before applying it. Apply tracked migrations and,
+when needed by Supabase queries, generate types locally:
 
 ```sh
 pnpm exec supabase migration up --local
@@ -508,7 +512,7 @@ pnpm exec supabase db push --dry-run
 pnpm exec supabase db push
 ```
 
-`db push` applies pending migrations; it does not deploy the web/API apps or transfer Auth users and uploaded photos. With no application migrations yet, there is no family schema to push. [Supabase CLI migration commands](https://supabase.com/docs/reference/cli/supabase-migration-up).
+`db push` applies pending migrations; it does not deploy the web/API apps or transfer Auth users and uploaded photos. [Supabase CLI migration commands](https://supabase.com/docs/reference/cli/supabase-migration-up).
 
 To provision the hosted bucket without changing your local app configuration, create `apps/api/.env.hosted` in your editor with these hosted values:
 
