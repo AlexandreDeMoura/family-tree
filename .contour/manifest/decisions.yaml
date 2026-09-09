@@ -1,0 +1,12 @@
+# Durable product and architecture decisions; do not infer unknown history.
+# Example:
+# - id: dec-use-sqlite
+#   name: Store local data in SQLite
+#   status: shipped
+#   why: "The product needs durable local storage without a service dependency."
+#   code: [src/storage/]
+#   verified_by: []
+#   relies_on: [part-storage]
+#   doors: []
+#   open_questions: []
+#   last_verified: abc1234

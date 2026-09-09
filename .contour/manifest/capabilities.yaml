@@ -1,0 +1,12 @@
+# Product capabilities. Keep ids stable once referenced.
+# Example:
+# - id: cap-checkout
+#   name: Complete checkout
+#   status: shipped
+#   why: "Lets a customer place an order."
+#   code: [src/checkout/]
+#   verified_by: [test/checkout.test.ts]
+#   relies_on: [part-api]
+#   doors: [door-checkout-page]
+#   open_questions: []
+#   last_verified: abc1234

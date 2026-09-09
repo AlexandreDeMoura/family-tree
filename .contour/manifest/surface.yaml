@@ -1,0 +1,14 @@
+# User-visible or machine-facing doors into the product.
+# Example:
+# - id: door-http-api
+#   name: HTTP API
+#   status: shipped
+#   why: "Lets clients invoke application capabilities."
+#   code:
+#     - path: src/api/routes.ts
+#       symbol: router
+#   verified_by: []
+#   relies_on: [part-api]
+#   doors: []
+#   open_questions: []
+#   last_verified: abc1234

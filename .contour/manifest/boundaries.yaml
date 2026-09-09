@@ -1,0 +1,12 @@
+# Runtime parts and ownership boundaries.
+# Example:
+# - id: part-api
+#   name: Application API
+#   status: shipped
+#   why: "Owns server-side application behavior."
+#   code: [src/api/]
+#   verified_by: []
+#   relies_on: []
+#   doors: [door-http-api]
+#   open_questions: []
+#   last_verified: abc1234

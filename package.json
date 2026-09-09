@@ -11,11 +11,15 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm --filter @family-tree/family-core build && pnpm -r typecheck",
     "lint": "pnpm --filter @family-tree/web lint",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "check:manifest": "contour check",
+    "view:repo": "contour serve",
+    "validate": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run check:manifest"
   },
   "packageManager": "pnpm@10.34.5",
   "devDependencies": {
+    "@trompetteman/contour": "^0.1.0",
     "supabase": "2.117.0",
     "typescript": "~5.9.3",
     "vitest": "5.0.0"

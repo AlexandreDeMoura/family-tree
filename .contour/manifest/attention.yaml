@@ -1,0 +1,12 @@
+# Human-authored uncertainties and verifier findings that need attention.
+# Example:
+# - id: attention-missing-owner
+#   name: Confirm checkout ownership
+#   status: planned
+#   why: "Two parts appear to own the same checkout path."
+#   code: [src/checkout/]
+#   verified_by: []
+#   relies_on: []
+#   doors: []
+#   open_questions: ["Which part should own checkout?"]
+#   last_verified: abc1234

@@ -1,0 +1,36 @@
+# Repository-wide manifest settings.
+# Example:
+# purpose: "Explain what this project enables and for whom."
+# tech: [TypeScript, React]
+# entry_points:
+#   - src/cli/index.ts
+#   - path: src/renderer/src/web-main.tsx
+#     symbol: main
+# stale_after_commits: 30
+
+purpose: >-
+  A private, shareable family tree. Organizers model people and their
+  relationships with enforced graph invariants, attach photos and rich person
+  cards, and read the result through an automatic multi-generation layout.
+
+tech:
+  - TypeScript
+  - React
+  - Vite
+  - Tailwind CSS
+  - React Router
+  - TanStack Query
+  - React Flow (@xyflow/react)
+  - ELK.js
+  - Fastify
+  - Zod
+  - Supabase (PostgreSQL, Auth, Storage)
+  - Vitest
+  - pnpm workspaces
+
+entry_points:
+  - apps/web/src/main.tsx
+  - apps/api/src/server.ts
+  - packages/family-core/src/index.ts
+
+stale_after_commits: 30

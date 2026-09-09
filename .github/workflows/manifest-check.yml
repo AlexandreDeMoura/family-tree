@@ -1,0 +1,37 @@
+# Repository manifest validation (Contour).
+# Kept independent of lint/typecheck/test jobs, with no path filters or skips:
+# source-only changes must run the check because references and freshness can
+# change without YAML edits.
+name: Repository manifests
+
+on:
+  push:
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest-check:
+    name: manifest-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Check the event SHA: PR merge commit, pushed commit, or merge-group SHA.
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install locked dependencies including the local CLI
+        run: pnpm install --frozen-lockfile
+      - name: Report checked revision
+        run: git rev-parse HEAD
+      - name: Check manifests without writing
+        run: pnpm run check:manifest
