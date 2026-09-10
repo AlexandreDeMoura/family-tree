@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router';
 import type { Person } from '@family-tree/family-core';
 import { errorMessage, familyApi, type LoadedTree, type PersonInput } from '../../lib/api';
 import { PersonForm } from '../people/PersonForm';
+import { PersonCard } from '../people/PersonCard';
 import { RelationshipPanel } from '../people/RelationshipPanel';
 import type { RelationshipKind } from '../people/relationship-form';
 import { FamilyTree } from '../tree/FamilyTree';
@@ -18,6 +19,7 @@ export function FamilyEditorPage() {
   const userId = session!.user.id;
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const tree = useQuery({
     queryKey: treeKeys.detail(userId, treeId),
@@ -74,7 +76,19 @@ export function FamilyEditorPage() {
   const graph = tree.data.graph;
   const effectiveSelectedId = selectedId ?? graph.people[0]?.id ?? null;
   const selectedPerson = graph.people.find(({ id }) => id === effectiveSelectedId);
+  const focusedPerson = graph.people.find(({ id }) => id === focusedId);
   const showCreate = creating || graph.people.length === 0;
+
+  function openPerson(personId: string) {
+    setSelectedId(personId);
+    setFocusedId(personId);
+    setCreating(false);
+  }
+
+  function startCreating() {
+    setFocusedId(null);
+    setCreating(true);
+  }
 
   return (
     <div className="app-shell">
@@ -83,7 +97,7 @@ export function FamilyEditorPage() {
         <aside className="people-sidebar">
           <div className="sidebar-heading">
             <div><Link className="back-link" to="/organizer">← All trees</Link><h1>{tree.data.name}</h1><p>{graph.people.length} {graph.people.length === 1 ? 'person' : 'people'}</p></div>
-            <button className="icon-button" type="button" title="Add person" aria-label="Add person" onClick={() => setCreating(true)}>+</button>
+            <button className="icon-button" type="button" title="Add person" aria-label="Add person" onClick={startCreating}>+</button>
           </div>
           {graph.people.length === 0 ? (
             <div className="sidebar-empty"><span aria-hidden="true">✦</span><strong>No people yet</strong><p>Add the first person to begin this family story.</p></div>
@@ -94,7 +108,7 @@ export function FamilyEditorPage() {
                   key={person.id}
                   className={person.id === effectiveSelectedId && !showCreate ? 'person-list-item is-active' : 'person-list-item'}
                   type="button"
-                  onClick={() => { setSelectedId(person.id); setCreating(false); }}
+                  onClick={() => openPerson(person.id)}
                 >
                   <span className="person-avatar">{person.firstName.charAt(0)}{person.lastName.charAt(0)}</span>
                   <span><strong>{person.firstName} {person.lastName}</strong><small>{person.birthYear ?? 'Year unknown'} · {lifeLabel(person)}</small></span>
@@ -103,7 +117,7 @@ export function FamilyEditorPage() {
               ))}
             </nav>
           )}
-          {graph.people.length > 0 && <button className="button button--secondary button--wide sidebar-add" type="button" onClick={() => setCreating(true)}>+ Add another person</button>}
+          {graph.people.length > 0 && <button className="button button--secondary button--wide sidebar-add" type="button" onClick={startCreating}>+ Add another person</button>}
         </aside>
 
         <div className="editor-main">
@@ -111,17 +125,31 @@ export function FamilyEditorPage() {
             <section className="panel family-map-panel">
               <div className="family-map-heading">
                 <div>
-                  <span className="eyebrow">Family map</span>
-                  <h2>See the whole family at a glance</h2>
-                  <p>Select a person to edit their record. Use the map controls to pan, zoom, or fit everyone into view.</p>
+                  <span className="eyebrow">{focusedPerson ? 'Person focus' : 'Family map'}</span>
+                  <h2>{focusedPerson ? `Exploring ${focusedPerson.firstName}'s family` : 'See the whole family at a glance'}</h2>
+                  <p>{focusedPerson
+                    ? 'Immediate family stays prominent while the broader tree remains in view. Select anyone nearby to continue exploring.'
+                    : 'Select a person to open their story. Use the map controls to pan, zoom, or fit everyone into view.'}</p>
                 </div>
-                <span className="count-pill">Automatic layout</span>
+                {focusedPerson ? (
+                  <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Show whole tree</button>
+                ) : <span className="count-pill">Automatic layout</span>}
               </div>
-              <FamilyTree
-                graph={graph}
-                selectedPersonId={showCreate ? null : selectedPerson?.id}
-                onSelectPerson={(personId) => { setSelectedId(personId); setCreating(false); }}
-              />
+              <div className={focusedPerson && !showCreate ? 'family-map-body has-person-card' : 'family-map-body'}>
+                <FamilyTree
+                  graph={graph}
+                  selectedPersonId={showCreate ? null : focusedPerson?.id}
+                  onSelectPerson={openPerson}
+                />
+                {focusedPerson && !showCreate && (
+                  <PersonCard
+                    graph={graph}
+                    personId={focusedPerson.id}
+                    onNavigate={openPerson}
+                    onClose={() => setFocusedId(null)}
+                  />
+                )}
+              </div>
             </section>
           )}
           <section className="panel">
@@ -130,7 +158,7 @@ export function FamilyEditorPage() {
               graph={graph}
               person={showCreate ? undefined : selectedPerson}
               onSave={(input) => savePerson(input, showCreate ? undefined : selectedPerson)}
-              onSaved={(person) => { setSelectedId(person.id); setCreating(false); }}
+              onSaved={(person) => { setSelectedId(person.id); setFocusedId(person.id); setCreating(false); }}
               onCancel={creating && graph.people.length ? () => setCreating(false) : undefined}
             />
           </section>

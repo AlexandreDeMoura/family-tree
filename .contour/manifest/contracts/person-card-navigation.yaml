@@ -1,0 +1,30 @@
+id: contract-person-card-navigation
+name: Graph-derived person cards and contextual focus
+status: in-progress
+part: part-web
+why: Keeps family-card relationships and focus emphasis consistent with the authoritative graph while preserving the broader tree for navigation.
+accepts:
+  - An authoritative family graph and a selected person ID contained in that graph.
+guarantees:
+  - Person cards project parents, children, partners, full siblings, and half-siblings without persisting or inventing relationships.
+  - Relationship sections distinguish complete lists, partial knowledge, unknown information, and known empty lists.
+  - Sibling completeness depends on known parents and those parents' child-list completeness, while sibling type still depends only on shared known parent IDs.
+  - Focus projections include the selected person and card-listed immediate family without mutating or replacing the full family graph.
+  - Deceased people retain the same portrait, card, and node prominence as living people; only graph distance from the selected person may fade a node.
+rules:
+  - Parents, siblings, partners, and children remain expandable and every listed person can become the next focus.
+  - Closing focus returns to the broader tree without changing the organizer's selected editing record.
+  - Photo galleries and signed portrait URLs remain outside this contract until the private photo workflow exists.
+code:
+  - apps/web/src/features/people/PersonCard.tsx
+  - apps/web/src/features/people/person-card.ts
+  - apps/web/src/features/tree/FamilyTree.tsx
+  - apps/web/src/features/organizer/FamilyEditorPage.tsx
+  - apps/web/src/index.css
+verified_by:
+  - apps/web/src/features/people/person-card.test.ts
+relies_on: [contract-family-graph, contract-family-tree-layout]
+doors: [door-contextual-person-card]
+open_questions:
+  - Manual UI QA must confirm that the overlaid card leaves enough tree context visible across supported screen sizes.
+last_verified: 75d97d3a6357c22920252d07476e9757992a85bf

@@ -2,13 +2,13 @@
 - id: part-web
   name: Organizer web application
   status: shipped
-  why: Hosts session-aware organizer routes, family queries, validated editing forms, and the automatically laid-out organizer family map.
+  why: Hosts session-aware organizer routes, family queries, validated editing forms, the automatically laid-out family map, and contextual person-card navigation.
   code: [apps/web/src/, apps/web/vite.config.ts, apps/web/tsconfig.app.json, apps/web/tsconfig.node.json]
-  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts]
+  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts]
   relies_on: [part-family-core]
-  doors: [door-web-shell, door-organizer-family-editor, door-family-tree-canvas]
-  open_questions: ["The organizer editing and family-map workflows await manual UI QA."]
-  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
+  doors: [door-web-shell, door-organizer-family-editor, door-family-tree-canvas, door-contextual-person-card]
+  open_questions: ["The organizer editing, family-map, and contextual card workflows await manual UI QA."]
+  last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
 
 - id: part-api
   name: Fastify API foundation

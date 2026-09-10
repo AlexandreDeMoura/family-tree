@@ -156,12 +156,18 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
 .family-map-heading h2 { margin-bottom: .45rem; }
 .family-map-heading p { max-width: 45rem; margin-bottom: 0; font-size: .82rem; }
 .family-map-heading .count-pill { flex: 0 0 auto; }
+.family-map-heading .button { flex: 0 0 auto; }
+.family-map-body { position: relative; }
+.family-map-body.has-person-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(20rem, 25rem); }
 .family-tree-canvas { height: clamp(30rem, 62vh, 44rem); border-top: 1px solid var(--line); background: #f2f0e8; }
 .family-tree-state { display: flex; min-height: 22rem; align-items: center; justify-content: center; gap: .75rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
 .family-tree-state--error { color: var(--error); }
 .family-tree-canvas .react-flow__node { border: 0; background: transparent; box-shadow: none; }
 .family-tree-canvas .react-flow__node:focus-visible { outline: 3px solid rgb(201 149 78 / 45%); outline-offset: 5px; }
 .family-tree-canvas .react-flow__edge-path { stroke-linecap: round; }
+.family-tree-canvas .family-flow-node, .family-tree-canvas .family-edge { transition: opacity .22s ease; }
+.family-tree-canvas .family-flow-node--distant, .family-tree-canvas .family-edge.is-distant { opacity: .2; }
+.family-tree-canvas .family-flow-node--distant:hover { opacity: .72; }
 .family-tree-canvas .family-edge--parent .react-flow__edge-path { stroke: #789186; stroke-width: 2px; }
 .family-tree-canvas .family-edge--partnership .react-flow__edge-path { stroke: var(--gold); stroke-width: 2.5px; }
 .family-tree-canvas .react-flow__controls { overflow: hidden; border: 1px solid #cfd7d0; border-radius: .65rem; box-shadow: 0 5px 15px rgb(35 52 47 / 9%); }
@@ -189,6 +195,57 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
 .tree-badge--discovery { border-color: #d8d8cd; background: #f6f5ef; color: #707a74; }
 .tree-handle { width: 1px !important; height: 1px !important; min-width: 0 !important; min-height: 0 !important; border: 0 !important; opacity: 0; pointer-events: none; }
 .tree-junction { width: 12px; height: 12px; border: 2px solid #fffdf8; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 1px #bf8c45; }
+.person-card {
+  z-index: 8; height: clamp(30rem, 62vh, 44rem); overflow-y: auto; border: 1px solid #d7dbd3; border-width: 1px 0 0 1px;
+  background: var(--paper); box-shadow: -12px 0 32px rgb(23 60 51 / 9%);
+}
+.person-card__header { position: relative; display: grid; justify-items: center; padding: 2rem 1.5rem 1.35rem; text-align: center; }
+.person-card__close {
+  position: absolute; top: .8rem; right: .8rem; display: grid; width: 2rem; height: 2rem; place-items: center; border: 1px solid #d8ddd6;
+  border-radius: 50%; background: #f7f7f1; color: #627169; font-size: 1.2rem; line-height: 1; cursor: pointer;
+}
+.person-card__close:hover { border-color: #aebdb5; background: white; color: var(--forest); }
+.person-card__portrait {
+  display: grid; width: 7rem; height: 7rem; margin-bottom: 1rem; place-items: center; border: 5px solid #edf1eb; border-radius: 50%;
+  background: linear-gradient(145deg, #dce7df, #c7d8cd); color: var(--forest); font-family: Georgia, serif; font-size: 1.8rem;
+  box-shadow: 0 8px 24px rgb(35 52 47 / 10%);
+}
+.person-card__header .eyebrow { margin-bottom: .35rem; }
+.person-card__header h2 { margin-bottom: .35rem; font-size: 1.8rem; }
+.person-card__header p { margin-bottom: 0; font-size: .82rem; }
+.person-card__badges { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem; margin-top: .9rem; }
+.person-card-badge { border: 1px solid #cad8d0; border-radius: 99px; padding: .25rem .55rem; background: #eef4ef; color: #49665a; font-size: .62rem; font-weight: 800; }
+.person-card-badge--memory { border-color: #e2cba4; background: #fbf3e4; color: #86602d; }
+.person-card-badge--unknown { border-color: #d8d9d0; background: #f5f4ee; color: #6d7772; }
+.person-card__facts { border-block: 1px solid #e3e3dc; padding: 1.2rem 1.35rem; background: #f7f4ea; }
+.person-card__facts .eyebrow { margin-bottom: .6rem; }
+.person-card__facts ul { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+.person-card__facts li { position: relative; padding-left: 1rem; color: #3f5048; font-family: Georgia, serif; font-size: .9rem; line-height: 1.45; }
+.person-card__facts li::before { position: absolute; left: 0; color: var(--gold); content: "✦"; font-size: .62rem; }
+.person-card__facts p { margin: 0; font-size: .78rem; }
+.person-card__relationships { padding: .25rem 1.35rem 1.35rem; }
+.person-card-section { border-bottom: 1px solid #e5e5de; }
+.person-card-section summary { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: 1rem 0; cursor: pointer; list-style: none; }
+.person-card-section summary::-webkit-details-marker { display: none; }
+.person-card-section summary::after { color: var(--forest); content: "+"; font-size: 1.1rem; font-weight: 500; }
+.person-card-section[open] summary::after { content: "−"; }
+.person-card-section summary > span { font-family: Georgia, serif; font-size: .98rem; font-weight: 600; }
+.person-card-section summary small { min-width: 0; margin-left: auto; color: #7b8881; font-size: .62rem; text-align: right; }
+.person-card-section__body { display: grid; gap: .45rem; padding: 0 0 1rem; }
+.person-card-link {
+  display: flex; width: 100%; align-items: center; gap: .65rem; border: 1px solid #dde1da; border-radius: .7rem; padding: .6rem;
+  background: #fbfbf7; color: var(--ink); text-align: left; cursor: pointer; transition: border-color .15s, background .15s, transform .15s;
+}
+.person-card-link:hover { transform: translateX(2px); border-color: #b8c8bf; background: white; }
+.person-card-link__avatar { display: grid; width: 2.3rem; height: 2.3rem; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #dce6df; color: var(--forest); font-size: .65rem; font-weight: 800; }
+.person-card-link > span:nth-child(2) { display: grid; min-width: 0; flex: 1; gap: .08rem; }
+.person-card-link strong { overflow: hidden; font-size: .75rem; text-overflow: ellipsis; white-space: nowrap; }
+.person-card-link small { color: #7d8882; font-size: .62rem; }
+.person-card-link__badge { border: 1px solid #dfcba7; border-radius: 99px; padding: .15rem .35rem; background: #fbf3e5; color: #86602d; font-size: .55rem; font-weight: 800; }
+.person-card-link__arrow { color: var(--sage); font-size: .8rem; }
+.person-card-section__empty { display: flex; align-items: flex-start; gap: .5rem; margin: 0; border-radius: .6rem; padding: .7rem; background: #f5f5ef; font-size: .72rem; line-height: 1.45; }
+.person-card-section__empty.is-unknown { background: #f8f5ec; color: #746b5e; }
+.person-card-section__empty span { color: var(--gold); }
 .person-form, .relationship-panel { padding: clamp(1.25rem, 3vw, 2.4rem); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.8rem; }
 .section-heading h2 { margin-bottom: 0; }
@@ -241,6 +298,8 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
   .people-list { grid-auto-columns: minmax(13rem, 16rem); grid-auto-flow: column; overflow-x: auto; padding-bottom: .5rem; }
   .sidebar-add { width: auto; }
   .family-map-heading { align-items: flex-start; flex-direction: column; gap: .75rem; }
+  .family-map-body.has-person-card { grid-template-columns: 1fr; }
+  .person-card { width: auto; height: auto; max-height: none; border-width: 1px 0 0; box-shadow: none; }
   .form-grid--three, .facts-grid, .completeness-grid { grid-template-columns: 1fr; }
 }
 

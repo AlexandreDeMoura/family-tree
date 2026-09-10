@@ -43,6 +43,25 @@
     - Manual QA must confirm readability for multiple partners, half-siblings, large sibling groups, several generations, and small screens.
   last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf
 
+- id: door-contextual-person-card
+  name: Contextual person card and family focus
+  status: in-progress
+  why: Lets the organizer open a person's story over the family map, inspect immediate relationships and facts, and move between relatives without losing broader tree context.
+  code:
+    - apps/web/src/features/people/PersonCard.tsx
+    - apps/web/src/features/people/person-card.ts
+    - apps/web/src/features/tree/FamilyTree.tsx
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/index.css
+  verified_by:
+    - apps/web/src/features/people/person-card.test.ts
+  relies_on: [part-web, contract-person-card-navigation, door-family-tree-canvas]
+  doors: []
+  open_questions:
+    - Manual QA must confirm card readability, navigation, unknown states, and respectful treatment of deceased relatives.
+    - Read-only relative access remains for commit 10.
+  last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
+
 - id: door-api-health
   name: GET /health
   status: shipped

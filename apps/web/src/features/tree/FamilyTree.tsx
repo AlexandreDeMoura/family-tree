@@ -12,7 +12,9 @@ import {
   type Node,
   type NodeProps,
   type NodeTypes,
+  type ReactFlowInstance,
 } from '@xyflow/react';
+import { projectFocusedFamilyGraph } from '../people/person-card';
 import {
   layoutFamilyGraph,
   type PositionedFamilyGraph,
@@ -27,10 +29,12 @@ interface FamilyTreeProps {
 interface PersonNodeData extends Record<string, unknown> {
   person: Person;
   active: boolean;
+  prominent: boolean;
 }
 
 interface JunctionNodeData extends Record<string, unknown> {
   hidden: boolean;
+  prominent: boolean;
 }
 
 type PersonFlowNode = Node<PersonNodeData, 'person'>;
@@ -48,6 +52,14 @@ const nodeTypes: NodeTypes = {
 
 export function FamilyTree({ graph, selectedPersonId, onSelectPerson }: FamilyTreeProps) {
   const [resolvedLayout, setResolvedLayout] = useState<LayoutState | null>(null);
+  const focusedGraph = useMemo(
+    () => selectedPersonId ? projectFocusedFamilyGraph(graph, selectedPersonId) : null,
+    [graph, selectedPersonId],
+  );
+  const prominentPersonIds = useMemo(
+    () => focusedGraph ? new Set(focusedGraph.people.map(({ id }) => id)) : null,
+    [focusedGraph],
+  );
 
   useEffect(() => {
     let active = true;
@@ -84,6 +96,7 @@ export function FamilyTree({ graph, selectedPersonId, onSelectPerson }: FamilyTr
     <FamilyTreeCanvas
       layout={layoutState.layout}
       selectedPersonId={selectedPersonId}
+      prominentPersonIds={prominentPersonIds}
       onSelectPerson={onSelectPerson}
     />
   );
@@ -92,16 +105,32 @@ export function FamilyTree({ graph, selectedPersonId, onSelectPerson }: FamilyTr
 function FamilyTreeCanvas({
   layout,
   selectedPersonId,
+  prominentPersonIds,
   onSelectPerson,
 }: {
   layout: PositionedFamilyGraph;
   selectedPersonId?: string | null;
+  prominentPersonIds: Set<string> | null;
   onSelectPerson?: (personId: string) => void;
 }) {
+  const [flow, setFlow] = useState<ReactFlowInstance<FamilyFlowNode, Edge> | null>(null);
   const { nodes, edges } = useMemo(
-    () => toReactFlowGraph(layout, selectedPersonId),
-    [layout, selectedPersonId],
+    () => toReactFlowGraph(layout, selectedPersonId, prominentPersonIds),
+    [layout, prominentPersonIds, selectedPersonId],
   );
+
+  useEffect(() => {
+    if (!flow) return;
+    const visiblePeople = nodes
+      .filter((node) => node.type === 'person' && (!prominentPersonIds || prominentPersonIds.has(node.id)))
+      .map(({ id }) => ({ id }));
+    void flow.fitView({
+      nodes: visiblePeople,
+      padding: selectedPersonId ? 0.35 : 0.18,
+      maxZoom: selectedPersonId ? 1.05 : 1,
+      duration: 350,
+    });
+  }, [flow, nodes, prominentPersonIds, selectedPersonId]);
 
   return (
     <div className="family-tree-canvas" aria-label="Interactive family tree">
@@ -119,6 +148,7 @@ function FamilyTreeCanvas({
         fitView
         fitViewOptions={{ padding: 0.18, maxZoom: 1 }}
         onlyRenderVisibleElements
+        onInit={setFlow}
         onNodeClick={(_, node) => {
           if (node.type === 'person') onSelectPerson?.(node.id);
         }}
@@ -136,11 +166,22 @@ function FamilyTreeCanvas({
   );
 }
 
-function toReactFlowGraph(layout: PositionedFamilyGraph, selectedPersonId?: string | null) {
+function toReactFlowGraph(
+  layout: PositionedFamilyGraph,
+  selectedPersonId?: string | null,
+  prominentPersonIds?: Set<string> | null,
+) {
   const positionedById = new Map(layout.nodes.map((node) => [node.id, node]));
+  const prominentJunctionIds = new Set(layout.nodes.flatMap((node) => {
+    if (node.kind !== 'junction' || !prominentPersonIds) return [];
+    const hasProminentParent = node.parentIds.some((id) => prominentPersonIds.has(id));
+    const hasProminentChild = node.childIds.some((id) => prominentPersonIds.has(id));
+    return hasProminentParent && hasProminentChild ? [node.id] : [];
+  }));
   const nodes = layout.nodes.map<FamilyFlowNode>((node) => {
     if (node.kind === 'person') {
       const active = node.id === selectedPersonId;
+      const prominent = !prominentPersonIds || prominentPersonIds.has(node.id);
       return {
         id: node.id,
         type: 'person',
@@ -150,10 +191,12 @@ function toReactFlowGraph(layout: PositionedFamilyGraph, selectedPersonId?: stri
         draggable: false,
         selectable: true,
         selected: active,
+        className: prominent ? 'family-flow-node family-flow-node--prominent' : 'family-flow-node family-flow-node--distant',
         ariaLabel: `${node.person.firstName} ${node.person.lastName}, ${birthYearLabel(node.person)}`,
-        data: { person: node.person, active },
+        data: { person: node.person, active, prominent },
       };
     }
+    const prominent = !prominentPersonIds || prominentJunctionIds.has(node.id);
     return {
       id: node.id,
       type: 'junction',
@@ -164,11 +207,18 @@ function toReactFlowGraph(layout: PositionedFamilyGraph, selectedPersonId?: stri
       selectable: false,
       focusable: false,
       hidden: node.junctionKind === 'partnership',
-      data: { hidden: node.junctionKind === 'partnership' },
+      className: prominent ? 'family-flow-node family-flow-node--prominent' : 'family-flow-node family-flow-node--distant',
+      data: { hidden: node.junctionKind === 'partnership', prominent },
     };
   });
 
   const edges = layout.edges.map<Edge>((edge) => {
+    const prominent = !prominentPersonIds || (
+      edge.kind === 'partnership'
+        ? prominentPersonIds.has(edge.source) && prominentPersonIds.has(edge.target)
+        : edgeIsProminent(edge.source, edge.target, prominentPersonIds, prominentJunctionIds)
+    );
+    const focusClassName = prominent ? 'is-prominent' : 'is-distant';
     if (edge.kind === 'partnership') {
       const source = positionedById.get(edge.source);
       const target = positionedById.get(edge.target);
@@ -181,7 +231,7 @@ function toReactFlowGraph(layout: PositionedFamilyGraph, selectedPersonId?: stri
         targetHandle: sourceIsLeft ? 'partner-target-left' : 'partner-target-right',
         type: 'straight',
         selectable: false,
-        className: 'family-edge family-edge--partnership',
+        className: `family-edge family-edge--partnership ${focusClassName}`,
       };
     }
 
@@ -195,7 +245,7 @@ function toReactFlowGraph(layout: PositionedFamilyGraph, selectedPersonId?: stri
       type: 'smoothstep',
       pathOptions: { borderRadius: 12 },
       selectable: false,
-      className: 'family-edge family-edge--parent',
+      className: `family-edge family-edge--parent ${focusClassName}`,
     };
   });
 
@@ -231,6 +281,17 @@ function PersonTreeNode({ data }: NodeProps<PersonFlowNode>) {
       )}
     </article>
   );
+}
+
+function edgeIsProminent(
+  source: string,
+  target: string,
+  prominentPersonIds: Set<string>,
+  prominentJunctionIds: Set<string>,
+) {
+  const sourceProminent = prominentPersonIds.has(source) || prominentJunctionIds.has(source);
+  const targetProminent = prominentPersonIds.has(target) || prominentJunctionIds.has(target);
+  return sourceProminent && targetProminent;
 }
 
 function JunctionTreeNode({ data }: NodeProps<JunctionFlowNode>) {
