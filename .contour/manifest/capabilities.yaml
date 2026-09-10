@@ -1,32 +1,79 @@
-- id: cap-development-foundation
-  name: Run the local development foundation
-  status: shipped
-  why: Starts the shared package and application watchers against the user's provisioned local Supabase instance.
-  code: [package.json, pnpm-workspace.yaml, README.md, SETUP.md, vitest.config.ts, vitest.database.config.ts, apps/api/.env.example, apps/web/.env.example, .gitignore]
-  verified_by: [apps/api/src/app.test.ts]
+- id: cap-manage-family-tree
+  name: Create and maintain a family tree
+  status: in-progress
+  why: Lets the family organizer build the shared family record from scratch and keep each person's information accurate.
+  code:
+    - packages/family-core/src/schemas.ts
+    - packages/family-core/src/person.ts
+    - supabase/migrations/20260909000000_create_family_schema.sql
+  verified_by:
+    - packages/family-core/src/person.test.ts
+    - apps/api/src/lib/database.db.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-web-shell, door-api-health]
-  open_questions: ["This foundation does not yet create, persist, or display family graphs."]
-  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
-
-- id: cap-family-graph-rules
-  name: Validate and derive a family graph
-  status: shipped
-  why: Lets future organizer forms and API services share person validation, proposed mutation checks, and immediate-family views without persisting derived relationships.
-  code: [packages/family-core/src/, packages/family-core/README.md]
-  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
-  relies_on: [part-family-core]
   doors: []
-  open_questions: ["Application endpoints are future commits; the API now supplies the transaction helper, while the core remains free of persistence and authorization."]
-  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+  open_questions:
+    - Organizer authentication, tree and person endpoints, and the editing UI remain to make this outcome usable.
+  last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
 
-- id: cap-private-family-persistence
-  name: Store family records behind private access boundaries
-  status: shipped
-  why: Provides constrained SQL persistence and a common tree-row lock for future authoritative graph mutations.
-  code: [supabase/migrations/, supabase/README.md, apps/api/src/lib/database.ts, vitest.database.config.ts]
-  verified_by: [apps/api/src/lib/database.db.test.ts]
-  relies_on: [part-supabase, part-api, part-family-core]
+- id: cap-connect-family-members
+  name: Connect people through family relationships
+  status: in-progress
+  why: Lets the organizer represent parents, children, partners, full siblings, half-siblings, and multiple-partner branches without creating impossible relationships.
+  code:
+    - packages/family-core/src/graph.ts
+    - packages/family-core/src/invariants.ts
+    - packages/family-core/src/relationships.ts
+    - supabase/migrations/20260909000000_create_family_schema.sql
+  verified_by:
+    - packages/family-core/src/graph.test.ts
+    - packages/family-core/src/relationships.test.ts
+    - apps/api/src/lib/database.db.test.ts
+  relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: []
-  open_questions: ["No family endpoints exist yet; commits 04–05 must authorize and run shared graph rules inside the locked callback."]
-  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e
+  open_questions:
+    - Atomic relationship endpoints and organizer editing controls remain to make the validated graph rules usable.
+  last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
+
+- id: cap-browse-family-tree
+  name: Browse and understand family branches
+  status: planned
+  why: Lets organizers and relatives navigate a clear, automatically laid-out tree and understand where people sit within a large family.
+  code: []
+  verified_by: []
+  relies_on: [part-web, part-api, part-family-core, part-supabase]
+  doors: []
+  open_questions:
+    - Will automatic layout keep multiple-partner, half-sibling, and large sibling branches understandable in manual QA?
+
+- id: cap-explore-relative
+  name: Explore a relative through their person card
+  status: planned
+  why: Lets a relative discover a person's immediate family, life information, photos, and memorable facts without losing tree context.
+  code: []
+  verified_by: []
+  relies_on: [part-web, part-api, part-family-core, part-supabase]
+  doors: []
+  open_questions:
+    - Will focus navigation preserve enough surrounding context for an unfamiliar relative to understand the selected person's branch?
+
+- id: cap-preserve-family-memories
+  name: Add private photos and memorable facts
+  status: planned
+  why: Lets the organizer make each person recognizable and memorable through life-stage photos and up to three fun facts.
+  code: []
+  verified_by: []
+  relies_on: [part-web, part-api, part-family-core, part-supabase]
+  doors: []
+  open_questions:
+    - What retry and cleanup experience will best explain partial photo upload failures without background workers?
+
+- id: cap-share-family-tree
+  name: Share the tree privately with relatives
+  status: planned
+  why: Lets the organizer share an unlisted link that relatives can open without an account while keeping them read-only.
+  code: []
+  verified_by: []
+  relies_on: [part-web, part-api, part-supabase]
+  doors: []
+  open_questions:
+    - Will the sharing experience make it clear that anyone holding the private link can view the tree?

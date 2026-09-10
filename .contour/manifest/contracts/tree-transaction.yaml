@@ -1,0 +1,23 @@
+id: contract-tree-transaction
+name: Atomic family graph mutation transaction
+status: shipped
+part: part-api
+why: Gives future organizer services one serialization boundary for authoritative family graph changes.
+accepts:
+  - A pooled PostgreSQL client, an existing tree ID, and a server-side work callback.
+guarantees:
+  - The transaction acquires the tree row lock before invoking the work callback.
+  - Successful work commits, failed work rolls back, and the database connection is always released.
+  - A connection is discarded rather than returned to the pool when rollback itself fails.
+  - A missing tree rejects the transaction before the work callback runs.
+rules:
+  - Every graph-affecting write must authorize and validate against fresh data inside the locked callback using its supplied client.
+  - READ COMMITTED lets a waiting writer read the committed graph after acquiring the tree lock.
+  - Tree creation authorizes the organizer before insertion because no tree row exists to lock yet.
+code: [apps/api/src/lib/database.ts]
+verified_by: [apps/api/src/lib/database.db.test.ts]
+relies_on: [part-supabase]
+doors: []
+open_questions:
+  - Organizer authorization and graph mutation services must adopt this boundary in the next API commits.
+last_verified: 60e59fa222054dada84ed465c861b1c5e1716869

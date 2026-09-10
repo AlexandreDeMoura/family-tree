@@ -115,6 +115,22 @@ Prefer the simpler design unless extra complexity directly improves graph correc
 <!-- contour:manifest:start -->
 ## Project manifest standing rule
 
+Capabilities are stable outcomes experienced by the product's intended users. Identify those users from the PRD or product brief; the developer working on the repository is not automatically a product persona. Developer-facing products can have developer users and real CLI or API surfaces.
+
+Before adding or updating a capability, ask:
+1. Can a product persona say, “I can now ___”?
+2. Would the outcome stay conceptually the same if the technical stack changed?
+3. Through which product surface can (or will) that user exercise it?
+
+Route setup and technology choices to `project.yaml`; system parts, infrastructure, libraries, validation engines, and persistence to `boundaries.yaml`; guarantees and invariants to part-owned `contracts/`; pages, endpoints, commands, and jobs to `surface.yaml`; and durable reasons to `decisions.yaml`. For example, “Validate and derive a family graph” belongs in a part and its contract; “Connect family members without impossible relationships” is a user capability. Do not create one capability per implementation commit or technical milestone. Reuse stable capability IDs across commits, linking foundations through `relies_on` and their contracts.
+
+Capability statuses describe the user outcome:
+- `planned`: the outcome has been chosen; no completed implementation is claimed. Empty references and an omitted `last_verified` are honest here.
+- `in-progress`: some implementation exists, but the outcome is not yet usable and verified end to end.
+- `shipped`: the intended user can complete the outcome through a real product surface, with end-to-end verification evidence. Record its `doors` and genuine `verified_by` paths. Unit tests of a foundation alone do not establish delivery; respect the builder's manual acceptance requirements and never invent evidence.
+
+For greenfield work, seed a small outcome checklist from the PRD's MVP user loop before implementation. Keep unbuilt outcomes planned, and advance the same entries as work progresses. For existing code, distinguish implemented outcomes from documented plans; do not infer a roadmap from folders or commits. Completed foundations can coexist with zero shipped capabilities. A shipped part or contract does not automatically ship its dependent capabilities. Semantic warnings are prompts for review, not proof that an outcome is wrong; confirm the evidence before changing status or ownership.
+
 Before broad codebase exploration, read `.contour/manifest/project.yaml`, the manifest slices relevant to the task, and any relevant files under `.contour/manifest/contracts/`. Treat them as a map, then verify affected claims against the code.
 
 After changing code, update the affected manifest YAML files. Run the repository's required validation command, including the manifest check, after your final code or manifest edit. If validation does not yet include it, run the locally installed `contour check` explicitly. Resolve check failures and rerun the affected checks before declaring the task complete. Report the commands run and their results. If a check cannot run, report the blocker explicitly and do not claim it passed. Do not bypass checks, weaken validation, or invent verification stamps to make the result pass.
