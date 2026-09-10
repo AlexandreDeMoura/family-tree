@@ -6,6 +6,7 @@ import { errorMessage, familyApi, type LoadedTree, type PersonInput } from '../.
 import { PersonForm } from '../people/PersonForm';
 import { RelationshipPanel } from '../people/RelationshipPanel';
 import type { RelationshipKind } from '../people/relationship-form';
+import { FamilyTree } from '../tree/FamilyTree';
 import { useAuth } from './auth-context';
 import { OrganizerHeader } from './OrganizerHeader';
 import { treeKeys } from './tree-queries';
@@ -106,6 +107,23 @@ export function FamilyEditorPage() {
         </aside>
 
         <div className="editor-main">
+          {graph.people.length > 0 && (
+            <section className="panel family-map-panel">
+              <div className="family-map-heading">
+                <div>
+                  <span className="eyebrow">Family map</span>
+                  <h2>See the whole family at a glance</h2>
+                  <p>Select a person to edit their record. Use the map controls to pan, zoom, or fit everyone into view.</p>
+                </div>
+                <span className="count-pill">Automatic layout</span>
+              </div>
+              <FamilyTree
+                graph={graph}
+                selectedPersonId={showCreate ? null : selectedPerson?.id}
+                onSelectPerson={(personId) => { setSelectedId(personId); setCreating(false); }}
+              />
+            </section>
+          )}
           <section className="panel">
             <PersonForm
               key={showCreate ? 'new-person' : selectedPerson?.id}

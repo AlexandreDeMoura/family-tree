@@ -151,6 +151,44 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
 .sidebar-empty strong { display: block; margin: .5rem 0; font-family: Georgia, serif; font-size: 1.1rem; }
 .sidebar-empty p { font-size: .78rem; }
 .editor-main { display: grid; max-width: 72rem; gap: 1.25rem; padding: clamp(1rem, 3.5vw, 3.5rem); }
+.family-map-panel { min-width: 0; overflow: hidden; }
+.family-map-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 1.6rem 1.15rem; }
+.family-map-heading h2 { margin-bottom: .45rem; }
+.family-map-heading p { max-width: 45rem; margin-bottom: 0; font-size: .82rem; }
+.family-map-heading .count-pill { flex: 0 0 auto; }
+.family-tree-canvas { height: clamp(30rem, 62vh, 44rem); border-top: 1px solid var(--line); background: #f2f0e8; }
+.family-tree-state { display: flex; min-height: 22rem; align-items: center; justify-content: center; gap: .75rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+.family-tree-state--error { color: var(--error); }
+.family-tree-canvas .react-flow__node { border: 0; background: transparent; box-shadow: none; }
+.family-tree-canvas .react-flow__node:focus-visible { outline: 3px solid rgb(201 149 78 / 45%); outline-offset: 5px; }
+.family-tree-canvas .react-flow__edge-path { stroke-linecap: round; }
+.family-tree-canvas .family-edge--parent .react-flow__edge-path { stroke: #789186; stroke-width: 2px; }
+.family-tree-canvas .family-edge--partnership .react-flow__edge-path { stroke: var(--gold); stroke-width: 2.5px; }
+.family-tree-canvas .react-flow__controls { overflow: hidden; border: 1px solid #cfd7d0; border-radius: .65rem; box-shadow: 0 5px 15px rgb(35 52 47 / 9%); }
+.family-tree-canvas .react-flow__controls-button { border-bottom-color: #dfe3dd; background: var(--paper); fill: var(--forest); }
+.family-tree-canvas .react-flow__minimap { overflow: hidden; border: 1px solid #cfd7d0; border-radius: .6rem; background: rgb(255 253 248 / 88%); }
+.tree-person {
+  display: grid; width: 184px; height: 224px; align-content: start; justify-items: center; border: 1px solid #d4d9d2; border-radius: 1.05rem;
+  padding: 1rem .8rem .75rem; background: var(--paper); box-shadow: 0 10px 24px rgb(35 52 47 / 9%); text-align: center;
+  transition: border-color .16s, box-shadow .16s, transform .16s;
+}
+.tree-person:hover { transform: translateY(-2px); border-color: #a9bbb1; box-shadow: 0 14px 28px rgb(35 52 47 / 13%); }
+.tree-person.is-active { border-color: var(--gold); box-shadow: 0 0 0 3px rgb(201 149 78 / 17%), 0 15px 30px rgb(35 52 47 / 12%); }
+.tree-person__portrait {
+  display: grid; width: 5.1rem; height: 5.1rem; place-items: center; border: 4px solid #edf1eb; border-radius: 50%;
+  background: linear-gradient(145deg, #dce7df, #c7d8cd); color: var(--forest); font-family: Georgia, serif; font-size: 1.35rem;
+}
+.tree-person__identity { display: grid; min-width: 0; max-width: 100%; gap: .05rem; margin-top: .65rem; }
+.tree-person__identity strong, .tree-person__identity > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-person__identity strong { font-family: Georgia, serif; font-size: 1.06rem; font-weight: 600; }
+.tree-person__identity > span { color: #53645c; font-size: .78rem; }
+.tree-person__identity small { margin-top: .18rem; color: #7a8780; font-size: .68rem; }
+.tree-person__badges { display: flex; max-width: 100%; flex-wrap: wrap; justify-content: center; gap: .28rem; margin-top: .55rem; }
+.tree-badge { border: 1px solid #ccd9d1; border-radius: 99px; padding: .17rem .38rem; background: #eff4f0; color: #4b685b; font-size: .55rem; font-weight: 800; letter-spacing: .025em; }
+.tree-badge--memory { border-color: #e3cda8; background: #fbf4e7; color: #8a622d; }
+.tree-badge--discovery { border-color: #d8d8cd; background: #f6f5ef; color: #707a74; }
+.tree-handle { width: 1px !important; height: 1px !important; min-width: 0 !important; min-height: 0 !important; border: 0 !important; opacity: 0; pointer-events: none; }
+.tree-junction { width: 12px; height: 12px; border: 2px solid #fffdf8; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 1px #bf8c45; }
 .person-form, .relationship-panel { padding: clamp(1.25rem, 3vw, 2.4rem); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.8rem; }
 .section-heading h2 { margin-bottom: 0; }
@@ -202,6 +240,7 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
   .people-sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   .people-list { grid-auto-columns: minmax(13rem, 16rem); grid-auto-flow: column; overflow-x: auto; padding-bottom: .5rem; }
   .sidebar-add { width: auto; }
+  .family-map-heading { align-items: flex-start; flex-direction: column; gap: .75rem; }
   .form-grid--three, .facts-grid, .completeness-grid { grid-template-columns: 1fr; }
 }
 

@@ -1,0 +1,26 @@
+id: contract-family-tree-layout
+name: Persistence-free family graph layout
+status: shipped
+part: part-web
+why: Turns an authoritative family graph into a complete, finite display graph suitable for automatic family-tree rendering.
+accepts:
+  - An authoritative family graph containing people, parent-child relationships, and unordered partnerships.
+guarantees:
+  - Every source person appears exactly once with finite coordinates, and older generations appear above their descendants.
+  - Compatible partners share a generation while children route below their one or two known parents through temporary family junctions.
+  - Disconnected people, multiple partners, half-sibling branches, and large sibling groups remain represented without invented relatives.
+  - The input graph remains unchanged, and all positions, junctions, and routing edges exist only in display output.
+rules:
+  - ELK determines automatic branch ordering; organizers cannot persist or manually change node positions.
+  - Partnership display edges come only from persisted partnerships, even when two parents share a family junction.
+  - Deceased nodes retain the same size, color, and prominence as living nodes and receive only a positive memory indicator.
+code:
+  - apps/web/src/features/tree/layout-family-graph.ts
+  - apps/web/src/features/tree/FamilyTree.tsx
+  - apps/web/src/index.css
+verified_by:
+  - apps/web/src/features/tree/layout-family-graph.test.ts
+relies_on: [contract-family-graph]
+doors: [door-family-tree-canvas]
+open_questions: []
+last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf

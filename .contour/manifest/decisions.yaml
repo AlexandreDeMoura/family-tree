@@ -81,3 +81,17 @@
   doors: [door-organizer-family-api]
   open_questions: []
   last_verified: f722cc7ad9cc3922a9546b822fa6dcf5c6ba0f8b
+
+- id: decision-ephemeral-family-layout
+  name: Keep family layout artifacts in the web application
+  status: shipped
+  why: ELK can optimize branch ordering with temporary family junctions while PostgreSQL remains authoritative for people, parent-child edges, and partnerships only.
+  code:
+    - apps/web/src/features/tree/layout-family-graph.ts
+    - apps/web/src/features/tree/FamilyTree.tsx
+  verified_by:
+    - apps/web/src/features/tree/layout-family-graph.test.ts
+  relies_on: [part-web, part-family-core]
+  doors: [door-family-tree-canvas]
+  open_questions: []
+  last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf

@@ -27,6 +27,22 @@
     - Organizer manual QA must verify sign-in, creation, editing, responsive presentation, value preservation after failed saves, and validation feedback.
   last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
 
+- id: door-family-tree-canvas
+  name: Automatically laid-out organizer family map
+  status: in-progress
+  why: Lets the organizer see the authoritative family graph by generation and navigate large branches with pan, zoom, and fit-to-view controls.
+  code:
+    - apps/web/src/features/tree/
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/index.css
+  verified_by:
+    - apps/web/src/features/tree/layout-family-graph.test.ts
+  relies_on: [part-web, contract-family-tree-layout, door-organizer-family-api]
+  doors: []
+  open_questions:
+    - Manual QA must confirm readability for multiple partners, half-siblings, large sibling groups, several generations, and small screens.
+  last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf
+
 - id: door-api-health
   name: GET /health
   status: shipped

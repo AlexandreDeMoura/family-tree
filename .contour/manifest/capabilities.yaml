@@ -53,14 +53,20 @@
 
 - id: cap-browse-family-tree
   name: Browse and understand family branches
-  status: planned
+  status: in-progress
   why: Lets organizers and relatives navigate a clear, automatically laid-out tree and understand where people sit within a large family.
-  code: []
-  verified_by: []
+  code:
+    - apps/web/src/features/tree/
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/index.css
+  verified_by:
+    - apps/web/src/features/tree/layout-family-graph.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: []
+  doors: [door-family-tree-canvas]
   open_questions:
     - Will automatic layout keep multiple-partner, half-sibling, and large sibling branches understandable in manual QA?
+    - The account-free relative surface and person-focused navigation remain for later commits.
+  last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf
 
 - id: cap-explore-relative
   name: Explore a relative through their person card
