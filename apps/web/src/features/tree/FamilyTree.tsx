@@ -22,6 +22,7 @@ import {
 
 interface FamilyTreeProps {
   graph: FamilyGraph;
+  portraitUrls?: ReadonlyMap<string, string>;
   selectedPersonId?: string | null;
   onSelectPerson?: (personId: string) => void;
 }
@@ -30,6 +31,7 @@ interface PersonNodeData extends Record<string, unknown> {
   person: Person;
   active: boolean;
   prominent: boolean;
+  portraitUrl?: string;
 }
 
 interface JunctionNodeData extends Record<string, unknown> {
@@ -50,7 +52,7 @@ const nodeTypes: NodeTypes = {
   junction: JunctionTreeNode,
 };
 
-export function FamilyTree({ graph, selectedPersonId, onSelectPerson }: FamilyTreeProps) {
+export function FamilyTree({ graph, portraitUrls, selectedPersonId, onSelectPerson }: FamilyTreeProps) {
   const [resolvedLayout, setResolvedLayout] = useState<LayoutState | null>(null);
   const focusedGraph = useMemo(
     () => selectedPersonId ? projectFocusedFamilyGraph(graph, selectedPersonId) : null,
@@ -97,6 +99,7 @@ export function FamilyTree({ graph, selectedPersonId, onSelectPerson }: FamilyTr
       layout={layoutState.layout}
       selectedPersonId={selectedPersonId}
       prominentPersonIds={prominentPersonIds}
+      portraitUrls={portraitUrls}
       onSelectPerson={onSelectPerson}
     />
   );
@@ -106,17 +109,19 @@ function FamilyTreeCanvas({
   layout,
   selectedPersonId,
   prominentPersonIds,
+  portraitUrls,
   onSelectPerson,
 }: {
   layout: PositionedFamilyGraph;
   selectedPersonId?: string | null;
   prominentPersonIds: Set<string> | null;
+  portraitUrls?: ReadonlyMap<string, string>;
   onSelectPerson?: (personId: string) => void;
 }) {
   const [flow, setFlow] = useState<ReactFlowInstance<FamilyFlowNode, Edge> | null>(null);
   const { nodes, edges } = useMemo(
-    () => toReactFlowGraph(layout, selectedPersonId, prominentPersonIds),
-    [layout, prominentPersonIds, selectedPersonId],
+    () => toReactFlowGraph(layout, selectedPersonId, prominentPersonIds, portraitUrls),
+    [layout, portraitUrls, prominentPersonIds, selectedPersonId],
   );
 
   useEffect(() => {
@@ -170,6 +175,7 @@ function toReactFlowGraph(
   layout: PositionedFamilyGraph,
   selectedPersonId?: string | null,
   prominentPersonIds?: Set<string> | null,
+  portraitUrls?: ReadonlyMap<string, string>,
 ) {
   const positionedById = new Map(layout.nodes.map((node) => [node.id, node]));
   const prominentJunctionIds = new Set(layout.nodes.flatMap((node) => {
@@ -193,7 +199,7 @@ function toReactFlowGraph(
         selected: active,
         className: prominent ? 'family-flow-node family-flow-node--prominent' : 'family-flow-node family-flow-node--distant',
         ariaLabel: `${node.person.firstName} ${node.person.lastName}, ${birthYearLabel(node.person)}`,
-        data: { person: node.person, active, prominent },
+        data: { person: node.person, active, prominent, portraitUrl: portraitUrls?.get(node.id) },
       };
     }
     const prominent = !prominentPersonIds || prominentJunctionIds.has(node.id);
@@ -253,7 +259,7 @@ function toReactFlowGraph(
 }
 
 function PersonTreeNode({ data }: NodeProps<PersonFlowNode>) {
-  const { person, active } = data;
+  const { person, active, portraitUrl } = data;
   const incomplete = isIncomplete(person);
   return (
     <article className={active ? 'tree-person is-active' : 'tree-person'}>
@@ -265,7 +271,7 @@ function PersonTreeNode({ data }: NodeProps<PersonFlowNode>) {
       <Handle className="tree-handle" id="partner-target-right" type="target" position={Position.Right} />
 
       <div className="tree-person__portrait" aria-hidden="true">
-        <span>{initials(person)}</span>
+        {portraitUrl ? <img src={portraitUrl} alt="" /> : <span>{initials(person)}</span>}
       </div>
       <div className="tree-person__identity">
         <strong>{person.firstName}</strong>

@@ -11,10 +11,11 @@ guarantees:
   - Sibling completeness depends on known parents and those parents' child-list completeness, while sibling type still depends only on shared known parent IDs.
   - Focus projections include the selected person and card-listed immediate family without mutating or replacing the full family graph.
   - Deceased people retain the same portrait, card, and node prominence as living people; only graph distance from the selected person may fade a node.
+  - Available main portraits appear consistently in the sidebar, family map, and person card, while unavailable images fall back without fading the person.
 rules:
   - Parents, siblings, partners, and children remain expandable and every listed person can become the next focus.
   - Closing focus returns to the broader tree without changing the organizer's selected editing record.
-  - Photo galleries and signed portrait URLs remain outside this contract until the private photo workflow exists.
+  - Signed photo access and publication rules belong to the private-photo contract; this contract only consumes authorized short-lived URLs.
 code:
   - apps/web/src/features/people/PersonCard.tsx
   - apps/web/src/features/people/person-card.ts
@@ -27,4 +28,4 @@ relies_on: [contract-family-graph, contract-family-tree-layout]
 doors: [door-contextual-person-card]
 open_questions:
   - Manual UI QA must confirm that the overlaid card leaves enough tree context visible across supported screen sizes.
-last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
+last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

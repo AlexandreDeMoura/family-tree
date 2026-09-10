@@ -396,7 +396,7 @@ Expected: both paths are printed. API keys, the CLI login token, and the databas
 
 Create buckets through the Storage API. SQL migration files remain the source of truth for the application's own tables; Storage object operations go through its API. [Creating buckets](https://supabase.com/docs/guides/storage/buckets/creating-buckets), [Storage schema guidance](https://supabase.com/docs/guides/storage/schema/design).
 
-This repeatable script checks PostgreSQL and creates or configures the one private bucket. It chooses a 10 MiB JPEG limit for initialization; photo implementation can revise that limit deliberately.
+This repeatable script checks PostgreSQL and creates or configures the one private bucket. The 5 MiB JPEG limit matches the browser conversion and server completion checks.
 
 ```sh
 mkdir -p apps/api/scripts
@@ -426,7 +426,7 @@ if (listError) throw listError;
 const options = {
   public: false,
   allowedMimeTypes: ['image/jpeg'],
-  fileSizeLimit: 10 * 1024 * 1024,
+  fileSizeLimit: 5 * 1024 * 1024,
 };
 const exists = buckets.some((bucket) => bucket.id === 'family-photos');
 const { error } = exists
@@ -441,7 +441,7 @@ node --env-file=apps/api/.env apps/api/scripts/setup-supabase.mjs
 
 Run this command from the repository root. The explicit paths avoid `.env` lookup issues when invoking Node through `pnpm exec`.
 
-Do not add public `storage.objects` policies. Later, Fastify authorizes a tree/person before issuing signed uploads or short-lived viewing URLs. Stored paths follow `trees/{treeId}/people/{personId}/{photoId}.jpg`.
+Do not add public `storage.objects` policies. Fastify authorizes a tree/person before issuing signed uploads or five-minute viewing URLs. Stored paths follow `trees/{treeId}/people/{personId}/{photoId}.jpg`.
 
 ## 9. Build and start the foundation
 

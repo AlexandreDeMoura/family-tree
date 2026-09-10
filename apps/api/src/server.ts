@@ -1,10 +1,12 @@
 import { buildApp } from './app.js';
 import { createOrganizerAuthenticator } from './features/auth/auth.service.js';
 import { createPeopleService } from './features/people/people.service.js';
+import { createPhotosService } from './features/photos/photos.service.js';
 import { createRelationshipsService } from './features/relationships/relationships.service.js';
 import { createTreesService } from './features/trees/trees.service.js';
 import { createDatabasePool } from './lib/database.js';
 import { env } from './lib/env.js';
+import { createSupabasePhotoStorage } from './lib/photo-storage.js';
 import { createSupabaseAuthVerifier, supabaseAdmin } from './lib/supabase.js';
 
 const database = createDatabasePool(env.DATABASE_URL);
@@ -18,6 +20,7 @@ const app = buildApp({
     ),
     trees: createTreesService(database),
     people: createPeopleService(database),
+    photos: createPhotosService(database, createSupabasePhotoStorage(supabaseAdmin)),
     relationships: createRelationshipsService(database),
   },
 });

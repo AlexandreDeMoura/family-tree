@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router';
-import type { Person } from '@family-tree/family-core';
-import { errorMessage, familyApi, type LoadedTree, type PersonInput } from '../../lib/api';
+import type { AgeBucket, Person } from '@family-tree/family-core';
+import {
+  FamilyApiError,
+  errorMessage,
+  familyApi,
+  type LoadedTree,
+  type PersonInput,
+} from '../../lib/api';
+import { supabase } from '../../lib/supabase';
+import { PendingPhotoCleanupError, convertPhotoToJpeg } from '../photos/photo-upload';
 import { PersonForm } from '../people/PersonForm';
 import { PersonCard } from '../people/PersonCard';
 import { RelationshipPanel } from '../people/RelationshipPanel';
@@ -10,7 +18,7 @@ import type { RelationshipKind } from '../people/relationship-form';
 import { FamilyTree } from '../tree/FamilyTree';
 import { useAuth } from './auth-context';
 import { OrganizerHeader } from './OrganizerHeader';
-import { treeKeys } from './tree-queries';
+import { photoKeys, treeKeys } from './tree-queries';
 
 export function FamilyEditorPage() {
   const { treeId = '' } = useParams();
@@ -26,9 +34,82 @@ export function FamilyEditorPage() {
     queryFn: () => familyApi.loadTree(accessToken, treeId),
     enabled: Boolean(treeId),
   });
+  const photos = useQuery({
+    queryKey: photoKeys.all(userId, treeId),
+    queryFn: () => familyApi.listPhotos(accessToken, treeId),
+    enabled: Boolean(treeId) && tree.isSuccess,
+    staleTime: 4 * 60 * 1000,
+    refetchInterval: 4 * 60 * 1000,
+  });
 
   async function refresh() {
     await queryClient.invalidateQueries({ queryKey: treeKeys.detail(userId, treeId) });
+  }
+
+  async function refreshPhotos() {
+    await queryClient.invalidateQueries({ queryKey: photoKeys.all(userId, treeId) });
+  }
+
+  async function uploadPhoto(personId: string, file: File, ageBucket: AgeBucket, makeMain: boolean) {
+    const jpeg = await convertPhotoToJpeg(file);
+    const upload = await familyApi.createPhotoUpload(accessToken, treeId, personId, jpeg.size);
+    const { error } = await supabase.storage
+      .from('family-photos')
+      .uploadToSignedUrl(upload.path, upload.token, jpeg, {
+        cacheControl: '300',
+        contentType: 'image/jpeg',
+        upsert: false,
+      });
+    if (error) {
+      const uploadError = new Error(`The photo upload failed: ${error.message}`);
+      try {
+        await familyApi.cleanupPhotoUpload(accessToken, treeId, personId, upload.photoId);
+      } catch {
+        throw pendingCleanupError(personId, upload.photoId, uploadError);
+      }
+      throw uploadError;
+    }
+    try {
+      await familyApi.completePhotoUpload(
+        accessToken,
+        treeId,
+        personId,
+        upload.photoId,
+        ageBucket,
+        makeMain,
+      );
+    } catch (completionError) {
+      try {
+        await familyApi.cleanupPhotoUpload(accessToken, treeId, personId, upload.photoId);
+      } catch (cleanupError) {
+        // A lost completion response can leave a valid published record. In
+        // that case cleanup correctly refuses to remove it; refreshing reveals it.
+        if (cleanupError instanceof FamilyApiError && cleanupError.code === 'photo_already_published') {
+          await Promise.all([refreshPhotos(), refresh()]);
+          return;
+        }
+        throw pendingCleanupError(personId, upload.photoId, completionError);
+      }
+      throw completionError;
+    }
+    await Promise.all([refreshPhotos(), makeMain ? refresh() : Promise.resolve()]);
+  }
+
+  function pendingCleanupError(personId: string, photoId: string, cause: unknown) {
+    return new PendingPhotoCleanupError(
+      `${errorMessage(cause)} The unfinished private upload still needs cleanup.`,
+      () => familyApi.cleanupPhotoUpload(accessToken, treeId, personId, photoId),
+    );
+  }
+
+  async function setMainPhoto(personId: string, photoId: string) {
+    await familyApi.setMainPhoto(accessToken, treeId, personId, photoId);
+    await Promise.all([refreshPhotos(), refresh()]);
+  }
+
+  async function deletePhoto(personId: string, photoId: string) {
+    await familyApi.deletePhoto(accessToken, treeId, personId, photoId);
+    await Promise.all([refreshPhotos(), refresh()]);
   }
 
   async function savePerson(input: PersonInput, person?: Person) {
@@ -74,6 +155,10 @@ export function FamilyEditorPage() {
   }
 
   const graph = tree.data.graph;
+  const photoList = photos.data ?? [];
+  const portraitUrls = new Map(photoList.flatMap((photo) => photo.isMain && photo.viewUrl
+    ? [[photo.personId, photo.viewUrl] as const]
+    : []));
   const effectiveSelectedId = selectedId ?? graph.people[0]?.id ?? null;
   const selectedPerson = graph.people.find(({ id }) => id === effectiveSelectedId);
   const focusedPerson = graph.people.find(({ id }) => id === focusedId);
@@ -110,7 +195,9 @@ export function FamilyEditorPage() {
                   type="button"
                   onClick={() => openPerson(person.id)}
                 >
-                  <span className="person-avatar">{person.firstName.charAt(0)}{person.lastName.charAt(0)}</span>
+                  <span className="person-avatar">{portraitUrls.get(person.id)
+                    ? <img src={portraitUrls.get(person.id)} alt="" onError={() => void photos.refetch()} />
+                    : <>{person.firstName.charAt(0)}{person.lastName.charAt(0)}</>}</span>
                   <span><strong>{person.firstName} {person.lastName}</strong><small>{person.birthYear ?? 'Year unknown'} · {lifeLabel(person)}</small></span>
                   {isIncomplete(person) && <span className="discovery-dot" title="Some family information is still unknown">✦</span>}
                 </button>
@@ -138,6 +225,7 @@ export function FamilyEditorPage() {
               <div className={focusedPerson && !showCreate ? 'family-map-body has-person-card' : 'family-map-body'}>
                 <FamilyTree
                   graph={graph}
+                  portraitUrls={portraitUrls}
                   selectedPersonId={showCreate ? null : focusedPerson?.id}
                   onSelectPerson={openPerson}
                 />
@@ -147,6 +235,13 @@ export function FamilyEditorPage() {
                     personId={focusedPerson.id}
                     onNavigate={openPerson}
                     onClose={() => setFocusedId(null)}
+                    photos={photoList}
+                    photosLoading={photos.isPending}
+                    photosError={photos.error}
+                    onRefreshPhotos={() => void photos.refetch()}
+                    onUploadPhoto={(file, ageBucket, makeMain) => uploadPhoto(focusedPerson.id, file, ageBucket, makeMain)}
+                    onSetMainPhoto={(photoId) => setMainPhoto(focusedPerson.id, photoId)}
+                    onDeletePhoto={(photoId) => deletePhoto(focusedPerson.id, photoId)}
                   />
                 )}
               </div>

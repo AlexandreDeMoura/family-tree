@@ -1,4 +1,6 @@
-import type { FamilyGraph, Person, Sibling } from '@family-tree/family-core';
+import type { AgeBucket, FamilyGraph, Person, Sibling } from '@family-tree/family-core';
+import type { PhotoView } from '../../lib/api';
+import { PhotoGallery } from '../photos/PhotoGallery';
 import {
   projectPersonCard,
   type PersonRelationshipSection,
@@ -10,18 +12,43 @@ interface PersonCardProps {
   personId: string;
   onNavigate: (personId: string) => void;
   onClose: () => void;
+  photos: PhotoView[];
+  photosLoading: boolean;
+  photosError: unknown;
+  onRefreshPhotos: () => void;
+  onUploadPhoto: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
+  onSetMainPhoto: (photoId: string) => Promise<void>;
+  onDeletePhoto: (photoId: string) => Promise<void>;
 }
 
-export function PersonCard({ graph, personId, onNavigate, onClose }: PersonCardProps) {
+export function PersonCard({
+  graph,
+  personId,
+  onNavigate,
+  onClose,
+  photos,
+  photosLoading,
+  photosError,
+  onRefreshPhotos,
+  onUploadPhoto,
+  onSetMainPhoto,
+  onDeletePhoto,
+}: PersonCardProps) {
   const card = projectPersonCard(graph, personId);
   if (!card) return null;
 
   const { person } = card;
+  const personPhotos = photos.filter((photo) => photo.personId === person.id);
+  const portrait = personPhotos.find(({ isMain, viewUrl }) => isMain && viewUrl)?.viewUrl;
   return (
     <aside className="person-card" aria-label={`${person.firstName} ${person.lastName}'s person card`}>
       <header className="person-card__header">
         <button className="person-card__close" type="button" onClick={onClose} aria-label="Close person card and show the whole tree">×</button>
-        <div className="person-card__portrait" aria-hidden="true">{initials(person)}</div>
+        <div className="person-card__portrait">
+          {portrait
+            ? <img src={portrait} alt={`${person.firstName} ${person.lastName}'s main portrait`} onError={onRefreshPhotos} />
+            : <span aria-hidden="true">{initials(person)}</span>}
+        </div>
         <div>
           <span className="eyebrow">Family story</span>
           <h2>{person.firstName} {person.lastName}</h2>
@@ -33,6 +60,18 @@ export function PersonCard({ graph, personId, onNavigate, onClose }: PersonCardP
           {person.lifeStatus === 'unknown' && <span className="person-card-badge person-card-badge--unknown">Life status unknown</span>}
         </div>
       </header>
+
+      <PhotoGallery
+        key={person.id}
+        person={person}
+        photos={personPhotos}
+        loading={photosLoading}
+        loadError={photosError}
+        onRefresh={onRefreshPhotos}
+        onUpload={onUploadPhoto}
+        onSetMain={onSetMainPhoto}
+        onDelete={onDeletePhoto}
+      />
 
       <section className="person-card__facts" aria-labelledby={`facts-${person.id}`}>
         <span className="eyebrow" id={`facts-${person.id}`}>A little about {person.firstName}</span>

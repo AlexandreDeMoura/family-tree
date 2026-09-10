@@ -76,11 +76,14 @@ sets only `main_photo_id` to null, preserving the person. Composite foreign keys
 use restrictive updates: IDs are stable and moving connected records between
 trees is not an edit operation.
 
-Database cascades do **not** delete Storage objects. Future photo/deletion
-services must capture the paths and implement Storage cleanup/retry behavior in
-commit 09. Migrations do not manipulate Supabase Storage tables or add public
-Storage policies. The existing setup script provisions the single private
-`family-photos` bucket through the Storage API.
+Database cascades do **not** delete Storage objects. Photo deletion therefore
+removes the private object before deleting its metadata; if the database write
+fails, the missing-image record remains visible to the organizer and the same
+delete action safely retries cleanup. Failed publication removes its unfinished
+object, with an authenticated cleanup endpoint available when a retry is needed.
+Migrations do not manipulate Supabase Storage tables or add public Storage
+policies. The setup script provisions the single private `family-photos` bucket
+through the Storage API with a 5 MiB JPEG limit.
 
 ## Database verification
 

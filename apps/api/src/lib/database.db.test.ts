@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app.js';
 import { createOrganizerAuthenticator } from '../features/auth/auth.service.js';
 import { createPeopleService } from '../features/people/people.service.js';
+import { postgresPhotoQueries } from '../features/photos/photos.queries.js';
 import { createRelationshipsService } from '../features/relationships/relationships.service.js';
 import { createTreesService } from '../features/trees/trees.service.js';
 import { createDatabasePool, TreeNotFoundError, withTreeTransaction } from './database.js';
@@ -210,6 +211,26 @@ describe('family schema on a fresh local database', () => {
     for (const table of ['people', 'photos', 'parent_child', 'partnerships']) {
       expect((await pool.query(`SELECT * FROM public.${table} WHERE tree_id = $1`, [treeId])).rows).toEqual([]);
     }
+  });
+
+  it('reads, assigns, and deletes photo metadata through the photo query boundary', async () => {
+    const treeId = await tree();
+    const personId = await person(treeId);
+    const photoId = await photo(treeId, personId, '30s');
+
+    expect(await postgresPhotoQueries.personExists(pool, treeId, personId)).toBe(true);
+    expect(await postgresPhotoQueries.personExists(pool, treeId, randomUUID())).toBe(false);
+    expect(await postgresPhotoQueries.findPhoto(pool, treeId, personId, photoId)).toMatchObject({
+      id: photoId,
+      ageBucket: '30s',
+      isMain: false,
+    });
+    expect(await postgresPhotoQueries.setMainPhoto(pool, treeId, personId, photoId)).toBe(true);
+    expect(await postgresPhotoQueries.listTreePhotos(pool, treeId)).toEqual([
+      expect.objectContaining({ id: photoId, personId, isMain: true }),
+    ]);
+    expect(await postgresPhotoQueries.deletePhoto(pool, treeId, personId, photoId)).toBe(true);
+    expect(await postgresPhotoQueries.findPhoto(pool, treeId, personId, photoId)).toBeNull();
   });
 });
 

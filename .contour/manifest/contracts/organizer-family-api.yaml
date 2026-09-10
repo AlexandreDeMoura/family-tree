@@ -7,6 +7,7 @@ accepts:
   - A Supabase Bearer access token on tree listing/creation and owned tree, person, or relationship routes.
   - Strict tree creation, person creation, and partial person edit payloads with explicit nullable years and completeness flags.
   - Strict parent and partner identifiers for relationship additions and removals.
+  - Strict JPEG upload size declarations, photo identifiers, and one supported age bucket at publication.
 guarantees:
   - Supabase verifies each access token, and only the configured organizer user can reach organizer operations.
   - Every tree read and person write checks tree ownership without revealing another organizer's tree.
@@ -16,10 +17,11 @@ guarantees:
   - Parent and partner writes acquire the same tree lock, validate the fresh proposed graph, persist only valid mutations, and return a freshly loaded graph.
   - Parent and partner edges remain independent, and multiple partners and incomplete relationship information remain supported.
   - API failures have stable status codes and machine-readable error codes, including specific domain invariant codes.
+  - Photo upload, completion, viewing, portrait selection, pending cleanup, and deletion recheck organizer ownership and person/tree scope.
 rules:
   - Routes handle HTTP parsing only, services own authorization-aware workflows, and queries alone issue SQL.
   - Organizer identity comes from a server-verified access token and is never accepted from a request body.
-  - Main photo ownership remains outside person create/edit payloads and will be managed by the private photo workflow.
+  - Main photo ownership remains outside person create/edit payloads and is managed only by the private photo workflow.
   - Legitimate unknown values and known-absence completeness flags remain representable and are not validation failures.
 code:
   - apps/api/src/app.ts
@@ -27,10 +29,13 @@ code:
   - apps/api/src/features/
   - apps/api/src/lib/api-errors.ts
   - apps/api/src/lib/supabase.ts
+  - apps/api/src/features/photos/
+  - apps/api/src/lib/photo-storage.ts
 verified_by:
   - apps/api/src/organizer-api.test.ts
+  - apps/api/src/photos-api.test.ts
   - apps/api/src/lib/database.db.test.ts
 relies_on: [contract-family-graph, contract-private-family-persistence, contract-tree-transaction]
 doors: [door-organizer-family-api]
 open_questions: []
-last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
+last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

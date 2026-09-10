@@ -3,10 +3,11 @@ import { z } from 'zod';
 // Domain IDs are opaque strings; database UUID constraints belong to persistence.
 export const personIdSchema = z.string().trim().min(1);
 export const lifeStatusSchema = z.enum(['living', 'deceased', 'unknown']);
-export const ageBucketSchema = z.enum([
+export const ageBuckets = [
   'baby_toddler', 'kid', 'adolescent', '20s', '30s', '40s',
   '50s', '60s', '70s', '80s', '90s_plus',
-]);
+] as const;
+export const ageBucketSchema = z.enum(ageBuckets);
 
 // An empty relationship list is known absence only when its flag is true.
 // A complete nonempty list is still allowed; completeness is not a prohibition.

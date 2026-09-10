@@ -1,4 +1,4 @@
-import type { DomainIssue, FamilyGraph, Person } from '@family-tree/family-core';
+import type { AgeBucket, DomainIssue, FamilyGraph, Person } from '@family-tree/family-core';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -10,6 +10,25 @@ export interface TreeSummary {
 
 export interface LoadedTree extends TreeSummary {
   graph: FamilyGraph;
+}
+
+export interface PhotoView {
+  id: string;
+  personId: string;
+  ageBucket: AgeBucket;
+  createdAt: string;
+  isMain: boolean;
+  viewUrl: string | null;
+  viewExpiresAt: string | null;
+  availability: 'ready' | 'missing';
+}
+
+export interface PhotoUploadTicket {
+  photoId: string;
+  path: string;
+  uploadUrl: string;
+  token: string;
+  expiresInSeconds: number;
 }
 
 interface ErrorResponse {
@@ -134,6 +153,57 @@ export const familyApi = {
       `/trees/${treeId}/relationships/partners/${person1Id}/${person2Id}`,
       { method: 'DELETE' },
     )).graph;
+  },
+
+  async listPhotos(accessToken: string, treeId: string) {
+    return (await request<{ photos: PhotoView[] }>(accessToken, `/trees/${treeId}/photos`)).photos;
+  },
+
+  async createPhotoUpload(accessToken: string, treeId: string, personId: string, sizeBytes: number) {
+    return (await request<{ upload: PhotoUploadTicket }>(
+      accessToken,
+      `/trees/${treeId}/people/${personId}/photos/uploads`,
+      { method: 'POST', body: JSON.stringify({ contentType: 'image/jpeg', sizeBytes }) },
+    )).upload;
+  },
+
+  async cleanupPhotoUpload(accessToken: string, treeId: string, personId: string, photoId: string) {
+    await request(
+      accessToken,
+      `/trees/${treeId}/people/${personId}/photos/uploads/${photoId}`,
+      { method: 'DELETE' },
+    );
+  },
+
+  async completePhotoUpload(
+    accessToken: string,
+    treeId: string,
+    personId: string,
+    photoId: string,
+    ageBucket: AgeBucket,
+    makeMain: boolean,
+  ) {
+    return (await request<{ photo: PhotoView }>(
+      accessToken,
+      `/trees/${treeId}/people/${personId}/photos/${photoId}/complete`,
+      { method: 'POST', body: JSON.stringify({ ageBucket, makeMain }) },
+    )).photo;
+  },
+
+  async setMainPhoto(accessToken: string, treeId: string, personId: string, photoId: string) {
+    await request(
+      accessToken,
+      `/trees/${treeId}/people/${personId}/photos/${photoId}/portrait`,
+      { method: 'PATCH' },
+    );
+  },
+
+  async deletePhoto(accessToken: string, treeId: string, personId: string, photoId: string) {
+    await request(
+      accessToken,
+      `/trees/${treeId}/people/${personId}/photos/${photoId}`,
+      { method: 'DELETE' },
+    );
   },
 };
 

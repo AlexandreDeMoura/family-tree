@@ -46,7 +46,7 @@
 - id: door-contextual-person-card
   name: Contextual person card and family focus
   status: in-progress
-  why: Lets the organizer open a person's story over the family map, inspect immediate relationships and facts, and move between relatives without losing broader tree context.
+  why: Lets the organizer open a person's story over the family map, inspect immediate relationships, facts, and photos, and move between relatives without losing broader tree context.
   code:
     - apps/web/src/features/people/PersonCard.tsx
     - apps/web/src/features/people/person-card.ts
@@ -58,9 +58,9 @@
   relies_on: [part-web, contract-person-card-navigation, door-family-tree-canvas]
   doors: []
   open_questions:
-    - Manual QA must confirm card readability, navigation, unknown states, and respectful treatment of deceased relatives.
+    - Manual QA must confirm card and gallery readability, navigation, unknown states, and respectful treatment of deceased relatives.
     - Read-only relative access remains for commit 10.
-  last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
 
 - id: door-api-health
   name: GET /health
@@ -76,7 +76,7 @@
 - id: door-organizer-family-api
   name: Organizer family HTTP API
   status: shipped
-  why: Lets the authenticated organizer list, create, and load owned trees, edit people, and add or remove parent and partner relationships through the server-authoritative family boundary.
+  why: Lets the authenticated organizer list, create, and load owned trees, edit people, add or remove relationships, and manage verified private photos through the server-authoritative family boundary.
   code:
     - apps/api/src/features/organizer.routes.ts
     - apps/api/src/features/organizer.schemas.ts
@@ -84,10 +84,35 @@
     - apps/api/src/features/trees/
     - apps/api/src/features/people/
     - apps/api/src/features/relationships/
+    - apps/api/src/features/photos/
+    - apps/api/src/lib/photo-storage.ts
   verified_by:
     - apps/api/src/organizer-api.test.ts
+    - apps/api/src/photos-api.test.ts
     - apps/api/src/lib/database.db.test.ts
   relies_on: [part-api, part-family-core, part-supabase]
   doors: []
   open_questions: []
-  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+
+- id: door-private-photo-gallery
+  name: Private portraits and age-bucket gallery
+  status: in-progress
+  why: Lets the organizer add a private portrait, browse a person's photos by life stage, recover from expired links, and remove unavailable images.
+  code:
+    - apps/api/src/features/photos/
+    - apps/api/src/lib/photo-storage.ts
+    - apps/api/src/features/organizer.routes.ts
+    - apps/web/src/features/photos/
+    - apps/web/src/features/people/PersonCard.tsx
+    - apps/web/src/features/tree/FamilyTree.tsx
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+  verified_by:
+    - apps/api/src/photos-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+    - apps/web/src/features/photos/photo-upload.test.ts
+  relies_on: [part-web, part-api, part-supabase, contract-private-photos]
+  doors: []
+  open_questions:
+    - Manual QA must confirm conversion and upload feedback, portrait rendering, every bucket, expired-link refresh, missing-image treatment, and deletion retry behavior.
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

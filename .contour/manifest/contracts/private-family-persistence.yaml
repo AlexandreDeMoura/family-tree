@@ -21,5 +21,5 @@ verified_by: [apps/api/src/lib/database.db.test.ts]
 relies_on: []
 doors: []
 open_questions:
-  - Signed photo operations and Storage cleanup remain for the photo workflow.
-last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
+  - SQL cascades cannot clean Storage objects; future person/tree deletion services must capture and remove their object paths explicitly.
+last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

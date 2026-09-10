@@ -22,7 +22,7 @@ if (listError) throw listError;
 const options = {
   public: false,
   allowedMimeTypes: ['image/jpeg'],
-  fileSizeLimit: 10 * 1024 * 1024,
+  fileSizeLimit: 5 * 1024 * 1024,
 };
 const exists = buckets.some((bucket) => bucket.id === 'family-photos');
 const { error } = exists

@@ -50,8 +50,25 @@
   verified_by: [apps/api/src/lib/database.db.test.ts]
   relies_on: [part-supabase]
   doors: []
-  open_questions: ["Storage objects require service-level cleanup in commit 09; database cascades do not remove files."]
-  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e
+  open_questions: ["Photo deletion now cleans individual Storage objects; future person/tree deletion services must do the same before metadata cascades."]
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+
+- id: decision-verified-photo-publication
+  name: Publish private photos only after object verification
+  status: shipped
+  why: A two-phase signed upload keeps invalid or partial browser uploads out of gallery metadata while preserving direct-to-Storage transfer and explicit cleanup without workers.
+  code:
+    - packages/family-core/src/photos.ts
+    - apps/api/src/features/photos/
+    - apps/api/src/lib/photo-storage.ts
+    - apps/web/src/features/photos/photo-upload.ts
+  verified_by:
+    - apps/api/src/photos-api.test.ts
+    - apps/web/src/features/photos/photo-upload.test.ts
+  relies_on: [part-api, part-web, part-supabase, contract-private-photos]
+  doors: [door-private-photo-gallery]
+  open_questions: []
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
 
 - id: decision-known-parent-siblings
   name: Derive siblings exclusively from shared known parent IDs

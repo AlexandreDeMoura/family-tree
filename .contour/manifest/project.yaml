@@ -15,9 +15,10 @@ purpose: >-
   private family SQL schema, tree-locking PostgreSQL transactions, organizer
   authentication, owned tree/person endpoints, atomic parent/partner mutations,
   authenticated family editing, and an ELK-powered React Flow family map with
-  automatic generation layout, and contextual rich person cards with family focus navigation.
-  The editing, tree, and card screens await organizer manual QA; photo workflows and sharing
-  remain subsequent work in the PRD commit plan.
+  automatic generation layout, contextual rich person cards with family focus navigation,
+  and verified private portrait uploads with age-bucket galleries.
+  The editing, tree, card, and photo screens await organizer manual QA; account-free sharing
+  remains subsequent work in the PRD commit plan.
 
 tech:
   - TypeScript

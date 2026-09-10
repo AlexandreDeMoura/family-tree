@@ -91,14 +91,26 @@
 
 - id: cap-preserve-family-memories
   name: Add private photos and memorable facts
-  status: planned
+  status: in-progress
   why: Lets the organizer make each person recognizable and memorable through life-stage photos and up to three fun facts.
-  code: []
-  verified_by: []
+  code:
+    - packages/family-core/src/photos.ts
+    - apps/api/src/features/photos/
+    - apps/api/src/lib/photo-storage.ts
+    - apps/web/src/features/photos/
+    - apps/web/src/features/people/PersonCard.tsx
+    - apps/web/src/features/tree/FamilyTree.tsx
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/lib/api.ts
+  verified_by:
+    - apps/api/src/photos-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+    - apps/web/src/features/photos/photo-upload.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: []
+  doors: [door-private-photo-gallery]
   open_questions:
-    - What retry and cleanup experience will best explain partial photo upload failures without background workers?
+    - Organizer manual QA must verify image conversion, signed upload, bucket browsing, portrait selection, expired-link refresh, and cleanup messaging.
+  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
 
 - id: cap-share-family-tree
   name: Share the tree privately with relatives

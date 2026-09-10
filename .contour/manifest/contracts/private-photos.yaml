@@ -1,0 +1,33 @@
+id: contract-private-photos
+name: Verified private photo publication and access
+status: shipped
+part: part-api
+why: Prevents unauthorized or malformed objects from becoming family memories while keeping files private and recoverable without background workers.
+accepts:
+  - An authenticated organizer request scoped to an owned tree and existing person.
+  - A browser-prepared JPEG no larger than 5 MiB uploaded to its server-issued deterministic path.
+  - Exactly one supported age bucket and an optional main-portrait choice at publication.
+guarantees:
+  - Signed uploads are issued only after organizer, tree, and person authorization and cannot overwrite an existing object.
+  - Completion verifies object existence, declared JPEG MIME type, byte size, and JPEG signature before metadata becomes visible.
+  - Photo metadata stores only the deterministic private path and age bucket; signed upload and view credentials are never persisted.
+  - Five-minute viewing URLs are issued only after tree access checks, and missing objects return an explicit unavailable state.
+  - Main portraits can reference only a published photo owned by the same tree and person.
+  - Invalid uploads are removed, publication failures attempt immediate cleanup, pending cleanup is explicit, and individual deletion is safely retryable without a worker.
+rules:
+  - Browser source acceptance is JPEG, PNG, or WebP up to 20 MiB; it is resized within 2400 pixels and encoded as JPEG no larger than 5 MiB before upload.
+  - Every Storage path is `trees/{treeId}/people/{personId}/{photoId}.jpg` in the single private `family-photos` bucket.
+  - Storage deletion precedes metadata deletion so a database failure leaves a removable unavailable record instead of exposing an object with no record.
+code:
+  - packages/family-core/src/photos.ts
+  - apps/api/src/features/photos/
+  - apps/api/src/lib/photo-storage.ts
+  - apps/web/src/features/photos/
+verified_by:
+  - apps/api/src/photos-api.test.ts
+  - apps/api/src/lib/database.db.test.ts
+  - apps/web/src/features/photos/photo-upload.test.ts
+relies_on: [contract-private-family-persistence, contract-tree-transaction]
+doors: [door-private-photo-gallery]
+open_questions: []
+last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

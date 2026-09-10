@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { completenessSchema, lifeStatusSchema } from '@family-tree/family-core';
+import {
+  PHOTO_UPLOAD_MAX_BYTES,
+  ageBucketSchema,
+  completenessSchema,
+  lifeStatusSchema,
+} from '@family-tree/family-core';
 import { ApiError } from '../lib/api-errors.js';
 
 const name = z.string().trim().min(1);
@@ -8,6 +13,11 @@ const funFacts = z.array(z.string().trim().min(1)).max(3);
 
 export const treeParamsSchema = z.strictObject({ treeId: z.uuid() });
 export const personParamsSchema = z.strictObject({ treeId: z.uuid(), personId: z.uuid() });
+export const photoParamsSchema = z.strictObject({
+  treeId: z.uuid(),
+  personId: z.uuid(),
+  photoId: z.uuid(),
+});
 export const parentRelationshipParamsSchema = z.strictObject({
   treeId: z.uuid(),
   parentId: z.uuid(),
@@ -26,6 +36,14 @@ export const parentRelationshipBodySchema = z.strictObject({
 export const partnershipBodySchema = z.strictObject({
   person1Id: z.uuid(),
   person2Id: z.uuid(),
+});
+export const createPhotoUploadBodySchema = z.strictObject({
+  contentType: z.literal('image/jpeg'),
+  sizeBytes: z.number().int().positive().max(PHOTO_UPLOAD_MAX_BYTES),
+});
+export const completePhotoUploadBodySchema = z.strictObject({
+  ageBucket: ageBucketSchema,
+  makeMain: z.boolean().default(false),
 });
 
 const personFields = {
