@@ -20,13 +20,15 @@ are already declared in `apps/api/package.json`.
 | `parent_child` | Unique directed edges; both people must belong to the supplied tree. No self-links. |
 | `partnerships` | Unique unordered pairs stored with `person1_id < person2_id`; callers canonicalize UUID pairs. Multiple partners are allowed. |
 | `photos` | One required age bucket and a unique `trees/{treeId}/people/{personId}/{photoId}.jpg` path. Composite foreign keys bind photos and main portraits to the same person and tree. |
+| `tree_share_links` | One active SHA-256 viewer-token hash per tree. Replacing the row invalidates the prior viewer link; raw bearer tokens are never persisted. |
 
 Person checks reject death before birth and living people with a death year.
 A write trigger rejects death years beyond the current UTC year. Unknown years
 and equal birth/death years are valid. No age is inferred from years.
 
 No siblings, layout coordinates, placeholder people, or routing nodes are stored.
-There are no share secrets on `trees`; commit 10 will add a separate hash store.
+There are no share secrets on `trees`; viewer access uses the separate hash-only
+`tree_share_links` table.
 Application reads must project only the fields needed by their response.
 
 ## Transactions and validation
@@ -60,7 +62,7 @@ yet. Trusted direct SQL can bypass these application-level graph rules.
 
 ## Access and deletion
 
-All five tables have RLS enabled with no policies. Existing grants to `PUBLIC`,
+All six tables have RLS enabled with no policies. Existing grants to `PUBLIC`,
 `anon`, and `authenticated` are revoked, including for authenticated organizers;
 browser clients must use Fastify. Future tables, sequences, and functions created
 by the migration owner in `public` also default to no browser grants. A different
@@ -70,7 +72,7 @@ server credentials remain private. Supabase Auth and signed Storage operations
 continue to use the Supabase clients.
 
 Deleting an organizer who still owns a tree is restricted. Deleting a tree
-cascades its people, edges, partnerships, and photo metadata. Deleting a person
+cascades its people, edges, partnerships, share hash, and photo metadata. Deleting a person
 cascades their edges, partnerships, and photo metadata. Deleting a main photo
 sets only `main_photo_id` to null, preserving the person. Composite foreign keys
 use restrictive updates: IDs are stable and moving connected records between

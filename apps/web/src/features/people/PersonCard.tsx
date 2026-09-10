@@ -16,9 +16,9 @@ interface PersonCardProps {
   photosLoading: boolean;
   photosError: unknown;
   onRefreshPhotos: () => void;
-  onUploadPhoto: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
-  onSetMainPhoto: (photoId: string) => Promise<void>;
-  onDeletePhoto: (photoId: string) => Promise<void>;
+  onUploadPhoto?: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
+  onSetMainPhoto?: (photoId: string) => Promise<void>;
+  onDeletePhoto?: (photoId: string) => Promise<void>;
 }
 
 export function PersonCard({

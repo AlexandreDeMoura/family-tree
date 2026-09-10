@@ -10,15 +10,15 @@
 
 purpose: >-
   A private, shareable family tree for one organizer and read-only relatives.
-  Commits 01–08 provide the pnpm workspace, organizer web application, API health endpoint,
+  Commits 01–10 provide the pnpm workspace, organizer web application, API health endpoint,
   local Supabase setup, pure shared person schemas and family graph rules,
   private family SQL schema, tree-locking PostgreSQL transactions, organizer
   authentication, owned tree/person endpoints, atomic parent/partner mutations,
   authenticated family editing, and an ELK-powered React Flow family map with
   automatic generation layout, contextual rich person cards with family focus navigation,
-  and verified private portrait uploads with age-bucket galleries.
-  The editing, tree, card, and photo screens await organizer manual QA; account-free sharing
-  remains subsequent work in the PRD commit plan.
+  verified private portrait uploads with age-bucket galleries, and hash-only private
+  viewer links for account-free read-only family browsing.
+  The editing, tree, card, photo, and viewer screens await organizer manual QA.
 
 tech:
   - TypeScript

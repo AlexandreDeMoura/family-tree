@@ -5,6 +5,7 @@ part: part-api
 why: Prevents unauthorized or malformed objects from becoming family memories while keeping files private and recoverable without background workers.
 accepts:
   - An authenticated organizer request scoped to an owned tree and existing person.
+  - A valid tree-specific private viewer credential for read-only gallery access.
   - A browser-prepared JPEG no larger than 5 MiB uploaded to its server-issued deterministic path.
   - Exactly one supported age bucket and an optional main-portrait choice at publication.
 guarantees:

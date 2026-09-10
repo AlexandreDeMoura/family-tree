@@ -14,9 +14,9 @@ interface PhotoGalleryProps {
   loading: boolean;
   loadError: unknown;
   onRefresh: () => void;
-  onUpload: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
-  onSetMain: (photoId: string) => Promise<void>;
-  onDelete: (photoId: string) => Promise<void>;
+  onUpload?: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
+  onSetMain?: (photoId: string) => Promise<void>;
+  onDelete?: (photoId: string) => Promise<void>;
 }
 
 export function PhotoGallery({
@@ -29,6 +29,7 @@ export function PhotoGallery({
   onSetMain,
   onDelete,
 }: PhotoGalleryProps) {
+  const editable = Boolean(onUpload && onSetMain && onDelete);
   const defaultBucket = photos.find(({ isMain }) => isMain)?.ageBucket ?? photos[0]?.ageBucket ?? 'baby_toddler';
   const [selectedBucket, setSelectedBucket] = useState<AgeBucket | null>(null);
   const [uploadBucket, setUploadBucket] = useState<AgeBucket | null>(null);
@@ -53,7 +54,7 @@ export function PhotoGallery({
     setActionError(null);
     setPendingCleanup(null);
     try {
-      await onUpload(file, activeUploadBucket, makeMain);
+      await onUpload!(file, activeUploadBucket, makeMain);
       setSelectedBucket(activeUploadBucket);
       setFile(null);
       setMakeMain(false);
@@ -111,7 +112,7 @@ export function PhotoGallery({
               return (
                 <article className="photo-tile" key={photo.id}>
                   {unavailable ? (
-                    <div className="photo-tile__missing"><span aria-hidden="true">◌</span><strong>Photo unavailable</strong><small>Refresh its private link or remove it.</small></div>
+                    <div className="photo-tile__missing"><span aria-hidden="true">◌</span><strong>Photo unavailable</strong><small>{editable ? 'Refresh its private link or remove it.' : 'Refresh its private link and try again.'}</small></div>
                   ) : (
                     <img
                       src={photo.viewUrl!}
@@ -122,13 +123,13 @@ export function PhotoGallery({
                       }}
                     />
                   )}
-                  <div className="photo-tile__actions">
+                  {editable && <div className="photo-tile__actions">
                     {photo.isMain ? <span className="photo-main-label">Main portrait</span> : (
                       <button
                         className="text-button"
                         type="button"
                         disabled={busy !== null}
-                        onClick={() => void act(`main-${photo.id}`, () => onSetMain(photo.id))}
+                        onClick={() => void act(`main-${photo.id}`, () => onSetMain!(photo.id))}
                       >Use as portrait</button>
                     )}
                     <button
@@ -137,11 +138,11 @@ export function PhotoGallery({
                       disabled={busy !== null}
                       onClick={() => {
                         if (window.confirm('Remove this private photo permanently?')) {
-                          void act(`delete-${photo.id}`, () => onDelete(photo.id));
+                          void act(`delete-${photo.id}`, () => onDelete!(photo.id));
                         }
                       }}
                     >{busy === `delete-${photo.id}` ? 'Removing…' : 'Remove'}</button>
-                  </div>
+                  </div>}
                 </article>
               );
             }) : <p className="photo-gallery__empty">No photos in {ageBucketLabels[activeBucket]} yet.</p>}
@@ -149,7 +150,7 @@ export function PhotoGallery({
         </>
       )}
 
-      <form className="photo-upload" onSubmit={(event) => void upload(event)}>
+      {editable && <form className="photo-upload" onSubmit={(event) => void upload(event)}>
         <strong>Add a private photo</strong>
         <p>JPEG, PNG, or WebP up to 20 MB. It is converted to a JPEG no larger than 5 MB before upload.</p>
         <div className="photo-upload__fields">
@@ -171,7 +172,7 @@ export function PhotoGallery({
           >{busy === 'cleanup' ? 'Cleaning up…' : 'Retry unfinished-upload cleanup'}</button>
         )}
         <button className="button button--secondary" type="submit" disabled={!file || busy !== null || pendingCleanup !== null}>{busy === 'upload' ? 'Preparing and uploading…' : 'Add photo'}</button>
-      </form>
+      </form>}
     </section>
   );
 }

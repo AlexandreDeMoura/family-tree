@@ -2,24 +2,24 @@
 - id: part-web
   name: Organizer web application
   status: shipped
-  why: Hosts session-aware organizer routes, family queries, validated editing forms, the automatically laid-out family map, contextual person-card navigation, and private life-stage photo controls.
+  why: Hosts session-aware organizer routes, family queries, validated editing forms, the automatically laid-out family map, contextual person-card navigation, private life-stage photo controls, and an account-free read-only viewer route.
   code: [apps/web/src/, apps/web/vite.config.ts, apps/web/tsconfig.app.json, apps/web/tsconfig.node.json]
-  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts, apps/web/src/features/photos/photo-upload.test.ts]
+  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts, apps/web/src/features/photos/photo-upload.test.ts, apps/web/src/features/sharing/share-link.test.ts]
   relies_on: [part-family-core]
-  doors: [door-web-shell, door-organizer-family-editor, door-family-tree-canvas, door-contextual-person-card, door-private-photo-gallery]
-  open_questions: ["The organizer editing, family-map, contextual card, and photo workflows await manual UI QA."]
-  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+  doors: [door-web-shell, door-organizer-family-editor, door-family-tree-canvas, door-contextual-person-card, door-private-photo-gallery, door-private-family-view]
+  open_questions: ["The organizer editing, family-map, contextual card, photo, sharing, and viewer workflows await manual UI QA."]
+  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
 
 - id: part-api
   name: Fastify API foundation
   status: shipped
-  why: Owns health and organizer HTTP endpoints, configured CORS, Supabase token verification, owned-tree discovery, ownership checks, stable API errors, atomic PostgreSQL family graph mutations, and verified signed photo operations.
+  why: Owns health, organizer, and read-only viewer HTTP endpoints, configured CORS, organizer and hash-only share authorization, stable API errors, atomic family graph mutations, and verified signed photo operations.
   code: [apps/api/src/, apps/api/package.json]
-  verified_by: [apps/api/src/app.test.ts, apps/api/src/organizer-api.test.ts, apps/api/src/photos-api.test.ts, apps/api/src/lib/database.db.test.ts]
+  verified_by: [apps/api/src/app.test.ts, apps/api/src/organizer-api.test.ts, apps/api/src/photos-api.test.ts, apps/api/src/sharing-api.test.ts, apps/api/src/lib/database.db.test.ts]
   relies_on: [part-family-core, part-supabase]
-  doors: [door-api-health, door-organizer-family-api, door-private-photo-gallery]
-  open_questions: ["Account-free sharing access remains for a later commit."]
-  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+  doors: [door-api-health, door-organizer-family-api, door-private-photo-gallery, door-private-family-view]
+  open_questions: []
+  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
 
 - id: part-family-core
   name: Pure shared person and family graph domain
@@ -35,10 +35,10 @@
 - id: part-supabase
   name: Supabase schema and private persistence
   status: shipped
-  why: Configures local Supabase and defines family tables, row constraints, ownership foreign keys, deletion cascades, and default-deny browser access.
+  why: Configures local Supabase and defines family tables, hash-only share links, row constraints, ownership foreign keys, deletion cascades, and default-deny browser access.
   code: [supabase/config.toml, supabase/migrations/, supabase/README.md, apps/api/scripts/setup-supabase.mjs]
   verified_by: [apps/api/src/lib/database.db.test.ts]
   relies_on: []
   doors: []
   open_questions: ["Organizer provisioning remains manual.", "Future person/tree deletion services must remove captured Storage paths before allowing SQL cascades to delete metadata."]
-  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d

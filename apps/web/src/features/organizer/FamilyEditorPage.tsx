@@ -16,6 +16,7 @@ import { PersonCard } from '../people/PersonCard';
 import { RelationshipPanel } from '../people/RelationshipPanel';
 import type { RelationshipKind } from '../people/relationship-form';
 import { FamilyTree } from '../tree/FamilyTree';
+import { SharePanel } from '../sharing/SharePanel';
 import { useAuth } from './auth-context';
 import { OrganizerHeader } from './OrganizerHeader';
 import { photoKeys, treeKeys } from './tree-queries';
@@ -208,6 +209,7 @@ export function FamilyEditorPage() {
         </aside>
 
         <div className="editor-main">
+          <SharePanel accessToken={accessToken} treeId={treeId} userId={userId} />
           {graph.people.length > 0 && (
             <section className="panel family-map-panel">
               <div className="family-map-heading">

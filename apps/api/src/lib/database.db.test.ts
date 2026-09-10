@@ -8,6 +8,7 @@ import { createOrganizerAuthenticator } from '../features/auth/auth.service.js';
 import { createPeopleService } from '../features/people/people.service.js';
 import { postgresPhotoQueries } from '../features/photos/photos.queries.js';
 import { createRelationshipsService } from '../features/relationships/relationships.service.js';
+import { postgresSharingQueries } from '../features/sharing/sharing.queries.js';
 import { createTreesService } from '../features/trees/trees.service.js';
 import { createDatabasePool, TreeNotFoundError, withTreeTransaction } from './database.js';
 
@@ -189,6 +190,28 @@ describe('family schema on a fresh local database', () => {
     }
   });
 
+  it('stores one constrained share hash per tree and replaces it without retaining the old hash', async () => {
+    const treeId = await tree();
+    const firstHash = 'a'.repeat(64);
+    const secondHash = 'b'.repeat(64);
+    await pool.query('INSERT INTO public.tree_share_links (tree_id, token_hash) VALUES ($1, $2)', [treeId, firstHash]);
+    await expect(pool.query(
+      'INSERT INTO public.tree_share_links (tree_id, token_hash) VALUES ($1, $2)',
+      [await tree(), firstHash],
+    )).rejects.toMatchObject({ code: '23505' });
+    await expect(pool.query(
+      'UPDATE public.tree_share_links SET token_hash = $2 WHERE tree_id = $1',
+      [treeId, 'raw-token'],
+    )).rejects.toMatchObject({ code: '23514' });
+
+    expect(await postgresSharingQueries.resolveTree(pool, treeId, firstHash)).toMatchObject({ id: treeId });
+    const replaced = await postgresSharingQueries.replaceForOwner(pool, treeId, organizer, secondHash);
+    expect(replaced).toMatchObject({ active: true });
+    expect(await postgresSharingQueries.resolveTree(pool, treeId, firstHash)).toBeNull();
+    expect(await postgresSharingQueries.resolveTree(pool, treeId, secondHash)).toMatchObject({ id: treeId });
+    expect(await postgresSharingQueries.replaceForOwner(pool, treeId, randomUUID(), firstHash)).toBeNull();
+  });
+
   it('clears deleted portraits and cascades person/tree metadata and relationships', async () => {
     const treeId = await tree();
     const [a, b] = (await Promise.all([person(treeId), person(treeId)])).sort();
@@ -201,6 +224,7 @@ describe('family schema on a fresh local database', () => {
     await pool.query('UPDATE public.people SET main_photo_id = $1 WHERE id = $2', [nextPortrait, a]);
     await pool.query('INSERT INTO public.parent_child VALUES ($1, $2, $3)', [treeId, a, b]);
     await pool.query('INSERT INTO public.partnerships VALUES ($1, $2, $3)', [treeId, a, b]);
+    await pool.query('INSERT INTO public.tree_share_links (tree_id, token_hash) VALUES ($1, $2)', [treeId, 'c'.repeat(64)]);
     await pool.query('DELETE FROM public.people WHERE id = $1', [a]);
     for (const table of ['photos', 'parent_child', 'partnerships']) {
       expect((await pool.query(`SELECT * FROM public.${table} WHERE tree_id = $1`, [treeId])).rows).toEqual([]);
@@ -208,7 +232,7 @@ describe('family schema on a fresh local database', () => {
     const remainingPortrait = await photo(treeId, b);
     await pool.query('UPDATE public.people SET main_photo_id = $1 WHERE id = $2', [remainingPortrait, b]);
     await pool.query('DELETE FROM public.trees WHERE id = $1', [treeId]);
-    for (const table of ['people', 'photos', 'parent_child', 'partnerships']) {
+    for (const table of ['people', 'photos', 'parent_child', 'partnerships', 'tree_share_links']) {
       expect((await pool.query(`SELECT * FROM public.${table} WHERE tree_id = $1`, [treeId])).rows).toEqual([]);
     }
   });
@@ -235,7 +259,7 @@ describe('family schema on a fresh local database', () => {
 });
 
 describe('private access boundaries', () => {
-  const tables = ['trees', 'people', 'parent_child', 'partnerships', 'photos'];
+  const tables = ['trees', 'people', 'parent_child', 'partnerships', 'photos', 'tree_share_links'];
 
   it.each(['anon', 'authenticated'])('denies direct %s reads and writes on every family table', async (role) => {
     const client = await pool.connect();

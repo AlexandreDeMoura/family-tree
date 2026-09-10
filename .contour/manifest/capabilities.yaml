@@ -59,15 +59,16 @@
     - apps/web/src/features/tree/
     - apps/web/src/features/people/person-card.ts
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/sharing/ViewerPage.tsx
     - apps/web/src/index.css
   verified_by:
     - apps/web/src/features/tree/layout-family-graph.test.ts
     - apps/web/src/features/people/person-card.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-family-tree-canvas]
+  doors: [door-family-tree-canvas, door-private-family-view]
   open_questions:
     - Will automatic layout keep multiple-partner, half-sibling, and large sibling branches understandable in manual QA?
-    - Contextual focus navigation awaits manual UI QA; the account-free relative surface remains for commit 10.
+    - Contextual focus navigation on both organizer and account-free viewer surfaces awaits manual UI QA.
   last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
 
 - id: cap-explore-relative
@@ -79,14 +80,15 @@
     - apps/web/src/features/people/person-card.ts
     - apps/web/src/features/tree/FamilyTree.tsx
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/sharing/ViewerPage.tsx
     - apps/web/src/index.css
   verified_by:
     - apps/web/src/features/people/person-card.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-contextual-person-card]
+  doors: [door-contextual-person-card, door-private-family-view]
   open_questions:
     - Will focus navigation preserve enough surrounding context for an unfamiliar relative to understand the selected person's branch?
-    - The organizer card experience awaits manual UI QA, and account-free relative access remains for commit 10.
+    - The organizer and account-free viewer card experiences await manual UI QA.
   last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
 
 - id: cap-preserve-family-memories
@@ -114,11 +116,22 @@
 
 - id: cap-share-family-tree
   name: Share the tree privately with relatives
-  status: planned
+  status: in-progress
   why: Lets the organizer share an unlisted link that relatives can open without an account while keeping them read-only.
-  code: []
-  verified_by: []
+  code:
+    - supabase/migrations/20260910000000_add_tree_share_links.sql
+    - apps/api/src/features/sharing/
+    - apps/api/src/sharing-api.test.ts
+    - apps/web/src/features/sharing/
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/lib/api.ts
+    - apps/web/index.html
+  verified_by:
+    - apps/api/src/sharing-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+    - apps/web/src/features/sharing/share-link.test.ts
   relies_on: [part-web, part-api, part-supabase]
-  doors: []
+  doors: [door-private-family-view]
   open_questions:
-    - Will the sharing experience make it clear that anyone holding the private link can view the tree?
+    - Organizer manual QA must confirm link creation, copying, replacement, and account-free read-only browsing.
+  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d

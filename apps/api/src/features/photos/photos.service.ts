@@ -50,6 +50,37 @@ export interface PhotosService {
   deletePhoto(organizerUserId: string, treeId: string, personId: string, photoId: string): Promise<void>;
 }
 
+export async function createPhotoViews(
+  photos: PhotoRecord[],
+  storage: PhotoStorage,
+  now: () => Date = () => new Date(),
+): Promise<PhotoView[]> {
+  return Promise.all(photos.map(async (photo) => {
+    const object = await storage.getObjectInfo(photo.storagePath);
+    if (!object) return {
+      id: photo.id,
+      personId: photo.personId,
+      ageBucket: photo.ageBucket,
+      createdAt: photo.createdAt,
+      isMain: photo.isMain,
+      viewUrl: null,
+      viewExpiresAt: null,
+      availability: 'missing' as const,
+    };
+    const issuedAt = now();
+    return {
+      id: photo.id,
+      personId: photo.personId,
+      ageBucket: photo.ageBucket,
+      createdAt: photo.createdAt,
+      isMain: photo.isMain,
+      viewUrl: await storage.createSignedView(photo.storagePath, PHOTO_VIEW_TTL_SECONDS),
+      viewExpiresAt: new Date(issuedAt.getTime() + PHOTO_VIEW_TTL_SECONDS * 1000).toISOString(),
+      availability: 'ready' as const,
+    };
+  }));
+}
+
 type TreeTransactionRunner = <T>(treeId: string, work: (database: Queryable) => Promise<T>) => Promise<T>;
 
 interface PhotosServiceOptions {
@@ -87,31 +118,6 @@ export function createPhotosService(
 
   async function assertPerson(client: Queryable, treeId: string, personId: string) {
     if (!await photoQueries.personExists(client, treeId, personId)) throw new PersonNotFoundError();
-  }
-
-  async function toView(photo: PhotoRecord): Promise<PhotoView> {
-    const object = await storage.getObjectInfo(photo.storagePath);
-    if (!object) return {
-      id: photo.id,
-      personId: photo.personId,
-      ageBucket: photo.ageBucket,
-      createdAt: photo.createdAt,
-      isMain: photo.isMain,
-      viewUrl: null,
-      viewExpiresAt: null,
-      availability: 'missing',
-    };
-    const issuedAt = now();
-    return {
-      id: photo.id,
-      personId: photo.personId,
-      ageBucket: photo.ageBucket,
-      createdAt: photo.createdAt,
-      isMain: photo.isMain,
-      viewUrl: await storage.createSignedView(photo.storagePath, PHOTO_VIEW_TTL_SECONDS),
-      viewExpiresAt: new Date(issuedAt.getTime() + PHOTO_VIEW_TTL_SECONDS * 1000).toISOString(),
-      availability: 'ready',
-    };
   }
 
   return {
@@ -181,12 +187,12 @@ export function createPhotosService(
         }
         throw error;
       }
-      return toView(photo);
+      return (await createPhotoViews([photo], storage, now))[0];
     },
 
     async listPhotos(organizerUserId, treeId) {
       await assertOwnership(database, treeId, organizerUserId);
-      return Promise.all((await photoQueries.listTreePhotos(database, treeId)).map(toView));
+      return createPhotoViews(await photoQueries.listTreePhotos(database, treeId), storage, now);
     },
 
     async setMainPhoto(organizerUserId, treeId, personId, photoId) {

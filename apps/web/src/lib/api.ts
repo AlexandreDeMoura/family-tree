@@ -31,6 +31,15 @@ export interface PhotoUploadTicket {
   expiresInSeconds: number;
 }
 
+export interface ShareLinkStatus {
+  active: boolean;
+  createdAt: string | null;
+}
+
+export interface ReplacedShareLink extends ShareLinkStatus {
+  token: string;
+}
+
 interface ErrorResponse {
   error?: {
     code?: string;
@@ -58,7 +67,7 @@ export class FamilyApiError extends Error {
   }
 }
 
-async function request<T>(accessToken: string, path: string, init?: RequestInit): Promise<T> {
+async function requestWithAuthorization<T>(authorization: string, path: string, init?: RequestInit): Promise<T> {
   if (!apiUrl) throw new FamilyApiError(0, 'missing_configuration', 'The API URL is not configured.');
 
   let response: Response;
@@ -66,7 +75,7 @@ async function request<T>(accessToken: string, path: string, init?: RequestInit)
     response = await fetch(`${apiUrl}${path}`, {
       ...init,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: authorization,
         ...(init?.body ? { 'Content-Type': 'application/json' } : {}),
         ...init?.headers,
       },
@@ -85,6 +94,10 @@ async function request<T>(accessToken: string, path: string, init?: RequestInit)
     );
   }
   return body as T;
+}
+
+function request<T>(accessToken: string, path: string, init?: RequestInit) {
+  return requestWithAuthorization<T>(`Bearer ${accessToken}`, path, init);
 }
 
 export interface PersonInput {
@@ -113,6 +126,16 @@ export const familyApi = {
 
   async loadTree(accessToken: string, treeId: string) {
     return (await request<{ tree: LoadedTree }>(accessToken, `/trees/${treeId}`)).tree;
+  },
+
+  async getShareLink(accessToken: string, treeId: string) {
+    return (await request<{ shareLink: ShareLinkStatus }>(accessToken, `/trees/${treeId}/share-link`)).shareLink;
+  },
+
+  async replaceShareLink(accessToken: string, treeId: string) {
+    return (await request<{ shareLink: ReplacedShareLink }>(accessToken, `/trees/${treeId}/share-link`, {
+      method: 'PUT',
+    })).shareLink;
   },
 
   async createPerson(accessToken: string, treeId: string, input: PersonInput) {
@@ -204,6 +227,20 @@ export const familyApi = {
       `/trees/${treeId}/people/${personId}/photos/${photoId}`,
       { method: 'DELETE' },
     );
+  },
+
+  async loadSharedTree(token: string, treeId: string) {
+    return (await requestWithAuthorization<{ tree: LoadedTree }>(
+      `Share ${token}`,
+      `/viewer/trees/${treeId}`,
+    )).tree;
+  },
+
+  async listSharedPhotos(token: string, treeId: string) {
+    return (await requestWithAuthorization<{ photos: PhotoView[] }>(
+      `Share ${token}`,
+      `/viewer/trees/${treeId}/photos`,
+    )).photos;
   },
 };
 

@@ -153,6 +153,21 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
 .sidebar-empty strong { display: block; margin: .5rem 0; font-family: Georgia, serif; font-size: 1.1rem; }
 .sidebar-empty p { font-size: .78rem; }
 .editor-main { display: grid; max-width: 72rem; gap: 1.25rem; padding: clamp(1rem, 3.5vw, 3.5rem); }
+.share-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, .75fr); gap: 2rem; padding: 1.5rem 1.6rem; }
+.share-panel h2 { margin-bottom: .55rem; }
+.share-panel p { max-width: 42rem; margin-bottom: 0; font-size: .82rem; }
+.share-panel__actions { display: grid; align-content: center; justify-items: start; gap: .7rem; }
+.share-link-field { width: 100%; }
+.share-link-field__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem; }
+.share-link-field input { min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .7rem; }
+.viewer-shell { background: linear-gradient(180deg, #f8f5ec 0, var(--cream) 24rem); }
+.viewer-header { position: relative; }
+.viewer-badge { border: 1px solid #cad8d0; border-radius: 99px; padding: .38rem .68rem; background: #eef4ef; color: var(--forest); font-size: .68rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.viewer-workspace { width: min(100% - 2rem, 90rem); margin: 0 auto; padding: clamp(2rem, 5vw, 4.5rem) 0 2rem; }
+.viewer-intro { display: grid; max-width: 54rem; justify-items: start; margin-bottom: 1.5rem; }
+.viewer-intro h1 { margin-bottom: .8rem; }
+.viewer-intro p { max-width: 46rem; margin-bottom: 1rem; }
+.viewer-privacy-note { margin: 1.2rem auto 0; font-size: .72rem; text-align: center; }
 .family-map-panel { min-width: 0; overflow: hidden; }
 .family-map-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 1.6rem 1.15rem; }
 .family-map-heading h2 { margin-bottom: .45rem; }
@@ -336,6 +351,7 @@ label small, .form-note, .save-hint { color: #7b8781; font-size: .76rem; font-we
   .family-map-heading { align-items: flex-start; flex-direction: column; gap: .75rem; }
   .family-map-body.has-person-card { grid-template-columns: 1fr; }
   .person-card { width: auto; height: auto; max-height: none; border-width: 1px 0 0; box-shadow: none; }
+  .share-panel { grid-template-columns: 1fr; gap: 1.25rem; }
   .form-grid--three, .facts-grid, .completeness-grid { grid-template-columns: 1fr; }
 }
 

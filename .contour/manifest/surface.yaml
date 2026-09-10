@@ -116,3 +116,26 @@
   open_questions:
     - Manual QA must confirm conversion and upload feedback, portrait rendering, every bucket, expired-link refresh, missing-image treatment, and deletion retry behavior.
   last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+
+- id: door-private-family-view
+  name: Private read-only family viewer
+  status: in-progress
+  why: Lets the organizer issue or replace an unlisted link that relatives can open without an account to browse the tree, person cards, and private galleries without editing.
+  code:
+    - apps/api/src/features/sharing/
+    - apps/api/src/sharing-api.test.ts
+    - apps/web/src/features/sharing/
+    - apps/web/src/App.tsx
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/people/PersonCard.tsx
+    - apps/web/src/features/photos/PhotoGallery.tsx
+    - apps/web/src/lib/api.ts
+  verified_by:
+    - apps/api/src/sharing-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+    - apps/web/src/features/sharing/share-link.test.ts
+  relies_on: [part-web, part-api, part-supabase, contract-private-sharing, door-family-tree-canvas, door-contextual-person-card, door-private-photo-gallery]
+  doors: []
+  open_questions:
+    - Manual QA must confirm account-free loading, read-only presentation, navigation, link copying, and link replacement.
+  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d

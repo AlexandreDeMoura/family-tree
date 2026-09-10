@@ -1,0 +1,34 @@
+id: contract-private-sharing
+name: Hash-only private viewer authorization
+status: in-progress
+part: part-api
+why: Gives relatives account-free read access through an unguessable, replaceable tree-specific bearer link without exposing family writes or persisted raw secrets.
+accepts:
+  - An authenticated organizer request to inspect or replace an owned tree's active viewer link.
+  - A 256-bit base64url share token in the Share authorization scheme for a specific tree.
+guarantees:
+  - Only the SHA-256 token hash is persisted, and replacing it invalidates prior tree and gallery requests.
+  - A share token resolves only its own tree and cannot authorize organizer or viewer mutations.
+  - Valid viewers can load the authoritative graph and receive five-minute signed URLs for that tree's published photos without an account.
+  - Viewer responses disable caching and indexing and apply a no-referrer policy.
+  - The browser keeps the raw token in the URL fragment so it is excluded from HTTP paths and referrers.
+rules:
+  - Share tokens contain 256 random bits and are returned only when created or replaced.
+  - Authorization headers are redacted from API logs.
+  - Anyone holding or receiving the unlisted link can view the tree until the organizer replaces it.
+  - Already-issued signed photo URLs remain usable only until their short expiry after link replacement.
+code:
+  - supabase/migrations/20260910000000_add_tree_share_links.sql
+  - apps/api/src/features/sharing/
+  - apps/api/src/app.ts
+  - apps/web/src/features/sharing/
+  - apps/web/index.html
+verified_by:
+  - apps/api/src/sharing-api.test.ts
+  - apps/api/src/lib/database.db.test.ts
+  - apps/web/src/features/sharing/share-link.test.ts
+relies_on: [contract-private-family-persistence, contract-private-photos]
+doors: [door-private-family-view]
+open_questions:
+  - Manual UI QA is required before this contract and its product door can be marked shipped.
+last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d

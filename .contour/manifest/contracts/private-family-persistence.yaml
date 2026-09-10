@@ -10,11 +10,12 @@ guarantees:
   - Composite foreign keys reject cross-tree relationships and photos; a main photo belongs to the same person and tree.
   - Parent edges are unique and reject self-links; partnerships require canonical distinct UUID pairs and permit multiple partners.
   - Photo records require one supported age bucket and the exact private JPEG path derived from tree, person, and photo IDs.
+  - Each tree has at most one active, constrained SHA-256 viewer-token hash that cascades with tree deletion.
   - All family tables enable RLS without policies and revoke direct browser-role reads and mutations.
   - Deleting a photo clears its main-photo reference; deleting a person or tree cascades dependent metadata; organizer deletion is restricted while trees exist.
 rules:
   - Ancestry cycles, the two-parent limit, and connected birth-year ordering use shared validators in tree-locked API services; SQL row constraints alone do not enforce them.
-  - No derived siblings, layout artifacts, or sharing secrets are stored in the family tables.
+  - No derived siblings, layout artifacts, raw sharing tokens, or signed URLs are stored in the family tables.
   - Storage provisioning remains on the Storage API and migrations add no public Storage policies; SQL cascades do not delete Storage objects.
 code: [supabase/migrations/, supabase/README.md]
 verified_by: [apps/api/src/lib/database.db.test.ts]

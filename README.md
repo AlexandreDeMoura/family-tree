@@ -1,12 +1,12 @@
 # Family Tree
 
 A private, shareable family tree for one organizer and read-only relatives.
-This repository currently implements commits 01–05 of the
+This repository currently implements commits 01–10 of the
 [MVP plan](family_tree_constrained_mvp_prd.md#28-implementation-commit-plan):
-the development foundation, shared person schemas, family graph rules,
-the private SQL schema, organizer-owned tree/person APIs, and atomic parent and
-partner mutations. The web application still exposes a starter page; family editing,
-tree rendering, sharing, and photo workflows follow.
+the development foundation, shared person schemas and graph rules, private SQL
+persistence, organizer editing, automatic tree layout, person cards, verified
+private photos, and account-free read-only viewer links. UI acceptance remains
+manual as required by the project workflow.
 
 ## Local development
 
@@ -35,8 +35,8 @@ Hosted Supabase is optional and documented in setup steps 10–11.
 
 | Package | Responsibility |
 | --- | --- |
-| `apps/web` | React/Vite/Tailwind shell with Router and Query providers; browser Supabase client for future Auth and signed uploads. |
-| `apps/api` | Fastify health and organizer family APIs, server-side authentication, and PostgreSQL-backed atomic graph mutations. |
+| `apps/web` | React/Vite organizer and read-only viewer surfaces; browser Supabase is limited to Auth and signed uploads. |
+| `apps/api` | Fastify organizer/viewer APIs, authorization, PostgreSQL graph mutations, hash-only share links, and signed photo access. |
 | `packages/family-core` | Pure Zod schemas, person/graph validation, and immediate-family derivation, emitted as ESM and TypeScript declarations. See its [usage guide](packages/family-core/README.md). |
 | `supabase` | Local CLI configuration, family schema migrations, row constraints, and private access boundaries. See the [persistence guide](supabase/README.md). |
 
@@ -77,6 +77,24 @@ node --env-file=apps/api/.env apps/api/scripts/setup-supabase.mjs
 
 That script creates or updates the bucket to private, JPEG-only, and 10 MiB per
 file. It does not create family tables or an organizer. UI QA remains manual.
+
+## Private viewer links
+
+The organizer sharing panel creates or replaces the tree's active private link.
+Links use `/view/:treeId#token`, keeping the bearer secret out of HTTP paths and
+referrers. The API stores only the SHA-256 token hash. Replacing a link immediately
+invalidates the previous tree and gallery reads; photo URLs already issued remain
+valid only until their five-minute expiry.
+
+Viewer reads use `Authorization: Share token` on dedicated GET-only endpoints:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/viewer/trees/:treeId` | Load the shared tree and authoritative graph. |
+| `GET` | `/viewer/trees/:treeId/photos` | Issue short-lived URLs for the shared private gallery. |
+
+Anyone holding the link can view and forward it. Viewer tokens are never accepted
+by organizer mutation routes, and viewer responses disable storage and indexing.
 
 ## Organizer relationship endpoints
 
