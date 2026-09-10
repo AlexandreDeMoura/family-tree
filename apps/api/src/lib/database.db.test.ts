@@ -3,6 +3,10 @@ import { readFile, readdir } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { buildApp } from '../app.js';
+import { createOrganizerAuthenticator } from '../features/auth/auth.service.js';
+import { createPeopleService } from '../features/people/people.service.js';
+import { createTreesService } from '../features/trees/trees.service.js';
 import { createDatabasePool, TreeNotFoundError, withTreeTransaction } from './database.js';
 
 // Never reset the user's database. Create/drop only this randomly named database
@@ -327,6 +331,60 @@ describe('tree transactions', () => {
       await holder.query('ROLLBACK');
       holder.release();
       await waiting;
+    }
+  });
+});
+
+describe('organizer API PostgreSQL wiring', () => {
+  it('persists owned trees and people while rolling back an invalid connected birth-year edit', async () => {
+    const app = buildApp({
+      webOrigin: 'http://localhost:5173',
+      organizerApi: {
+        authenticator: createOrganizerAuthenticator({
+          async verifyAccessToken(token) {
+            return token === 'valid' ? { id: organizer } : null;
+          },
+        }, organizer),
+        trees: createTreesService(pool),
+        people: createPeopleService(pool, { currentYear: () => 2026 }),
+      },
+    });
+
+    try {
+      const createdTree = await app.inject({
+        method: 'POST', url: '/trees',
+        headers: { authorization: 'Bearer valid' }, payload: { name: 'API family' },
+      });
+      expect(createdTree.statusCode).toBe(201);
+      const treeId = createdTree.json().tree.id as string;
+      const create = (firstName: string, birthYear: number) => app.inject({
+        method: 'POST', url: `/trees/${treeId}/people`,
+        headers: { authorization: 'Bearer valid' },
+        payload: { firstName, lastName: 'Martin', lifeStatus: 'unknown', birthYear },
+      });
+      const parent = (await create('Parent', 1970)).json().person;
+      const child = (await create('Child', 2000)).json().person;
+      await pool.query('INSERT INTO public.parent_child VALUES ($1, $2, $3)', [treeId, parent.id, child.id]);
+
+      const invalidEdit = await app.inject({
+        method: 'PATCH', url: `/trees/${treeId}/people/${parent.id}`,
+        headers: { authorization: 'Bearer valid' }, payload: { birthYear: 2010 },
+      });
+      expect(invalidEdit.statusCode).toBe(422);
+      expect(invalidEdit.json().error.code).toBe('parent_younger_than_child');
+      expect((await pool.query('SELECT birth_year FROM public.people WHERE id = $1', [parent.id])).rows[0].birth_year)
+        .toBe(1970);
+
+      const loaded = await app.inject({
+        method: 'GET', url: `/trees/${treeId}`, headers: { authorization: 'Bearer valid' },
+      });
+      expect(loaded.statusCode).toBe(200);
+      expect(loaded.json().tree.graph).toMatchObject({
+        treeId,
+        parentChild: [{ parentId: parent.id, childId: child.id }],
+      });
+    } finally {
+      await app.close();
     }
   });
 });

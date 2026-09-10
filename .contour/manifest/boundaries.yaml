@@ -13,12 +13,12 @@
 - id: part-api
   name: Fastify API foundation
   status: shipped
-  why: Owns the health endpoint, configured CORS, startup environment validation, server-only Supabase client, and pooled PostgreSQL tree transactions.
+  why: Owns health and organizer HTTP endpoints, configured CORS, Supabase token verification, ownership checks, stable API errors, and pooled PostgreSQL tree transactions.
   code: [apps/api/src/, apps/api/package.json]
-  verified_by: [apps/api/src/app.test.ts, apps/api/src/lib/database.db.test.ts]
+  verified_by: [apps/api/src/app.test.ts, apps/api/src/organizer-api.test.ts, apps/api/src/lib/database.db.test.ts]
   relies_on: [part-family-core, part-supabase]
-  doors: [door-api-health]
-  open_questions: ["Organizer authorization and family endpoints are not implemented yet."]
+  doors: [door-api-health, door-organizer-family-api]
+  open_questions: ["Atomic parent/partner mutations, sharing access, and photo operations remain for later commits."]
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
 
 - id: part-family-core

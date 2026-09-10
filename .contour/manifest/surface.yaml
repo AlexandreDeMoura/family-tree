@@ -19,3 +19,22 @@
   doors: []
   open_questions: []
   last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+
+- id: door-organizer-family-api
+  name: Organizer tree and person HTTP API
+  status: shipped
+  why: Lets the authenticated organizer create and load owned trees and add or edit people through the server-authoritative family boundary.
+  code:
+    - apps/api/src/features/organizer.routes.ts
+    - apps/api/src/features/organizer.schemas.ts
+    - apps/api/src/features/auth/
+    - apps/api/src/features/trees/
+    - apps/api/src/features/people/
+  verified_by:
+    - apps/api/src/organizer-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+  relies_on: [part-api, part-family-core, part-supabase]
+  doors: []
+  open_questions:
+    - The web editing surface is planned for commit 06 and remains subject to organizer manual QA.
+  last_verified: f722cc7ad9cc3922a9546b822fa6dcf5c6ba0f8b

@@ -6,13 +6,18 @@
     - packages/family-core/src/schemas.ts
     - packages/family-core/src/person.ts
     - supabase/migrations/20260909000000_create_family_schema.sql
+    - apps/api/src/features/auth/
+    - apps/api/src/features/trees/
+    - apps/api/src/features/people/
+    - apps/api/src/features/organizer.routes.ts
   verified_by:
     - packages/family-core/src/person.test.ts
+    - apps/api/src/organizer-api.test.ts
     - apps/api/src/lib/database.db.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: []
+  doors: [door-organizer-family-api]
   open_questions:
-    - Organizer authentication, tree and person endpoints, and the editing UI remain to make this outcome usable.
+    - The organizer editing UI and relationship endpoints remain to make the full maintenance outcome usable.
   last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
 
 - id: cap-connect-family-members

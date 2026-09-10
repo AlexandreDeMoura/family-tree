@@ -10,10 +10,11 @@
 
 purpose: >-
   A private, shareable family tree for one organizer and read-only relatives.
-  Commits 01–03 provide the pnpm workspace, web shell, API health endpoint,
+  Commits 01–04 provide the pnpm workspace, web shell, API health endpoint,
   local Supabase setup, pure shared person schemas and family graph rules,
-  private family SQL schema, and a tree-locking PostgreSQL transaction helper.
-  Family endpoints, authorization, photo workflows, and automatic layout remain
+  private family SQL schema, tree-locking PostgreSQL transactions, organizer
+  authentication, and owned tree/person endpoints. Relationship endpoints,
+  editing screens, photo workflows, sharing, and automatic layout remain
   subsequent work in the PRD commit plan.
 
 tech:

@@ -19,5 +19,5 @@ verified_by: [apps/api/src/lib/database.db.test.ts]
 relies_on: [part-supabase]
 doors: []
 open_questions:
-  - Organizer authorization and graph mutation services must adopt this boundary in the next API commits.
+  - Parent and partner mutation services must adopt this boundary in commit 05.
 last_verified: 60e59fa222054dada84ed465c861b1c5e1716869

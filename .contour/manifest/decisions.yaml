@@ -63,3 +63,21 @@
   doors: []
   open_questions: []
   last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+
+- id: decision-verified-organizer-boundary
+  name: Verify the sole organizer at the API and hide unowned trees
+  status: shipped
+  why: Supabase token verification establishes identity, the configured organizer ID limits editing to one account, and tree-scoped owner checks prevent cross-tree access without disclosing existence.
+  code:
+    - apps/api/src/features/auth/auth.service.ts
+    - apps/api/src/features/organizer.routes.ts
+    - apps/api/src/features/trees/trees.service.ts
+    - apps/api/src/features/people/people.service.ts
+    - apps/api/src/lib/supabase.ts
+  verified_by:
+    - apps/api/src/organizer-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+  relies_on: [part-api, part-family-core, part-supabase]
+  doors: [door-organizer-family-api]
+  open_questions: []
+  last_verified: f722cc7ad9cc3922a9546b822fa6dcf5c6ba0f8b

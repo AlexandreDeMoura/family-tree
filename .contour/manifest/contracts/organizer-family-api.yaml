@@ -1,0 +1,33 @@
+id: contract-organizer-family-api
+name: Authenticated organizer tree and person management
+status: shipped
+part: part-api
+why: Keeps private family writes limited to the configured organizer and preserves family graph validity when people change.
+accepts:
+  - A Supabase Bearer access token on POST /trees and owned tree or person routes.
+  - Strict tree creation, person creation, and partial person edit payloads with explicit nullable years and completeness flags.
+guarantees:
+  - Supabase verifies each access token, and only the configured organizer user can reach organizer operations.
+  - Every tree read and person write checks tree ownership without revealing another organizer's tree.
+  - POST /trees creates an owned tree, and GET /trees/:treeId returns its persisted people and relationship graph.
+  - Person creation and editing apply shared person and graph validation with an explicit UTC year before persistence.
+  - Person writes acquire the tree lock, read the fresh graph, and roll back when an edit invalidates a connected parent or child.
+  - API failures have stable status codes and machine-readable error codes, including specific domain invariant codes.
+rules:
+  - Routes handle HTTP parsing only, services own authorization-aware workflows, and queries alone issue SQL.
+  - Organizer identity comes from a server-verified access token and is never accepted from a request body.
+  - Main photo ownership remains outside person create/edit payloads and will be managed by the private photo workflow.
+  - Legitimate unknown values and known-absence completeness flags remain representable and are not validation failures.
+code:
+  - apps/api/src/app.ts
+  - apps/api/src/server.ts
+  - apps/api/src/features/
+  - apps/api/src/lib/api-errors.ts
+  - apps/api/src/lib/supabase.ts
+verified_by:
+  - apps/api/src/organizer-api.test.ts
+  - apps/api/src/lib/database.db.test.ts
+relies_on: [contract-family-graph, contract-private-family-persistence, contract-tree-transaction]
+doors: [door-organizer-family-api]
+open_questions: []
+last_verified: f722cc7ad9cc3922a9546b822fa6dcf5c6ba0f8b
