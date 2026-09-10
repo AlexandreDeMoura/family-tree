@@ -8,7 +8,25 @@ const funFacts = z.array(z.string().trim().min(1)).max(3);
 
 export const treeParamsSchema = z.strictObject({ treeId: z.uuid() });
 export const personParamsSchema = z.strictObject({ treeId: z.uuid(), personId: z.uuid() });
+export const parentRelationshipParamsSchema = z.strictObject({
+  treeId: z.uuid(),
+  parentId: z.uuid(),
+  childId: z.uuid(),
+});
+export const partnershipParamsSchema = z.strictObject({
+  treeId: z.uuid(),
+  person1Id: z.uuid(),
+  person2Id: z.uuid(),
+});
 export const createTreeBodySchema = z.strictObject({ name });
+export const parentRelationshipBodySchema = z.strictObject({
+  parentId: z.uuid(),
+  childId: z.uuid(),
+});
+export const partnershipBodySchema = z.strictObject({
+  person1Id: z.uuid(),
+  person2Id: z.uuid(),
+});
 
 const personFields = {
   firstName: name,

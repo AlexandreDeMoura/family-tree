@@ -1,12 +1,12 @@
 # Family Tree
 
 A private, shareable family tree for one organizer and read-only relatives.
-This repository currently implements commits 01–03 of the
+This repository currently implements commits 01–05 of the
 [MVP plan](family_tree_constrained_mvp_prd.md#28-implementation-commit-plan):
 the development foundation, shared person schemas, family graph rules,
-and the private SQL schema with a tree-locking transaction helper.
-The applications still expose a starter page and API health endpoint;
-authorization endpoints, family editing, tree rendering, and photo workflows follow.
+the private SQL schema, organizer-owned tree/person APIs, and atomic parent and
+partner mutations. The web application still exposes a starter page; family editing,
+tree rendering, sharing, and photo workflows follow.
 
 ## Local development
 
@@ -36,7 +36,7 @@ Hosted Supabase is optional and documented in setup steps 10–11.
 | Package | Responsibility |
 | --- | --- |
 | `apps/web` | React/Vite/Tailwind shell with Router and Query providers; browser Supabase client for future Auth and signed uploads. |
-| `apps/api` | Fastify health endpoint, CORS, validated server environment, server-only Supabase client, and PostgreSQL transaction helper. |
+| `apps/api` | Fastify health and organizer family APIs, server-side authentication, and PostgreSQL-backed atomic graph mutations. |
 | `packages/family-core` | Pure Zod schemas, person/graph validation, and immediate-family derivation, emitted as ESM and TypeScript declarations. See its [usage guide](packages/family-core/README.md). |
 | `supabase` | Local CLI configuration, family schema migrations, row constraints, and private access boundaries. See the [persistence guide](supabase/README.md). |
 
@@ -77,6 +77,23 @@ node --env-file=apps/api/.env apps/api/scripts/setup-supabase.mjs
 
 That script creates or updates the bucket to private, JPEG-only, and 10 MiB per
 file. It does not create family tables or an organizer. UI QA remains manual.
+
+## Organizer relationship endpoints
+
+All organizer endpoints require a verified Bearer access token. Relationship
+creates return HTTP 201, removals return HTTP 200, and both return
+`{ "graph": ... }` with the updated authoritative family graph.
+
+| Method | Path | Input |
+| --- | --- | --- |
+| `POST` | `/trees/:treeId/relationships/parents` | `{ parentId, childId }` |
+| `DELETE` | `/trees/:treeId/relationships/parents/:parentId/:childId` | Path IDs |
+| `POST` | `/trees/:treeId/relationships/partners` | `{ person1Id, person2Id }` |
+| `DELETE` | `/trees/:treeId/relationships/partners/:person1Id/:person2Id` | Path IDs in either order |
+
+Every mutation acquires the tree lock before authorization, fresh graph loading,
+domain validation, persistence, and the response reload. Parent and partner edges
+remain independent; neither kind is inferred from the other.
 
 Stop the app with Ctrl-C and stop local Supabase while keeping data with
 `pnpm exec supabase stop`. Avoid database reset during routine development;

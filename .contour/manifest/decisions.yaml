@@ -34,13 +34,13 @@
 - id: decision-private-sql-boundary
   name: Deny browser SQL access and serialize graph mutations per tree
   status: shipped
-  why: Revoked browser grants plus RLS with no policies keep family access on Fastify; one READ COMMITTED tree-row lock lets later services validate fresh graphs atomically using plain pg.
-  code: [supabase/migrations/, apps/api/src/lib/database.ts, supabase/README.md]
+  why: Revoked browser grants plus RLS with no policies keep family access on Fastify; one READ COMMITTED tree-row lock lets person and relationship services authorize and validate fresh graphs atomically using plain pg.
+  code: [supabase/migrations/, apps/api/src/lib/database.ts, apps/api/src/features/people/, apps/api/src/features/relationships/, supabase/README.md]
   verified_by: [apps/api/src/lib/database.db.test.ts]
   relies_on: [part-api, part-supabase, part-family-core]
   doors: []
-  open_questions: ["Authorization and topology validation are the responsibility of services added in commits 04–05, not the transaction helper or row constraints."]
-  last_verified: 7e2dc032f60fd33ff4d336de043a10fab6ff197e
+  open_questions: []
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
 
 - id: decision-photo-ownership-deletion
   name: Bind portraits by composite foreign keys and cascade metadata explicitly

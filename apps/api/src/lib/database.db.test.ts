@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../app.js';
 import { createOrganizerAuthenticator } from '../features/auth/auth.service.js';
 import { createPeopleService } from '../features/people/people.service.js';
+import { createRelationshipsService } from '../features/relationships/relationships.service.js';
 import { createTreesService } from '../features/trees/trees.service.js';
 import { createDatabasePool, TreeNotFoundError, withTreeTransaction } from './database.js';
 
@@ -347,6 +348,7 @@ describe('organizer API PostgreSQL wiring', () => {
         }, organizer),
         trees: createTreesService(pool),
         people: createPeopleService(pool, { currentYear: () => 2026 }),
+        relationships: createRelationshipsService(pool, { currentYear: () => 2026 }),
       },
     });
 
@@ -364,7 +366,38 @@ describe('organizer API PostgreSQL wiring', () => {
       });
       const parent = (await create('Parent', 1970)).json().person;
       const child = (await create('Child', 2000)).json().person;
-      await pool.query('INSERT INTO public.parent_child VALUES ($1, $2, $3)', [treeId, parent.id, child.id]);
+      const addedParent = await app.inject({
+        method: 'POST', url: `/trees/${treeId}/relationships/parents`,
+        headers: { authorization: 'Bearer valid' },
+        payload: { parentId: parent.id, childId: child.id },
+      });
+      expect(addedParent.statusCode).toBe(201);
+      expect(addedParent.json().graph).toMatchObject({
+        parentChild: [{ parentId: parent.id, childId: child.id }],
+        partnerships: [],
+      });
+
+      const addedPartner = await app.inject({
+        method: 'POST', url: `/trees/${treeId}/relationships/partners`,
+        headers: { authorization: 'Bearer valid' },
+        payload: { person1Id: child.id, person2Id: parent.id },
+      });
+      expect(addedPartner.statusCode).toBe(201);
+      expect(addedPartner.json().graph.partnerships).toEqual([{
+        person1Id: [parent.id, child.id].sort()[0],
+        person2Id: [parent.id, child.id].sort()[1],
+      }]);
+
+      const removedPartner = await app.inject({
+        method: 'DELETE',
+        url: `/trees/${treeId}/relationships/partners/${child.id}/${parent.id}`,
+        headers: { authorization: 'Bearer valid' },
+      });
+      expect(removedPartner.statusCode).toBe(200);
+      expect(removedPartner.json().graph).toMatchObject({
+        parentChild: [{ parentId: parent.id, childId: child.id }],
+        partnerships: [],
+      });
 
       const invalidEdit = await app.inject({
         method: 'PATCH', url: `/trees/${treeId}/people/${parent.id}`,
@@ -383,6 +416,93 @@ describe('organizer API PostgreSQL wiring', () => {
         treeId,
         parentChild: [{ parentId: parent.id, childId: child.id }],
       });
+
+      const removedParent = await app.inject({
+        method: 'DELETE',
+        url: `/trees/${treeId}/relationships/parents/${parent.id}/${child.id}`,
+        headers: { authorization: 'Bearer valid' },
+      });
+      expect(removedParent.statusCode).toBe(200);
+      expect(removedParent.json().graph.parentChild).toEqual([]);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('serializes relationship requests so concurrent writes cannot persist a third parent or cycle', async () => {
+    const app = buildApp({
+      webOrigin: 'http://localhost:5173',
+      organizerApi: {
+        authenticator: createOrganizerAuthenticator({
+          async verifyAccessToken(token) {
+            return token === 'valid' ? { id: organizer } : null;
+          },
+        }, organizer),
+        trees: createTreesService(pool),
+        people: createPeopleService(pool, { currentYear: () => 2026 }),
+        relationships: createRelationshipsService(pool, { currentYear: () => 2026 }),
+      },
+    });
+    const headers = { authorization: 'Bearer valid' };
+
+    try {
+      const createTree = async (name: string) => {
+        const response = await app.inject({ method: 'POST', url: '/trees', headers, payload: { name } });
+        return response.json().tree.id as string;
+      };
+      const createPerson = async (treeId: string, firstName: string, birthYear: number | null) => {
+        const response = await app.inject({
+          method: 'POST', url: `/trees/${treeId}/people`, headers,
+          payload: { firstName, lastName: 'Martin', lifeStatus: 'unknown', birthYear },
+        });
+        return response.json().person.id as string;
+      };
+      const addParent = (treeId: string, parentId: string, childId: string) => app.inject({
+        method: 'POST', url: `/trees/${treeId}/relationships/parents`, headers,
+        payload: { parentId, childId },
+      });
+
+      const parentTree = await createTree('Concurrent parents');
+      const child = await createPerson(parentTree, 'Child', 2000);
+      const first = await createPerson(parentTree, 'First', 1960);
+      const second = await createPerson(parentTree, 'Second', 1970);
+      const third = await createPerson(parentTree, 'Third', 1980);
+      expect((await addParent(parentTree, first, child)).statusCode).toBe(201);
+
+      const competingParents = await Promise.all([
+        addParent(parentTree, second, child),
+        addParent(parentTree, third, child),
+      ]);
+      expect(competingParents.map(({ statusCode }) => statusCode).sort()).toEqual([201, 422]);
+      expect(competingParents.find(({ statusCode }) => statusCode === 422)!.json().error.code)
+        .toBe('too_many_parents');
+      expect((await pool.query(
+        'SELECT parent_id FROM public.parent_child WHERE tree_id = $1 AND child_id = $2',
+        [parentTree, child],
+      )).rows).toHaveLength(2);
+
+      const cycleTree = await createTree('Concurrent cycle');
+      const a = await createPerson(cycleTree, 'A', null);
+      const b = await createPerson(cycleTree, 'B', null);
+      const competingCycle = await Promise.all([
+        addParent(cycleTree, a, b),
+        addParent(cycleTree, b, a),
+      ]);
+      expect(competingCycle.map(({ statusCode }) => statusCode).sort()).toEqual([201, 422]);
+      expect(competingCycle.find(({ statusCode }) => statusCode === 422)!.json().error.code)
+        .toBe('ancestry_cycle');
+      expect((await pool.query(
+        'SELECT parent_id, child_id FROM public.parent_child WHERE tree_id = $1',
+        [cycleTree],
+      )).rows).toHaveLength(1);
+
+      const invalidAge = await addParent(parentTree, child, first);
+      expect(invalidAge.statusCode).toBe(422);
+      expect(invalidAge.json().error.code).toBe('parent_younger_than_child');
+      expect((await pool.query(
+        'SELECT parent_id FROM public.parent_child WHERE tree_id = $1',
+        [parentTree],
+      )).rows).toHaveLength(2);
     } finally {
       await app.close();
     }

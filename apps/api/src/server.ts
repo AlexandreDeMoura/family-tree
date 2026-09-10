@@ -1,6 +1,7 @@
 import { buildApp } from './app.js';
 import { createOrganizerAuthenticator } from './features/auth/auth.service.js';
 import { createPeopleService } from './features/people/people.service.js';
+import { createRelationshipsService } from './features/relationships/relationships.service.js';
 import { createTreesService } from './features/trees/trees.service.js';
 import { createDatabasePool } from './lib/database.js';
 import { env } from './lib/env.js';
@@ -17,6 +18,7 @@ const app = buildApp({
     ),
     trees: createTreesService(database),
     people: createPeopleService(database),
+    relationships: createRelationshipsService(database),
   },
 });
 app.addHook('onClose', async () => database.end());

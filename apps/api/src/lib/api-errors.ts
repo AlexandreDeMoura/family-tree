@@ -34,3 +34,12 @@ export class PersonNotFoundError extends ApiError {
     this.name = 'PersonNotFoundError';
   }
 }
+
+export class RelationshipNotFoundError extends ApiError {
+  constructor(kind: 'parent' | 'partnership') {
+    const label = kind === 'parent' ? 'Parent relationship' : 'Partnership';
+    const code = kind === 'parent' ? 'parent_relationship_not_found' : 'partnership_not_found';
+    super(404, code, `${label} not found in this tree.`);
+    this.name = 'RelationshipNotFoundError';
+  }
+}

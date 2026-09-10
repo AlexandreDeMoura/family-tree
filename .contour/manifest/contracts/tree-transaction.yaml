@@ -2,7 +2,7 @@ id: contract-tree-transaction
 name: Atomic family graph mutation transaction
 status: shipped
 part: part-api
-why: Gives future organizer services one serialization boundary for authoritative family graph changes.
+why: Gives organizer services one serialization boundary for authoritative family graph changes.
 accepts:
   - A pooled PostgreSQL client, an existing tree ID, and a server-side work callback.
 guarantees:
@@ -18,6 +18,5 @@ code: [apps/api/src/lib/database.ts]
 verified_by: [apps/api/src/lib/database.db.test.ts]
 relies_on: [part-supabase]
 doors: []
-open_questions:
-  - Parent and partner mutation services must adopt this boundary in commit 05.
-last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
+open_questions: []
+last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6

@@ -9,6 +9,7 @@
     - apps/api/src/features/auth/
     - apps/api/src/features/trees/
     - apps/api/src/features/people/
+    - apps/api/src/features/relationships/
     - apps/api/src/features/organizer.routes.ts
   verified_by:
     - packages/family-core/src/person.test.ts
@@ -17,8 +18,8 @@
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-api]
   open_questions:
-    - The organizer editing UI and relationship endpoints remain to make the full maintenance outcome usable.
-  last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
+    - The organizer editing UI remains to make the full maintenance outcome usable.
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
 
 - id: cap-connect-family-members
   name: Connect people through family relationships
@@ -29,15 +30,19 @@
     - packages/family-core/src/invariants.ts
     - packages/family-core/src/relationships.ts
     - supabase/migrations/20260909000000_create_family_schema.sql
+    - apps/api/src/features/relationships/
+    - apps/api/src/features/organizer.routes.ts
+    - apps/api/src/features/organizer.schemas.ts
   verified_by:
     - packages/family-core/src/graph.test.ts
     - packages/family-core/src/relationships.test.ts
     - apps/api/src/lib/database.db.test.ts
+    - apps/api/src/organizer-api.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: []
+  doors: [door-organizer-family-api]
   open_questions:
-    - Atomic relationship endpoints and organizer editing controls remain to make the validated graph rules usable.
-  last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
+    - Organizer editing controls remain before this product outcome is usable through the web application.
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
 
 - id: cap-browse-family-tree
   name: Browse and understand family branches

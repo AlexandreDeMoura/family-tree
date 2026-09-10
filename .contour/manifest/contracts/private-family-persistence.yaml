@@ -13,7 +13,7 @@ guarantees:
   - All family tables enable RLS without policies and revoke direct browser-role reads and mutations.
   - Deleting a photo clears its main-photo reference; deleting a person or tree cascades dependent metadata; organizer deletion is restricted while trees exist.
 rules:
-  - Ancestry cycles, the two-parent limit, and connected birth-year ordering use shared validators in future API services; SQL row constraints alone do not enforce them.
+  - Ancestry cycles, the two-parent limit, and connected birth-year ordering use shared validators in tree-locked API services; SQL row constraints alone do not enforce them.
   - No derived siblings, layout artifacts, or sharing secrets are stored in the family tables.
   - Storage provisioning remains on the Storage API and migrations add no public Storage policies; SQL cascades do not delete Storage objects.
 code: [supabase/migrations/, supabase/README.md]
@@ -22,4 +22,4 @@ relies_on: []
 doors: []
 open_questions:
   - Signed photo operations and Storage cleanup remain for the photo workflow.
-last_verified: 60e59fa222054dada84ed465c861b1c5e1716869
+last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6

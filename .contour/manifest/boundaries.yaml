@@ -13,13 +13,13 @@
 - id: part-api
   name: Fastify API foundation
   status: shipped
-  why: Owns health and organizer HTTP endpoints, configured CORS, Supabase token verification, ownership checks, stable API errors, and pooled PostgreSQL tree transactions.
+  why: Owns health and organizer HTTP endpoints, configured CORS, Supabase token verification, ownership checks, stable API errors, and atomic PostgreSQL family graph mutations.
   code: [apps/api/src/, apps/api/package.json]
   verified_by: [apps/api/src/app.test.ts, apps/api/src/organizer-api.test.ts, apps/api/src/lib/database.db.test.ts]
   relies_on: [part-family-core, part-supabase]
   doors: [door-api-health, door-organizer-family-api]
-  open_questions: ["Atomic parent/partner mutations, sharing access, and photo operations remain for later commits."]
-  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+  open_questions: ["Sharing access and photo operations remain for later commits."]
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
 
 - id: part-family-core
   name: Pure shared person and family graph domain
@@ -29,8 +29,8 @@
   verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
   relies_on: []
   doors: []
-  open_questions: ["API services must enforce these rules inside tree-locked transactions in subsequent commits; main-photo ownership checks follow with persistence/photos."]
-  last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+  open_questions: ["Main-photo ownership checks at the application boundary follow with the photo workflow."]
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
 
 - id: part-supabase
   name: Supabase schema and private persistence
@@ -40,5 +40,5 @@
   verified_by: [apps/api/src/lib/database.db.test.ts]
   relies_on: []
   doors: []
-  open_questions: ["Organizer provisioning remains manual; graph-wide validation and ownership authorization must be wired into locked API services in commits 04–05.", "Storage object cleanup follows in commit 09; SQL cascades delete metadata only."]
-  last_verified: 4bb7f73c648ee0d3a1466533f076d5e53ead4715
+  open_questions: ["Organizer provisioning remains manual.", "Storage object cleanup follows in commit 09; SQL cascades delete metadata only."]
+  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
