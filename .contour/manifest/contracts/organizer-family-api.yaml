@@ -4,13 +4,13 @@ status: shipped
 part: part-api
 why: Keeps private family writes limited to the configured organizer and preserves family graph validity when people change.
 accepts:
-  - A Supabase Bearer access token on POST /trees and owned tree, person, or relationship routes.
+  - A Supabase Bearer access token on tree listing/creation and owned tree, person, or relationship routes.
   - Strict tree creation, person creation, and partial person edit payloads with explicit nullable years and completeness flags.
   - Strict parent and partner identifiers for relationship additions and removals.
 guarantees:
   - Supabase verifies each access token, and only the configured organizer user can reach organizer operations.
   - Every tree read and person write checks tree ownership without revealing another organizer's tree.
-  - POST /trees creates an owned tree, and GET /trees/:treeId returns its persisted people and relationship graph.
+  - GET /trees lists only the organizer's owned tree summaries, POST /trees creates an owned tree, and GET /trees/:treeId returns its persisted people and relationship graph.
   - Person creation and editing apply shared person and graph validation with an explicit UTC year before persistence.
   - Person writes acquire the tree lock, read the fresh graph, and roll back when an edit invalidates a connected parent or child.
   - Parent and partner writes acquire the same tree lock, validate the fresh proposed graph, persist only valid mutations, and return a freshly loaded graph.
@@ -33,4 +33,4 @@ verified_by:
 relies_on: [contract-family-graph, contract-private-family-persistence, contract-tree-transaction]
 doors: [door-organizer-family-api]
 open_questions: []
-last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
+last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943

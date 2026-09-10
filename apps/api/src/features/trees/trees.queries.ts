@@ -10,6 +10,7 @@ export interface TreeSummary {
 
 export interface TreeQueries {
   createTree(database: Queryable, organizerUserId: string, name: string): Promise<TreeSummary>;
+  listOwnedTrees(database: Queryable, organizerUserId: string): Promise<TreeSummary[]>;
   findOwnedTree(
     database: Queryable,
     treeId: string,
@@ -35,6 +36,16 @@ export const postgresTreeQueries: TreeQueries = {
       RETURNING id, name, created_at
     `, [organizerUserId, name]);
     return toTreeSummary(result.rows[0]);
+  },
+
+  async listOwnedTrees(database, organizerUserId) {
+    const result = await database.query<TreeRow>(`
+      SELECT id, name, created_at
+      FROM public.trees
+      WHERE organizer_user_id = $1
+      ORDER BY created_at ASC, id ASC
+    `, [organizerUserId]);
+    return result.rows.map(toTreeSummary);
   },
 
   async findOwnedTree(database, treeId, organizerUserId) {

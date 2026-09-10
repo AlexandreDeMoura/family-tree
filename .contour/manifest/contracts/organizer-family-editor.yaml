@@ -1,0 +1,33 @@
+id: contract-organizer-family-editor
+name: Organizer family editing experience
+status: in-progress
+part: part-web
+why: Keeps organizer input intact and validates proposed family changes before sending them to the authoritative API.
+accepts:
+  - A Supabase email and password for the pre-provisioned organizer account.
+  - Tree names, complete person form values, and explicit parent or partner connection selections.
+  - Nullable year fields and completeness choices that distinguish unknown relationship lists from known complete lists.
+guarantees:
+  - Organizer routes wait for session restoration and redirect unauthenticated visitors to sign-in.
+  - Every family API request carries the current Supabase Bearer access token.
+  - Person forms normalize optional years and facts, then use shared graph validation for create and connected-person edits before submission.
+  - Relationship forms use shared parent and partnership validation and never offer direct sibling editing.
+  - Failed saves retain the entered form values and show client or server feedback; successful mutations invalidate the affected tree queries.
+  - Loading, request failure, no-tree, no-person, and insufficient-people states have explicit organizer-facing treatments.
+rules:
+  - The frontend improves feedback but never replaces server authorization or authoritative validation.
+  - Empty complete relationship lists mean known absence; unchecked completeness means unknown or incomplete.
+  - Sibling summaries are derived from the authoritative graph and never persisted by the web application.
+code:
+  - apps/web/src/App.tsx
+  - apps/web/src/features/organizer/
+  - apps/web/src/features/people/
+  - apps/web/src/lib/api.ts
+verified_by:
+  - apps/web/src/features/people/person-form.test.ts
+  - apps/web/src/features/people/relationship-form.test.ts
+relies_on: [contract-organizer-family-api, contract-family-graph]
+doors: [door-organizer-family-editor]
+open_questions:
+  - Manual UI QA is required before this contract and its product door can be marked shipped.
+last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943

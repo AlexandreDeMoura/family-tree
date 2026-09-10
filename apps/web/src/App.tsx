@@ -1,8 +1,18 @@
+import { Navigate, Route, Routes } from 'react-router';
+import { FamilyEditorPage } from './features/organizer/FamilyEditorPage';
+import { OrganizerHomePage } from './features/organizer/OrganizerHomePage';
+import { ProtectedRoute } from './features/organizer/ProtectedRoute';
+import { SignInPage } from './features/organizer/SignInPage';
+
 export default function App() {
   return (
-    <main className="mx-auto max-w-3xl p-8">
-      <h1 className="text-3xl font-semibold">Family Tree</h1>
-      <p className="mt-3 text-slate-600">Your family story starts here.</p>
-    </main>
+    <Routes>
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/organizer" element={<OrganizerHomePage />} />
+        <Route path="/organizer/trees/:treeId" element={<FamilyEditorPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/organizer" replace />} />
+    </Routes>
   );
 }

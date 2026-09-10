@@ -38,6 +38,11 @@ export async function registerOrganizerRoutes(
     return reply.code(201).send({ tree });
   });
 
+  app.get('/trees', async (request) => {
+    const principal = await organizer(request, dependencies.authenticator);
+    return { trees: await dependencies.trees.listTrees(principal.userId) };
+  });
+
   app.get('/trees/:treeId', async (request) => {
     const principal = await organizer(request, dependencies.authenticator);
     const { treeId } = parseRequest(treeParamsSchema, request.params);

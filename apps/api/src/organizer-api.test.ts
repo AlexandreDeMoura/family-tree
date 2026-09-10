@@ -31,6 +31,12 @@ class MemoryFamilyStore implements TreeQueries, PeopleQueries, RelationshipQueri
     return tree;
   }
 
+  async listOwnedTrees(_database: Queryable, organizerUserId: string) {
+    return [...this.trees.values()]
+      .filter((tree) => tree.organizerUserId === organizerUserId)
+      .map(({ organizerUserId: _owner, ...summary }) => summary);
+  }
+
   async findOwnedTree(_database: Queryable, treeId: string, organizerUserId: string) {
     const tree = this.trees.get(treeId);
     if (!tree || tree.organizerUserId !== organizerUserId) return null;
@@ -155,6 +161,17 @@ describe('organizer tree and person API', () => {
       ...tree,
       graph: { treeId: tree.id, people: [], parentChild: [], partnerships: [] },
     } });
+  });
+
+  it('lists only trees owned by the organizer', async () => {
+    const first = await createTree('The Martin Family');
+    const second = await createTree('The Moreau Family');
+    await store.createTree(unusedDatabase, otherUserId, 'Other family');
+
+    const response = await app.inject({ method: 'GET', url: '/trees', headers: bearer });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ trees: [first, second] });
   });
 
   it('creates people with explicit unknown/default values and completeness flags', async () => {

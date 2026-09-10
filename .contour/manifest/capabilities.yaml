@@ -11,15 +11,19 @@
     - apps/api/src/features/people/
     - apps/api/src/features/relationships/
     - apps/api/src/features/organizer.routes.ts
+    - apps/web/src/features/organizer/
+    - apps/web/src/features/people/
+    - apps/web/src/lib/api.ts
   verified_by:
     - packages/family-core/src/person.test.ts
     - apps/api/src/organizer-api.test.ts
     - apps/api/src/lib/database.db.test.ts
+    - apps/web/src/features/people/person-form.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-organizer-family-api]
+  doors: [door-organizer-family-api, door-organizer-family-editor]
   open_questions:
-    - The organizer editing UI remains to make the full maintenance outcome usable.
-  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
+    - Organizer sign-in, creation, editing, and validation messages await manual UI QA.
+  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
 
 - id: cap-connect-family-members
   name: Connect people through family relationships
@@ -33,16 +37,19 @@
     - apps/api/src/features/relationships/
     - apps/api/src/features/organizer.routes.ts
     - apps/api/src/features/organizer.schemas.ts
+    - apps/web/src/features/people/RelationshipPanel.tsx
+    - apps/web/src/features/people/relationship-form.ts
   verified_by:
     - packages/family-core/src/graph.test.ts
     - packages/family-core/src/relationships.test.ts
     - apps/api/src/lib/database.db.test.ts
     - apps/api/src/organizer-api.test.ts
+    - apps/web/src/features/people/relationship-form.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-organizer-family-api]
+  doors: [door-organizer-family-api, door-organizer-family-editor]
   open_questions:
-    - Organizer editing controls remain before this product outcome is usable through the web application.
-  last_verified: d3d234f72b7486d648e6ae8f62f5f9d0b44ed1b6
+    - Organizer relationship controls and actionable conflict messages await manual UI QA.
+  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
 
 - id: cap-browse-family-tree
   name: Browse and understand family branches

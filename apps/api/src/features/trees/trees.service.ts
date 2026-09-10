@@ -10,6 +10,7 @@ export interface LoadedTree extends TreeSummary {
 
 export interface TreesService {
   createTree(organizerUserId: string, input: { name: string }): Promise<TreeSummary>;
+  listTrees(organizerUserId: string): Promise<TreeSummary[]>;
   loadTree(organizerUserId: string, treeId: string): Promise<LoadedTree>;
 }
 
@@ -21,6 +22,10 @@ export function createTreesService(
   return {
     async createTree(organizerUserId, input) {
       return treeQueries.createTree(database, organizerUserId, input.name);
+    },
+
+    async listTrees(organizerUserId) {
+      return treeQueries.listOwnedTrees(database, organizerUserId);
     },
 
     async loadTree(organizerUserId, treeId) {
