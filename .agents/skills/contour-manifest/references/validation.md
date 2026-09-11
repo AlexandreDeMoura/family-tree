@@ -1,0 +1,3 @@
+Follow the project manifest standing rule in the root agent instruction files: after your final edit, run the repository's required validation, including the locally installed `contour check`. Resolve failures and rerun affected checks before reporting completion. Use the repository's package-manager runner for the installed binary. Report commands and results or an explicit setup blocker; do not download a missing tool, bypass checks, weaken validation, or invent verification stamps.
+
+<!-- contour:skill version=0.6.0-19bf337432393f8d sha256=a3b881244e500367dd72763601835f783503b0ab8e989f339200524f2b8ac55e -->

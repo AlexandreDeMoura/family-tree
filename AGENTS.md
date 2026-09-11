@@ -115,29 +115,9 @@ Prefer the simpler design unless extra complexity directly improves graph correc
 <!-- contour:manifest:start -->
 ## Project manifest standing rule
 
-Capabilities are stable outcomes experienced by the product's intended users. Identify those users from the PRD or product brief; the developer working on the repository is not automatically a product persona. Developer-facing products can have developer users and real CLI or API surfaces.
+Before creating or modifying manifest entries, or implementing changes that affect recorded product behavior, read `.agents/skills/contour-manifest/SKILL.md` and follow the relevant procedure. Read that file directly if your agent does not discover skills automatically. Its references contain the complete capability scope rules, schema, examples, and task procedures; no Contour webapp action is required.
 
-Before adding or updating a capability, ask:
-1. Can a product persona say, “I can now ___”?
-2. Would the outcome stay conceptually the same if the technical stack changed?
-3. Through which product surface can (or will) that user exercise it?
+Capabilities are bounded user tasks with observable results. Keep their boundaries independent of implementation commits, reuse existing IDs for the same task, and keep evidence and delivery status honest. After changing code, update the affected manifest YAML files. Respect the builder's manual acceptance requirements.
 
-Route setup and technology choices to `project.yaml`; system parts, infrastructure, libraries, validation engines, and persistence to `boundaries.yaml`; guarantees and invariants to part-owned `contracts/`; pages, endpoints, commands, and jobs to `surface.yaml`; and durable reasons to `decisions.yaml`. For example, “Validate and derive a family graph” belongs in a part and its contract; “Connect family members without impossible relationships” is a user capability. Do not create one capability per implementation commit or technical milestone. Reuse stable capability IDs across commits, linking foundations through `relies_on` and their contracts.
-
-Capability statuses describe the user outcome:
-- `planned`: the outcome has been chosen; no completed implementation is claimed. Empty references and an omitted `last_verified` are honest here.
-- `in-progress`: some implementation exists, but the outcome is not yet usable and verified end to end.
-- `shipped`: the intended user can complete the outcome through a real product surface, with end-to-end verification evidence. Record its `doors` and genuine `verified_by` paths. Unit tests of a foundation alone do not establish delivery; respect the builder's manual acceptance requirements and never invent evidence.
-
-For greenfield work, seed a small outcome checklist from the PRD's MVP user loop before implementation. Keep unbuilt outcomes planned, and advance the same entries as work progresses. For existing code, distinguish implemented outcomes from documented plans; do not infer a roadmap from folders or commits. Completed foundations can coexist with zero shipped capabilities. A shipped part or contract does not automatically ship its dependent capabilities. Semantic warnings are prompts for review, not proof that an outcome is wrong; confirm the evidence before changing status or ownership.
-
-Before broad codebase exploration, read `.contour/manifest/project.yaml`, the manifest slices relevant to the task, and any relevant files under `.contour/manifest/contracts/`. Treat them as a map, then verify affected claims against the code.
-
-After changing code, update the affected manifest YAML files. Run the repository's required validation command, including the manifest check, after your final code or manifest edit. If validation does not yet include it, run the locally installed `contour check` explicitly. Resolve check failures and rerun the affected checks before declaring the task complete. Report the commands run and their results. If a check cannot run, report the blocker explicitly and do not claim it passed. Do not bypass checks, weaken validation, or invent verification stamps to make the result pass.
-
-Use the repository's package-manager runner for the installed binary; do not download a missing package as part of validation. An unavailable tool is a setup blocker to report. Keep stable ids stable, record durable architectural choices in `decisions.yaml`, and do not edit marker-owned generated sections in `attention.yaml` by hand.
-
-Each contract file contains one `contract-*` entry bound to exactly one owner: either `part: part-*` or `capability: cap-*`, never both or neither. Keep its `accepts`, `guarantees`, and `rules` as sequences of non-empty statements; use an empty sequence instead of inventing a promise. When affected behavior changes, keep those statements and their `verified_by` evidence honest, and update `last_verified` only after verifying the complete entry at the current commit.
-
-When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`. An authored uncertainty in `attention.yaml` must reference the entry it concerns in `relies_on` using its stable id.
+Follow the project manifest standing rule in the root agent instruction files: after your final edit, run the repository's required validation, including the locally installed `contour check`. Resolve failures and rerun affected checks before reporting completion. Use the repository's package-manager runner for the installed binary. Report commands and results or an explicit setup blocker; do not download a missing tool, bypass checks, weaken validation, or invent verification stamps.
 <!-- contour:manifest:end -->
