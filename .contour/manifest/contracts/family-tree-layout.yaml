@@ -21,6 +21,6 @@ code:
 verified_by:
   - apps/web/src/features/tree/layout-family-graph.test.ts
 relies_on: [contract-family-graph]
-doors: [door-family-tree-canvas]
+doors: [door-organizer-family-editor, door-private-family-view]
 open_questions: []
 last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf

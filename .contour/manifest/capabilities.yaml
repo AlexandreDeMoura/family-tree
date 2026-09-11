@@ -1,18 +1,62 @@
-- id: cap-manage-family-tree
-  name: Create and maintain a family tree
+# Bounded user tasks of the family organizer and the casual relative (PRD §5).
+# Every entry stays in-progress until the PRD §24 manual acceptance record in
+# docs/manual-acceptance.md passes; automated checks alone do not ship a capability.
+- id: cap-manage-family-trees
+  name: Create family trees and open one to work on
   status: in-progress
-  why: Lets the family organizer build the shared family record from scratch and keep each person's information accurate.
+  why: >-
+    A family organizer can sign in with the single pre-provisioned account, see the
+    trees they own, create a new named tree, and open one in the editor. Sign-in and
+    sign-out are the access context of this ability, not separate tasks. Adding
+    relatives, connecting them, photos, and sharing belong to other abilities. The
+    current product has no tree rename or deletion.
+  code:
+    - apps/api/src/features/auth/
+    - apps/api/src/features/trees/
+    - apps/api/src/features/organizer.routes.ts
+    - apps/api/src/features/organizer.schemas.ts
+    - apps/web/src/App.tsx
+    - apps/web/src/features/organizer/AuthProvider.tsx
+    - apps/web/src/features/organizer/auth-context.ts
+    - apps/web/src/features/organizer/ProtectedRoute.tsx
+    - apps/web/src/features/organizer/SignInPage.tsx
+    - apps/web/src/features/organizer/OrganizerHomePage.tsx
+    - apps/web/src/features/organizer/OrganizerHeader.tsx
+    - apps/web/src/features/organizer/tree-queries.ts
+    - apps/web/src/lib/api.ts
+    - apps/web/src/lib/supabase.ts
+  verified_by:
+    - apps/api/src/organizer-api.test.ts
+    - apps/api/src/lib/database.db.test.ts
+  relies_on: [part-web, part-api, part-supabase]
+  doors: [door-organizer-sign-in, door-organizer-home, door-organizer-family-editor, door-organizer-family-api]
+  open_questions:
+    - Organizer manual QA must confirm sign-in, redirect back to the requested page, the tree list, tree creation, and sign-out.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
+
+- id: cap-edit-relatives
+  name: Create and edit a relative in a selected family tree
+  status: in-progress
+  why: >-
+    A family organizer can add a person to the open tree and later edit their names,
+    life status, birth and death years, adoption flag, up to three fun facts, and
+    whether their parent, partner, and child lists are known to be complete. Invalid
+    life data and edits that would break a connected parent or child are refused
+    before anything is saved, and unknown values stay distinct from known absence.
+    Fields and validation messages are details of this task. Connecting people and
+    managing photos are separate abilities. Deleting a relative does not exist in the
+    current product.
   code:
     - packages/family-core/src/schemas.ts
     - packages/family-core/src/person.ts
+    - packages/family-core/src/invariants.ts
     - supabase/migrations/20260909000000_create_family_schema.sql
-    - apps/api/src/features/auth/
-    - apps/api/src/features/trees/
     - apps/api/src/features/people/
-    - apps/api/src/features/relationships/
     - apps/api/src/features/organizer.routes.ts
-    - apps/web/src/features/organizer/
-    - apps/web/src/features/people/
+    - apps/api/src/features/organizer.schemas.ts
+    - apps/web/src/features/people/PersonForm.tsx
+    - apps/web/src/features/people/person-form.ts
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/lib/api.ts
   verified_by:
     - packages/family-core/src/person.test.ts
@@ -20,15 +64,22 @@
     - apps/api/src/lib/database.db.test.ts
     - apps/web/src/features/people/person-form.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-organizer-family-api, door-organizer-family-editor]
+  doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions:
-    - Organizer sign-in, creation, editing, and validation messages await manual UI QA.
-  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
+    - Organizer manual QA must confirm creation, editing, specific blocked-rule messages, retained values after a failed save, and the unknown-versus-known-absence controls.
+    - Whether removing a relative belongs to the MVP is unresolved; see attention-relative-deletion-scope.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: cap-connect-family-members
-  name: Connect people through family relationships
+  name: Connect relatives as parents, children, or partners
   status: in-progress
-  why: Lets the organizer represent parents, children, partners, full siblings, half-siblings, and multiple-partner branches without creating impossible relationships.
+  why: >-
+    A family organizer can add or remove a parent-to-child link or a partnership
+    between two people in the open tree, including multiple partners and children
+    with one known parent, and see the full and half siblings derived from shared
+    parents. Links that would create an ancestry cycle, a third parent, a parent
+    younger than the child, a duplicate, or a self-link are refused before anything
+    is saved. Siblings are never entered directly.
   code:
     - packages/family-core/src/graph.ts
     - packages/family-core/src/invariants.ts
@@ -39,6 +90,8 @@
     - apps/api/src/features/organizer.schemas.ts
     - apps/web/src/features/people/RelationshipPanel.tsx
     - apps/web/src/features/people/relationship-form.ts
+    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/lib/api.ts
   verified_by:
     - packages/family-core/src/graph.test.ts
     - packages/family-core/src/relationships.test.ts
@@ -46,62 +99,67 @@
     - apps/api/src/organizer-api.test.ts
     - apps/web/src/features/people/relationship-form.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-organizer-family-api, door-organizer-family-editor]
+  doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions:
-    - Organizer relationship controls and actionable conflict messages await manual UI QA.
-  last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943
+    - Organizer manual QA must confirm adding and removing links, the derived sibling summary, and actionable conflict messages for each invariant.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: cap-browse-family-tree
-  name: Browse and understand family branches
+  name: Explore all relatives of a selected family tree on a canvas
   status: in-progress
-  why: Lets organizers and relatives navigate a clear, automatically laid-out tree and understand where people sit within a large family.
+  why: >-
+    A family organizer in the editor, or a casual relative holding a private link,
+    can see every person of a tree laid out automatically by generation, pan and
+    zoom to reach large or distant branches, focus on one person while the
+    surrounding tree stays visible, open that person's card to read life details,
+    fun facts, adoption and remembrance indicators, and life-stage photos by age
+    bucket, and step to any listed parent, sibling, partner, or child. Unknown
+    information reads as incomplete rather than broken, half siblings are marked,
+    and deceased relatives keep equal prominence. Pan, zoom, focus, and the card
+    are details of this one exploration task; obtaining the link belongs to
+    sharing, and adding photos or facts belongs to the organizer editing abilities.
   code:
     - apps/web/src/features/tree/
+    - apps/web/src/features/people/PersonCard.tsx
     - apps/web/src/features/people/person-card.ts
+    - apps/web/src/features/photos/PhotoGallery.tsx
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/features/sharing/ViewerPage.tsx
     - apps/web/src/index.css
+    - packages/family-core/src/relationships.ts
+    - apps/api/src/features/trees/
+    - apps/api/src/features/sharing/sharing.service.ts
   verified_by:
     - apps/web/src/features/tree/layout-family-graph.test.ts
     - apps/web/src/features/people/person-card.test.ts
+    - packages/family-core/src/relationships.test.ts
+    - packages/family-core/src/mvp-acceptance.fixture.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-family-tree-canvas, door-private-family-view]
+  doors: [door-organizer-family-editor, door-private-family-view]
   open_questions:
-    - Will automatic layout keep multiple-partner, half-sibling, and large sibling branches understandable in manual QA?
-    - Contextual focus navigation on both organizer and account-free viewer surfaces awaits manual UI QA.
-  last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
+    - Manual QA must confirm that multiple-partner, half-sibling, ten-sibling, and disconnected branches stay readable with pan, zoom, and fit-to-view on desktop and narrow screens.
+    - Manual QA must confirm that focus and the overlaid card leave enough tree context for an unfamiliar relative to understand a branch on both the organizer and viewer pages.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
-- id: cap-explore-relative
-  name: Explore a relative through their person card
+- id: cap-manage-relative-photos
+  name: Add, categorize, and remove a relative's private photos
   status: in-progress
-  why: Lets a relative discover a person's immediate family, life information, photos, and memorable facts without losing tree context.
-  code:
-    - apps/web/src/features/people/PersonCard.tsx
-    - apps/web/src/features/people/person-card.ts
-    - apps/web/src/features/tree/FamilyTree.tsx
-    - apps/web/src/features/organizer/FamilyEditorPage.tsx
-    - apps/web/src/features/sharing/ViewerPage.tsx
-    - apps/web/src/index.css
-  verified_by:
-    - apps/web/src/features/people/person-card.test.ts
-  relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-contextual-person-card, door-private-family-view]
-  open_questions:
-    - Will focus navigation preserve enough surrounding context for an unfamiliar relative to understand the selected person's branch?
-    - The organizer and account-free viewer card experiences await manual UI QA.
-  last_verified: 75d97d3a6357c22920252d07476e9757992a85bf
-
-- id: cap-preserve-family-memories
-  name: Add private photos and memorable facts
-  status: in-progress
-  why: Lets the organizer make each person recognizable and memorable through life-stage photos and up to three fun facts.
+  why: >-
+    A family organizer can upload a JPEG, PNG, or WebP photo of a person in the open
+    tree, assign it to exactly one life-stage bucket, choose which published photo is
+    the person's main portrait shown on the map, sidebar, and card, refresh expired
+    private links, retry cleanup of an unfinished upload, and remove a photo. Photos
+    stay in one private bucket and become visible only after the server verifies the
+    uploaded object. Browsing the gallery by life stage belongs to exploration; fun
+    facts belong to relative editing.
   code:
     - packages/family-core/src/photos.ts
+    - supabase/migrations/20260909000000_create_family_schema.sql
     - apps/api/src/features/photos/
     - apps/api/src/lib/photo-storage.ts
+    - apps/api/src/features/organizer.routes.ts
+    - apps/api/src/features/organizer.schemas.ts
     - apps/web/src/features/photos/
-    - apps/web/src/features/people/PersonCard.tsx
-    - apps/web/src/features/tree/FamilyTree.tsx
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/lib/api.ts
   verified_by:
@@ -109,29 +167,36 @@
     - apps/api/src/lib/database.db.test.ts
     - apps/web/src/features/photos/photo-upload.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
-  doors: [door-private-photo-gallery]
+  doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions:
-    - Organizer manual QA must verify image conversion, signed upload, bucket browsing, portrait selection, expired-link refresh, and cleanup messaging.
-  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+    - Organizer manual QA must confirm browser conversion, signed upload for every bucket, portrait selection and fallback, expired-link refresh, missing-image treatment, and deletion retry.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: cap-share-family-tree
-  name: Share the tree privately with relatives
+  name: Create a private link for relatives to view a tree without an account
   status: in-progress
-  why: Lets the organizer share an unlisted link that relatives can open without an account while keeping them read-only.
+  why: >-
+    A family organizer can create, copy, and later replace one unlisted link for the
+    open tree, and a casual relative who receives it can open the tree in a read-only
+    view without signing in. Replacing the link immediately stops the old one from
+    working, and the product states that anyone holding the link can view the tree.
+    Link creation and recipient access are steps of this one task; what the relative
+    does inside the opened tree is the exploration ability.
   code:
     - supabase/migrations/20260910000000_add_tree_share_links.sql
     - apps/api/src/features/sharing/
-    - apps/api/src/sharing-api.test.ts
+    - apps/api/src/app.ts
+    - apps/web/src/App.tsx
+    - apps/web/index.html
     - apps/web/src/features/sharing/
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/lib/api.ts
-    - apps/web/index.html
   verified_by:
     - apps/api/src/sharing-api.test.ts
     - apps/api/src/lib/database.db.test.ts
     - apps/web/src/features/sharing/share-link.test.ts
-  relies_on: [part-web, part-api, part-supabase]
-  doors: [door-private-family-view]
+  relies_on: [part-web, part-api, part-supabase, cap-browse-family-tree]
+  doors: [door-organizer-family-editor, door-organizer-family-api, door-private-family-view, door-viewer-family-api]
   open_questions:
-    - Organizer manual QA must confirm link creation, copying, replacement, and account-free read-only browsing.
-  last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
+    - Organizer manual QA must confirm link creation, copying, replacement, the privacy caveat, and account-free read-only loading in a signed-out window.
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

@@ -1,12 +1,39 @@
 # Human-authored uncertainties and verifier findings that need attention.
-# Example:
-# - id: attention-missing-owner
-#   name: Confirm checkout ownership
-#   status: planned
-#   why: "Two parts appear to own the same checkout path."
-#   code: [src/checkout/]
-#   verified_by: []
-#   relies_on: []
-#   doors: []
-#   open_questions: ["Which part should own checkout?"]
-#   last_verified: abc1234
+- id: attention-manual-acceptance-gate
+  name: Record PRD §24 manual acceptance before shipping any capability
+  status: in-progress
+  why: >-
+    Every capability is implemented end to end with automated domain, API, persistence,
+    and layout coverage, but the builder requires the manual acceptance record in
+    docs/manual-acceptance.md to pass before any capability is marked shipped. The
+    organizer pages have no browser-level automated tests.
+  code: [docs/manual-acceptance.md, apps/api/scripts/seed-acceptance.mjs]
+  verified_by: []
+  relies_on:
+    - cap-manage-family-trees
+    - cap-edit-relatives
+    - cap-connect-family-members
+    - cap-browse-family-tree
+    - cap-manage-relative-photos
+    - cap-share-family-tree
+  doors: [door-organizer-sign-in, door-organizer-home, door-organizer-family-editor, door-private-family-view]
+  open_questions:
+    - Which commit, browsers, and viewports were used for the acceptance run, and did every §24 item pass?
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
+
+- id: attention-relative-deletion-scope
+  name: Decide whether removing a relative or a tree is MVP scope
+  status: planned
+  why: >-
+    The PRD user stories cover adding and editing people and creating trees but never
+    deleting them, and the product exposes no delete action for people or trees. The
+    persistence layer already cascades metadata on person and tree deletion and
+    anticipates future deletion services that must clean Storage objects first. The
+    relative and tree capabilities are therefore scoped to create and edit only.
+  code: []
+  verified_by: []
+  relies_on: [cap-edit-relatives, cap-manage-family-trees, contract-private-family-persistence]
+  doors: []
+  open_questions:
+    - Should cap-edit-relatives and cap-manage-family-trees widen to include deletion, or is deletion a post-MVP ability?
+  last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

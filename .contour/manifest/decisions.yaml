@@ -66,7 +66,7 @@
     - apps/api/src/photos-api.test.ts
     - apps/web/src/features/photos/photo-upload.test.ts
   relies_on: [part-api, part-web, part-supabase, contract-private-photos]
-  doors: [door-private-photo-gallery]
+  doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions: []
   last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
 
@@ -109,7 +109,7 @@
   verified_by:
     - apps/web/src/features/tree/layout-family-graph.test.ts
   relies_on: [part-web, part-family-core]
-  doors: [door-family-tree-canvas]
+  doors: [door-organizer-family-editor, door-private-family-view]
   open_questions: []
   last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf
 
@@ -128,7 +128,7 @@
     - apps/api/src/lib/database.db.test.ts
     - apps/web/src/features/sharing/share-link.test.ts
   relies_on: [part-web, part-api, part-supabase, contract-private-sharing]
-  doors: [door-private-family-view]
+  doors: [door-private-family-view, door-viewer-family-api]
   open_questions: []
   last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
 

@@ -1,8 +1,8 @@
 id: contract-person-card-navigation
 name: Graph-derived person cards and contextual focus
 status: in-progress
-part: part-web
-why: Keeps family-card relationships and focus emphasis consistent with the authoritative graph while preserving the broader tree for navigation.
+capability: cap-browse-family-tree
+why: Promises organizers and relatives that person cards and focus emphasis stay consistent with the authoritative graph while the broader tree remains available for navigation on both the editor and viewer pages.
 accepts:
   - An authoritative family graph and a selected person ID contained in that graph.
 guarantees:
@@ -21,11 +21,12 @@ code:
   - apps/web/src/features/people/person-card.ts
   - apps/web/src/features/tree/FamilyTree.tsx
   - apps/web/src/features/organizer/FamilyEditorPage.tsx
+  - apps/web/src/features/sharing/ViewerPage.tsx
   - apps/web/src/index.css
 verified_by:
   - apps/web/src/features/people/person-card.test.ts
 relies_on: [contract-family-graph, contract-family-tree-layout]
-doors: [door-contextual-person-card]
+doors: [door-organizer-family-editor, door-private-family-view]
 open_questions:
-  - Manual UI QA must confirm that the overlaid card leaves enough tree context visible across supported screen sizes.
-last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+  - Manual UI QA must confirm that the overlaid card leaves enough tree context visible across supported screen sizes on both pages.
+last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

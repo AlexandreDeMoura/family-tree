@@ -6,7 +6,7 @@
   code: [apps/web/src/, apps/web/vite.config.ts, apps/web/tsconfig.app.json, apps/web/tsconfig.node.json]
   verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts, apps/web/src/features/photos/photo-upload.test.ts, apps/web/src/features/sharing/share-link.test.ts]
   relies_on: [part-family-core]
-  doors: [door-web-shell, door-organizer-family-editor, door-family-tree-canvas, door-contextual-person-card, door-private-photo-gallery, door-private-family-view]
+  doors: [door-organizer-sign-in, door-organizer-home, door-organizer-family-editor, door-private-family-view]
   open_questions: ["The organizer editing, family-map, contextual card, photo, sharing, and viewer workflows await manual UI QA."]
   last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
 
@@ -17,7 +17,7 @@
   code: [apps/api/src/, apps/api/package.json]
   verified_by: [apps/api/src/app.test.ts, apps/api/src/organizer-api.test.ts, apps/api/src/photos-api.test.ts, apps/api/src/sharing-api.test.ts, apps/api/src/lib/database.db.test.ts]
   relies_on: [part-family-core, part-supabase]
-  doors: [door-api-health, door-organizer-family-api, door-private-photo-gallery, door-private-family-view]
+  doors: [door-api-health, door-organizer-family-api, door-viewer-family-api]
   open_questions: []
   last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
 
