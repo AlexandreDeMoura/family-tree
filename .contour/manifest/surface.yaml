@@ -59,9 +59,9 @@
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: door-private-family-view
-  name: Private read-only viewer page (/view/:treeId#token)
+  name: Private read-only viewer routes (/view/:treeId…#token)
   status: in-progress
-  why: Opens a tree for a relative holding an unlisted link, reading the bearer token from the URL fragment, and shows the same full-height album family map, compact header, person cards, and life-stage galleries without editing or upload controls.
+  why: Opens a tree for a relative holding an unlisted link, reading the bearer token from the URL fragment, and provides the full-height family map, person cards with compact photo previews, and a dedicated read-only life-stage viewer with explicit routes back to the card or tree.
   code:
     - apps/web/src/App.tsx
     - apps/web/index.html
@@ -69,16 +69,19 @@
     - apps/web/src/features/sharing/share-link.ts
     - apps/web/src/features/tree/FamilyTree.tsx
     - apps/web/src/features/people/PersonCard.tsx
-    - apps/web/src/features/photos/PhotoGallery.tsx
+    - apps/web/src/features/photos/PhotoGalleryPreview.tsx
+    - apps/web/src/features/photos/LifeStagePhotoViewerPage.tsx
+    - apps/web/src/features/photos/life-stage-gallery.ts
     - apps/web/src/lib/api.ts
   verified_by:
     - apps/web/src/features/sharing/share-link.test.ts
     - apps/web/src/features/people/person-card.test.ts
+    - apps/web/src/features/photos/life-stage-gallery.test.ts
     - apps/web/src/features/tree/layout-family-graph.test.ts
   relies_on: [part-web, part-family-core, door-viewer-family-api]
   doors: []
   open_questions:
-    - Manual QA must confirm account-free loading, read-only presentation, navigation, and the incomplete or replaced-link states.
+    - Manual QA must confirm account-free loading, read-only presentation, tree/card/gallery navigation, incomplete or replaced-link states, and the dedicated viewer's mockup 03 image fitting.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: door-api-health

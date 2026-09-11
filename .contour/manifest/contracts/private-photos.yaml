@@ -29,6 +29,6 @@ verified_by:
   - apps/api/src/lib/database.db.test.ts
   - apps/web/src/features/photos/photo-upload.test.ts
 relies_on: [contract-private-family-persistence, contract-tree-transaction]
-doors: [door-organizer-family-editor, door-organizer-family-api]
+doors: [door-organizer-family-editor, door-organizer-family-api, door-private-family-view]
 open_questions: []
 last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28

@@ -146,3 +146,25 @@ Compare with interfaces 01 and 02 in `ui-mockups/Family Tree - Mockups.dc.html`.
 - [ ] On narrow screens and short viewports, headers wrap, tools and cards remain
   scrollable, and the tree stays reachable. Check these responsive layouts separately
   from the desktop mockups. No automated browser or screenshot QA was performed.
+
+## Life-stage photo viewer follow-up — PRD commit 14 (manual QA pending)
+
+Compare with interface 03 in `ui-mockups/Family Tree - Mockups.dc.html`.
+
+- [ ] In the private viewer, a person's card shows only a compact photo preview.
+  Opening it moves to `/view/:treeId/people/:personId/photos` without exposing any
+  upload, portrait, bucket-editing, cleanup, or deletion control.
+- [ ] The dedicated warm brown-black page shows the person's identity, life summary,
+  total photo and filled-bucket counts, one large contained image, bucket-local
+  thumbnails, and the selected photo's position within that bucket.
+- [ ] All eleven life stages stay visible in life order. Filled stages show their
+  photo count; empty stages say `none yet` and open a quiet empty state rather than
+  an error. Missing objects use the existing unavailable/refresh treatment.
+- [ ] `Back to card` restores the same person's card and close returns to the whole
+  tree. The private token remains only in the URL fragment through those transitions,
+  refresh, browser back, and browser forward.
+- [ ] Replacing the viewer link makes the old fragment fail on both the tree and
+  dedicated photo route. Newly issued signed URLs refresh after expiry as before.
+- [ ] Real portrait, landscape, and square images fit the large stage and thumbnails
+  acceptably at desktop and narrow widths. No automated browser or screenshot QA was
+  performed.

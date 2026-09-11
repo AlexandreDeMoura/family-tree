@@ -2,9 +2,9 @@
 - id: part-web
   name: Organizer web application
   status: shipped
-  why: Hosts session-aware organizer routes, family queries, validated editing forms, the automatically laid-out full-height album family workspace, contextual person-card navigation, private life-stage photo controls, and an account-free read-only viewer route.
+  why: Hosts session-aware organizer routes, family queries, validated editing forms, the automatically laid-out full-height album family workspace, contextual person-card navigation, private life-stage photo controls, and account-free read-only tree and dedicated gallery routes.
   code: [apps/web/src/, apps/web/vite.config.ts, apps/web/tsconfig.app.json, apps/web/tsconfig.node.json]
-  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts, apps/web/src/features/tree/tree-person.test.ts, apps/web/src/features/photos/photo-upload.test.ts, apps/web/src/features/sharing/share-link.test.ts]
+  verified_by: [apps/web/src/features/people/person-form.test.ts, apps/web/src/features/people/relationship-form.test.ts, apps/web/src/features/people/person-card.test.ts, apps/web/src/features/tree/layout-family-graph.test.ts, apps/web/src/features/tree/tree-person.test.ts, apps/web/src/features/photos/photo-upload.test.ts, apps/web/src/features/photos/life-stage-gallery.test.ts, apps/web/src/features/sharing/share-link.test.ts]
   relies_on: [part-family-core]
   doors: [door-organizer-sign-in, door-organizer-home, door-organizer-family-editor, door-private-family-view]
   open_questions: ["The organizer editing, family-map, contextual card, photo, sharing, and viewer workflows await manual UI QA."]

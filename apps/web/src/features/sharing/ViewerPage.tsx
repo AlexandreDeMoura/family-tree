@@ -1,21 +1,20 @@
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { errorMessage, familyApi } from '../../lib/api';
 import { PersonCard } from '../people/PersonCard';
 import { FamilyTree } from '../tree/FamilyTree';
-import { readPrivateViewerToken } from './share-link';
+import {
+  buildPrivatePhotoViewerPath,
+  buildPrivateViewerPath,
+  readPrivateViewerToken,
+} from './share-link';
 
 export function ViewerPage() {
   const { treeId = '' } = useParams();
-  const [token, setToken] = useState(() => readPrivateViewerToken(window.location.hash));
-  const [focusedId, setFocusedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const readHash = () => setToken(readPrivateViewerToken(window.location.hash));
-    window.addEventListener('hashchange', readHash);
-    return () => window.removeEventListener('hashchange', readHash);
-  }, []);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
+  const token = readPrivateViewerToken(location.hash);
 
   const tree = useQuery({
     queryKey: ['viewer-tree', treeId, token],
@@ -41,7 +40,15 @@ export function ViewerPage() {
   const portraitUrls = new Map(photoList.flatMap((photo) => photo.isMain && photo.viewUrl
     ? [[photo.personId, photo.viewUrl] as const]
     : []));
-  const focusedPerson = graph.people.find(({ id }) => id === focusedId);
+  const focusedPerson = graph.people.find(({ id }) => id === searchParameters.get('person'));
+
+  function openPerson(personId: string) {
+    navigate(buildPrivateViewerPath(treeId, token!, personId));
+  }
+
+  function closeCard() {
+    navigate(buildPrivateViewerPath(treeId, token!));
+  }
 
   return (
     <div className="app-shell viewer-shell tree-workspace">
@@ -51,7 +58,7 @@ export function ViewerPage() {
           <span><h1>{tree.data.name}</h1><small>{focusedPerson ? `${focusedPerson.firstName} ${focusedPerson.lastName}` : `${graph.people.length} people · Whole tree`}</small></span>
         </span>
         <div className="header-account">
-          {focusedPerson && <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Back to whole tree</button>}
+          {focusedPerson && <button className="button button--quiet" type="button" onClick={closeCard}>Back to whole tree</button>}
           <span className="viewer-badge">Private link · view only</span>
         </div>
       </header>
@@ -63,18 +70,19 @@ export function ViewerPage() {
                 graph={graph}
                 portraitUrls={portraitUrls}
                 selectedPersonId={focusedPerson?.id}
-                onSelectPerson={setFocusedId}
+                onSelectPerson={openPerson}
               />
               {focusedPerson && (
                 <PersonCard
                   graph={graph}
                   personId={focusedPerson.id}
-                  onNavigate={setFocusedId}
-                  onClose={() => setFocusedId(null)}
+                  onNavigate={openPerson}
+                  onClose={closeCard}
                   photos={photoList}
                   photosLoading={photos.isPending}
                   photosError={photos.error}
                   onRefreshPhotos={() => void photos.refetch()}
+                  onOpenPhotoViewer={() => navigate(buildPrivatePhotoViewerPath(treeId, focusedPerson.id, token!))}
                 />
               )}
             </div>

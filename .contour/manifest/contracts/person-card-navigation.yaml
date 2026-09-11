@@ -12,23 +12,32 @@ guarantees:
   - Focus projections include the selected person and card-listed immediate family without mutating or replacing the full family graph.
   - Deceased people retain the same portrait, card, and node prominence as living people; only graph distance from the selected person may fade a node.
   - Available main portraits appear consistently in the sidebar, family map, and person card, while unavailable images fall back without fading the person.
+  - A viewer's compact card preview opens the selected person's dedicated life-stage gallery; Back to card restores that person and close returns to the whole tree.
 rules:
   - The tree fills the workspace below its compact header; zoom-out, percentage, zoom-in, and fit controls stay in the canvas chrome.
   - Unknown relationship lists use neutral dashed placeholders while known absence stays plain copy.
   - Parents, siblings, partners, and children remain expandable and every listed person can become the next focus.
   - Closing focus returns to the broader tree without changing the organizer's selected editing record.
   - Signed photo access and publication rules belong to the private-photo contract; this contract only consumes authorized short-lived URLs.
+  - Dedicated viewer bucket and photo selections use route state so refresh and browser history retain the browsing context.
 code:
   - apps/web/src/features/people/PersonCard.tsx
   - apps/web/src/features/people/person-card.ts
   - apps/web/src/features/tree/FamilyTree.tsx
   - apps/web/src/features/organizer/FamilyEditorPage.tsx
   - apps/web/src/features/sharing/ViewerPage.tsx
+  - apps/web/src/features/photos/LifeStagePhotoViewerPage.tsx
+  - apps/web/src/features/photos/PhotoGalleryPreview.tsx
+  - apps/web/src/features/photos/life-stage-gallery.ts
+  - apps/web/src/features/sharing/share-link.ts
   - apps/web/src/index.css
 verified_by:
   - apps/web/src/features/people/person-card.test.ts
+  - apps/web/src/features/photos/life-stage-gallery.test.ts
+  - apps/web/src/features/sharing/share-link.test.ts
 relies_on: [contract-family-graph, contract-family-tree-layout]
 doors: [door-organizer-family-editor, door-private-family-view]
 open_questions:
   - Manual UI QA must confirm that the adjacent card leaves enough tree context visible across supported screen sizes on both pages.
+  - Manual UI QA must confirm that the compact preview and both gallery exit paths preserve the expected card and tree context.
 last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

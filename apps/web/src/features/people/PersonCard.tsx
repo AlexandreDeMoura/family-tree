@@ -1,6 +1,7 @@
 import type { AgeBucket, FamilyGraph, Person, Sibling } from '@family-tree/family-core';
 import type { PhotoView } from '../../lib/api';
 import { PhotoGallery } from '../photos/PhotoGallery';
+import { PhotoGalleryPreview } from '../photos/PhotoGalleryPreview';
 import {
   projectPersonCard,
   type PersonRelationshipSection,
@@ -17,6 +18,7 @@ interface PersonCardProps {
   photosLoading: boolean;
   photosError: unknown;
   onRefreshPhotos: () => void;
+  onOpenPhotoViewer?: () => void;
   onUploadPhoto?: (file: File, ageBucket: AgeBucket, makeMain: boolean) => Promise<void>;
   onSetMainPhoto?: (photoId: string) => Promise<void>;
   onDeletePhoto?: (photoId: string) => Promise<void>;
@@ -32,6 +34,7 @@ export function PersonCard({
   photosLoading,
   photosError,
   onRefreshPhotos,
+  onOpenPhotoViewer,
   onUploadPhoto,
   onSetMainPhoto,
   onDeletePhoto,
@@ -64,17 +67,29 @@ export function PersonCard({
         {onEdit && <button className="button button--quiet person-card__edit" type="button" onClick={onEdit}>Edit person</button>}
       </header>
 
-      <PhotoGallery
-        key={person.id}
-        person={person}
-        photos={personPhotos}
-        loading={photosLoading}
-        loadError={photosError}
-        onRefresh={onRefreshPhotos}
-        onUpload={onUploadPhoto}
-        onSetMain={onSetMainPhoto}
-        onDelete={onDeletePhoto}
-      />
+      {onOpenPhotoViewer ? (
+        <PhotoGalleryPreview
+          key={person.id}
+          person={person}
+          photos={personPhotos}
+          loading={photosLoading}
+          loadError={photosError}
+          onRefresh={onRefreshPhotos}
+          onOpen={onOpenPhotoViewer}
+        />
+      ) : (
+        <PhotoGallery
+          key={person.id}
+          person={person}
+          photos={personPhotos}
+          loading={photosLoading}
+          loadError={photosError}
+          onRefresh={onRefreshPhotos}
+          onUpload={onUploadPhoto}
+          onSetMain={onSetMainPhoto}
+          onDelete={onDeletePhoto}
+        />
+      )}
 
       <section className="person-card__facts" aria-labelledby={`facts-${person.id}`}>
         <span className="eyebrow" id={`facts-${person.id}`}>A little about {person.firstName}</span>

@@ -12,6 +12,7 @@ guarantees:
   - Valid viewers can load the authoritative graph and receive five-minute signed URLs for that tree's published photos without an account.
   - Viewer responses disable caching and indexing and apply a no-referrer policy.
   - The browser keeps the raw token in the URL fragment so it is excluded from HTTP paths and referrers.
+  - Internal tree, card, and dedicated photo-viewer routes retain the raw token fragment across refresh and browser history navigation.
 rules:
   - Share tokens contain 256 random bits and are returned only when created or replaced.
   - Authorization headers are redacted from API logs.
@@ -22,11 +23,13 @@ code:
   - apps/api/src/features/sharing/
   - apps/api/src/app.ts
   - apps/web/src/features/sharing/
+  - apps/web/src/features/photos/LifeStagePhotoViewerPage.tsx
   - apps/web/index.html
 verified_by:
   - apps/api/src/sharing-api.test.ts
   - apps/api/src/lib/database.db.test.ts
   - apps/web/src/features/sharing/share-link.test.ts
+  - apps/web/src/features/photos/life-stage-gallery.test.ts
 relies_on: [contract-private-family-persistence, contract-private-photos]
 doors: [door-organizer-family-api, door-viewer-family-api, door-private-family-view]
 open_questions:

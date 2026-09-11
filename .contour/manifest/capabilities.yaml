@@ -112,8 +112,10 @@
     can see every person of a tree laid out automatically by generation, pan and
     zoom to reach large or distant branches, focus on one person while the
     surrounding tree stays visible, open that person's card to read life details,
-    fun facts, adoption and remembrance indicators, and life-stage photos by age
-    bucket, and step to any listed parent, sibling, partner, or child. Unknown
+    fun facts, adoption and remembrance indicators, open a dedicated life-stage photo
+    viewer from a compact card preview, browse every age bucket in life order, and step
+    to any listed parent, sibling, partner, or child. Photo-viewer navigation retains
+    the selected person's card or returns to the whole tree. Unknown
     information reads as incomplete rather than broken, half siblings are marked,
     and deceased relatives keep equal prominence. The organizer and viewer use a
     full-height album workspace with compact portrait cards, a visible zoom percentage,
@@ -126,7 +128,7 @@
     - apps/web/src/features/tree/
     - apps/web/src/features/people/PersonCard.tsx
     - apps/web/src/features/people/person-card.ts
-    - apps/web/src/features/photos/PhotoGallery.tsx
+    - apps/web/src/features/photos/
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/features/sharing/ViewerPage.tsx
     - apps/web/src/index.css
@@ -137,6 +139,8 @@
     - apps/web/src/features/tree/layout-family-graph.test.ts
     - apps/web/src/features/tree/tree-person.test.ts
     - apps/web/src/features/people/person-card.test.ts
+    - apps/web/src/features/photos/life-stage-gallery.test.ts
+    - apps/web/src/features/sharing/share-link.test.ts
     - packages/family-core/src/relationships.test.ts
     - packages/family-core/src/mvp-acceptance.fixture.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
@@ -145,6 +149,7 @@
     - Manual QA must compare whole-tree and focused-person album workspaces with mockups 01 and 02, including compact nodes, remembrance rings, discovery cues, visible zoom controls, and responsive behavior.
     - Manual QA must confirm that multiple-partner, half-sibling, ten-sibling, and disconnected branches stay readable with pan, zoom, and fit-to-view on desktop and narrow screens.
     - Manual QA must confirm that focus and the overlaid card leave enough tree context for an unfamiliar relative to understand a branch on both the organizer and viewer pages.
+    - Manual QA must compare the dedicated life-stage photo viewer with mockup 03 and confirm real-image fitting on desktop and narrow screens.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: cap-manage-relative-photos
