@@ -139,10 +139,9 @@ Compare with interfaces 01 and 02 in `ui-mockups/Family Tree - Mockups.dc.html`.
 - [ ] Focusing a person retains tree context; selecting a relative in the card
   changes focus; returning to the whole tree restores the broader view. Keyboard
   navigation, pan, zoom, and fit remain usable with the large acceptance family.
-- [ ] Organizer People & editing and Share tree panels scroll independently of
-  the tree. Add, save, cancel, relationships, photo tools, and sharing still work;
-  closing/reopening editing preserves an existing person's unsaved form values.
-  The private viewer exposes none of these editing tools.
+- [ ] The organizer Share tree panel scrolls independently of the tree and the
+  private viewer exposes no editing or sharing controls. Dedicated person editing
+  is checked in the commit-15 section below.
 - [ ] On narrow screens and short viewports, headers wrap, tools and cards remain
   scrollable, and the tree stays reachable. Check these responsive layouts separately
   from the desktop mockups. No automated browser or screenshot QA was performed.
@@ -168,3 +167,33 @@ Compare with interface 03 in `ui-mockups/Family Tree - Mockups.dc.html`.
 - [ ] Real portrait, landscape, and square images fit the large stage and thumbnails
   acceptably at desktop and narrow widths. No automated browser or screenshot QA was
   performed.
+
+## Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
+
+Compare with interface 04 in `ui-mockups/Family Tree - Mockups.dc.html`.
+
+- [ ] `+ Add person` opens `/organizer/trees/:treeId/people/new`; `Edit person`
+  opens `/organizer/trees/:treeId/people/:personId/edit`. The overview no longer
+  stacks a people list, person form, and generic relationship panel beside the tree.
+- [ ] Saving returns to the overview with the saved person focused. Discarding an
+  edit returns with the original person focused; discarding a new person returns to
+  the whole tree without persisting the draft.
+- [ ] Identity, manually chosen life status, optional years, adoption, three facts,
+  portrait and life-stage photos, parents, partners, and children remain usable.
+  Siblings appear only as a derived, read-only summary.
+- [ ] Children supports known selections, `No children`, and `Unknown`; parents and
+  partners can remain unknown/incomplete or be marked complete. Each state survives
+  save and produces the correct tree/card wording.
+- [ ] A conflicting parent year, ancestry loop, or third parent produces a specific
+  terracotta fact-conflict message, marks the relevant live rule, disables Save person,
+  and retains every draft value. Missing facts/photos/relationships appear only under
+  `Still to discover` and never disable save.
+- [ ] The right rail continuously shows the resulting node preview, all invariant
+  checks, and discovery prompts. Deceased and adopted previews retain the album visual
+  treatment and equal prominence.
+- [ ] A simulated server failure retains person and relationship selections. A valid
+  save changes person facts and all selected relationships together; unrelated graph
+  edges stay unchanged.
+- [ ] On narrow screens and short viewports, header actions, both form columns, photo
+  controls, relationship choices, and the right rail remain reachable and readable.
+  No automated browser or screenshot QA was performed.

@@ -35,11 +35,12 @@
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: door-organizer-family-editor
-  name: Family editor page (/organizer/trees/:treeId)
+  name: Organizer family workspace routes (/organizer/trees/:treeId…)
   status: in-progress
-  why: Hosts a full-height album family map beneath a compact tree-name and focus header, with contextual person cards and editable private galleries. People and editing tools and private-link sharing open in independently scrolling side panels for one owned tree; dedicated editing routes remain follow-up work.
+  why: Hosts a full-height album family overview with contextual person cards and private-link sharing, plus dedicated full-height add/edit-person routes that stage facts and relationships together, retain failed drafts, and return to the relevant tree focus after save or discard.
   code:
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/organizer/PersonWorkspacePage.tsx
     - apps/web/src/features/people/
     - apps/web/src/features/tree/
     - apps/web/src/features/photos/
@@ -50,12 +51,13 @@
     - apps/web/src/features/people/person-form.test.ts
     - apps/web/src/features/people/relationship-form.test.ts
     - apps/web/src/features/people/person-card.test.ts
+    - apps/web/src/features/people/person-workspace.test.ts
     - apps/web/src/features/tree/layout-family-graph.test.ts
     - apps/web/src/features/photos/photo-upload.test.ts
   relies_on: [part-web, part-family-core, door-organizer-family-api]
   doors: []
   open_questions:
-    - Organizer manual QA must verify editing feedback, map readability, card and gallery behavior, responsive presentation, and value preservation after failed saves.
+    - Organizer manual QA must compare the dedicated editor with mockup 04 and verify add/edit routes, discard and focus restoration, live validation, photo controls, map readability, responsive presentation, and value preservation after failed saves.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
 
 - id: door-private-family-view

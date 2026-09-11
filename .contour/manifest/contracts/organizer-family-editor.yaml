@@ -5,14 +5,16 @@ part: part-web
 why: Keeps organizer input intact and validates proposed family changes before sending them to the authoritative API.
 accepts:
   - A Supabase email and password for the pre-provisioned organizer account.
-  - Tree names, complete person form values, and explicit parent or partner connection selections.
-  - Nullable year fields and completeness choices that distinguish unknown relationship lists from known complete lists.
+  - Tree names, complete person form values, and person-specific parent, partner, and child selections.
+  - Nullable year fields and completeness choices, including the explicit known, no children, and unknown child states.
 guarantees:
   - Organizer routes wait for session restoration and redirect unauthenticated visitors to sign-in.
   - Every family API request carries the current Supabase Bearer access token.
-  - Person forms normalize optional years and facts, then use shared graph validation for create and connected-person edits before submission.
-  - Relationship forms use shared parent and partnership validation and never offer direct sibling editing.
-  - Failed saves retain the entered form values and show client or server feedback; successful mutations invalidate the affected tree queries.
+  - Add and edit actions open dedicated route-backed workspaces; save or discard returns to the overview with the relevant person focused.
+  - The person draft normalizes optional years and facts, stages parent, partner, and child choices, then validates one proposed graph before submission.
+  - Specific fact conflicts block save in a terracotta banner; a live read-only node preview, invariant summary, and non-blocking discovery prompts update from the draft.
+  - Siblings remain derived and non-editable, while empty complete child selections remain distinct from unknown or incomplete child information.
+  - Failed saves retain the entered draft and show client or server feedback; successful mutations invalidate the affected tree queries.
   - Loading, request failure, no-tree, no-person, and insufficient-people states have explicit organizer-facing treatments.
 rules:
   - The frontend improves feedback but never replaces server authorization or authoritative validation.
@@ -26,8 +28,9 @@ code:
 verified_by:
   - apps/web/src/features/people/person-form.test.ts
   - apps/web/src/features/people/relationship-form.test.ts
+  - apps/web/src/features/people/person-workspace.test.ts
 relies_on: [contract-organizer-family-api, contract-family-graph]
 doors: [door-organizer-family-editor]
 open_questions:
-  - Manual UI QA is required before this contract and its product door can be marked shipped.
+    - Manual UI QA against mockup 04, including narrow screens and add/discard behavior, is required before this contract and its product door can be marked shipped.
 last_verified: 7d4b554211b33afed447a4ec84c5432dcf97a943

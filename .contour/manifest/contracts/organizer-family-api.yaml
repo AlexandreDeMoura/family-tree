@@ -14,6 +14,7 @@ guarantees:
   - GET /trees lists only the organizer's owned tree summaries, POST /trees creates an owned tree, and GET /trees/:treeId returns its persisted people and relationship graph.
   - Person creation and editing apply shared person and graph validation with an explicit UTC year before persistence.
   - Person writes acquire the tree lock, read the fresh graph, and roll back when an edit invalidates a connected parent or child.
+  - Dedicated workspace saves validate the complete proposed person, parents, partners, and children against the fresh graph, then replace that person's facts and incident relationships in one tree-locked transaction.
   - Parent and partner writes acquire the same tree lock, validate the fresh proposed graph, persist only valid mutations, and return a freshly loaded graph.
   - Parent and partner edges remain independent, and multiple partners and incomplete relationship information remain supported.
   - API failures have stable status codes and machine-readable error codes, including specific domain invariant codes.
@@ -22,6 +23,7 @@ rules:
   - Routes handle HTTP parsing only, services own authorization-aware workflows, and queries alone issue SQL.
   - Organizer identity comes from a server-verified access token and is never accepted from a request body.
   - Main photo ownership remains outside person create/edit payloads and is managed only by the private photo workflow.
+  - Atomic workspace saves replace only relationships incident to the edited person and preserve all unrelated graph edges.
   - Legitimate unknown values and known-absence completeness flags remain representable and are not validation failures.
 code:
   - apps/api/src/app.ts

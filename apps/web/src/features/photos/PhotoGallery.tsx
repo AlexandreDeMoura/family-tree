@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ageBucketLabels,
   ageBuckets,
@@ -39,6 +39,7 @@ export function PhotoGallery({
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingCleanup, setPendingCleanup] = useState<PendingPhotoCleanupError | null>(null);
   const [brokenUrls, setBrokenUrls] = useState<Set<string>>(() => new Set());
+  const fileInput = useRef<HTMLInputElement>(null);
   const bucketCounts = useMemo(() => new Map(ageBuckets.map((bucket) => [
     bucket,
     photos.filter((photo) => photo.ageBucket === bucket).length,
@@ -47,8 +48,7 @@ export function PhotoGallery({
   const activeUploadBucket = uploadBucket ?? defaultBucket;
   const visible = photos.filter((photo) => photo.ageBucket === activeBucket);
 
-  async function upload(event: FormEvent) {
-    event.preventDefault();
+  async function upload() {
     if (!file) return;
     setBusy('upload');
     setActionError(null);
@@ -58,8 +58,7 @@ export function PhotoGallery({
       setSelectedBucket(activeUploadBucket);
       setFile(null);
       setMakeMain(false);
-      const input = event.currentTarget.querySelector<HTMLInputElement>('input[type=file]');
-      if (input) input.value = '';
+      if (fileInput.current) fileInput.current.value = '';
     } catch (error) {
       setActionError(errorMessage(error));
       if (error instanceof PendingPhotoCleanupError) setPendingCleanup(error);
@@ -150,11 +149,11 @@ export function PhotoGallery({
         </>
       )}
 
-      {editable && <form className="photo-upload" onSubmit={(event) => void upload(event)}>
+      {editable && <div className="photo-upload">
         <strong>Add a private photo</strong>
         <p>JPEG, PNG, or WebP up to 20 MB. It is converted to a JPEG no larger than 5 MB before upload.</p>
         <div className="photo-upload__fields">
-          <label><span>Image</span><input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label>
+          <label><span>Image</span><input ref={fileInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label>
           <label><span>Age in photo</span><select value={activeUploadBucket} onChange={(event) => setUploadBucket(event.target.value as AgeBucket)}>{ageBuckets.map((bucket) => <option key={bucket} value={bucket}>{ageBucketLabels[bucket]}</option>)}</select></label>
         </div>
         <label className="photo-upload__main"><input type="checkbox" checked={makeMain} onChange={(event) => setMakeMain(event.target.checked)} /><span>Use as the main portrait</span></label>
@@ -171,8 +170,8 @@ export function PhotoGallery({
             })}
           >{busy === 'cleanup' ? 'Cleaning up…' : 'Retry unfinished-upload cleanup'}</button>
         )}
-        <button className="button button--secondary" type="submit" disabled={!file || busy !== null || pendingCleanup !== null}>{busy === 'upload' ? 'Preparing and uploading…' : 'Add photo'}</button>
-      </form>}
+        <button className="button button--secondary" type="button" onClick={() => void upload()} disabled={!file || busy !== null || pendingCleanup !== null}>{busy === 'upload' ? 'Preparing and uploading…' : 'Add photo'}</button>
+      </div>}
     </section>
   );
 }

@@ -17,7 +17,7 @@ rules:
   - The tree fills the workspace below its compact header; zoom-out, percentage, zoom-in, and fit controls stay in the canvas chrome.
   - Unknown relationship lists use neutral dashed placeholders while known absence stays plain copy.
   - Parents, siblings, partners, and children remain expandable and every listed person can become the next focus.
-  - Closing focus returns to the broader tree without changing the organizer's selected editing record.
+  - Organizer focus is retained in the overview URL and restored after a dedicated edit is saved or discarded.
   - Signed photo access and publication rules belong to the private-photo contract; this contract only consumes authorized short-lived URLs.
   - Dedicated viewer bucket and photo selections use route state so refresh and browser history retain the browsing context.
 code:

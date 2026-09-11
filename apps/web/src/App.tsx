@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { FamilyEditorPage } from './features/organizer/FamilyEditorPage';
 import { OrganizerHomePage } from './features/organizer/OrganizerHomePage';
+import { PersonWorkspacePage } from './features/organizer/PersonWorkspacePage';
 import { ProtectedRoute } from './features/organizer/ProtectedRoute';
 import { SignInPage } from './features/organizer/SignInPage';
 import { LifeStagePhotoViewerPage } from './features/photos/LifeStagePhotoViewerPage';
@@ -15,6 +16,8 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/organizer" element={<OrganizerHomePage />} />
         <Route path="/organizer/trees/:treeId" element={<FamilyEditorPage />} />
+        <Route path="/organizer/trees/:treeId/people/new" element={<PersonWorkspacePage />} />
+        <Route path="/organizer/trees/:treeId/people/:personId/edit" element={<PersonWorkspacePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/organizer" replace />} />
     </Routes>

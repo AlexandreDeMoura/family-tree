@@ -113,6 +113,12 @@ export interface PersonInput {
   childrenComplete: boolean;
 }
 
+export interface PersonWorkspaceRelationships {
+  parentIds: string[];
+  partnerIds: string[];
+  childIds: string[];
+}
+
 export const familyApi = {
   async listTrees(accessToken: string) {
     return (await request<{ trees: TreeSummary[] }>(accessToken, '/trees')).trees;
@@ -148,6 +154,22 @@ export const familyApi = {
     return (await request<{ person: Person }>(accessToken, `/trees/${treeId}/people/${personId}`, {
       method: 'PATCH', body: JSON.stringify(input),
     })).person;
+  },
+
+  async savePersonWorkspace(
+    accessToken: string,
+    treeId: string,
+    input: PersonInput,
+    relationships: PersonWorkspaceRelationships,
+    personId?: string,
+  ) {
+    const path = personId
+      ? `/trees/${treeId}/people/${personId}/workspace`
+      : `/trees/${treeId}/people/workspace`;
+    return request<{ person: Person; graph: FamilyGraph }>(accessToken, path, {
+      method: personId ? 'PUT' : 'POST',
+      body: JSON.stringify({ person: input, relationships }),
+    });
   },
 
   async addParent(accessToken: string, treeId: string, parentId: string, childId: string) {

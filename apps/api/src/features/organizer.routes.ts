@@ -15,6 +15,7 @@ import {
   parseRequest,
   partnershipBodySchema,
   partnershipParamsSchema,
+  personWorkspaceBodySchema,
   personParamsSchema,
   photoParamsSchema,
   treeParamsSchema,
@@ -67,6 +68,32 @@ export async function registerOrganizerRoutes(
     const { treeId, personId } = parseRequest(personParamsSchema, request.params);
     const body = parseRequest(editPersonBodySchema, request.body);
     return { person: await dependencies.people.editPerson(principal.userId, treeId, personId, body) };
+  });
+
+  app.post('/trees/:treeId/people/workspace', async (request, reply) => {
+    const principal = await organizer(request, dependencies.authenticator);
+    const { treeId } = parseRequest(treeParamsSchema, request.params);
+    const body = parseRequest(personWorkspaceBodySchema, request.body);
+    const result = await dependencies.people.savePersonWorkspace(
+      principal.userId,
+      treeId,
+      body.person,
+      body.relationships,
+    );
+    return reply.code(201).send(result);
+  });
+
+  app.put('/trees/:treeId/people/:personId/workspace', async (request) => {
+    const principal = await organizer(request, dependencies.authenticator);
+    const { treeId, personId } = parseRequest(personParamsSchema, request.params);
+    const body = parseRequest(personWorkspaceBodySchema, request.body);
+    return dependencies.people.savePersonWorkspace(
+      principal.userId,
+      treeId,
+      body.person,
+      body.relationships,
+      personId,
+    );
   });
 
   if (dependencies.photos) {

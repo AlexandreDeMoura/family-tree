@@ -116,6 +116,7 @@ describe('organizer tree and person API', () => {
           currentYear: () => 2026,
           treeQueries: store,
           peopleQueries: store,
+          relationshipQueries: store,
           runInTreeTransaction: transaction,
         }),
         relationships: createRelationshipsService(unusedDatabase, {
@@ -311,6 +312,92 @@ describe('organizer tree and person API', () => {
       birthYear: 1952,
       partnersComplete: true,
     });
+  });
+
+  it('creates a person and their selected relationships in one validated workspace save', async () => {
+    const tree = await createTree();
+    const parent = (await createPerson(tree.id, { firstName: 'Jean', birthYear: 1950 })).json().person as Person;
+    const partner = (await createPerson(tree.id, { firstName: 'Camille', birthYear: 1980 })).json().person as Person;
+    const response = await app.inject({
+      method: 'POST',
+      url: `/trees/${tree.id}/people/workspace`,
+      headers: bearer,
+      payload: {
+        person: {
+          firstName: 'Sophie', lastName: 'Martin', lifeStatus: 'living', birthYear: 1980,
+          deathYear: null, adopted: false, funFacts: ['Collects postcards'],
+          parentsComplete: true, partnersComplete: true, childrenComplete: true,
+        },
+        relationships: { parentIds: [parent.id], partnerIds: [partner.id], childIds: [] },
+      },
+    });
+
+    expect(response.statusCode).toBe(201);
+    const body = response.json();
+    expect(body.person).toMatchObject({ firstName: 'Sophie', childrenComplete: true });
+    expect(body.graph.parentChild).toEqual([{ parentId: parent.id, childId: body.person.id }]);
+    expect(body.graph.partnerships).toContainEqual(expect.objectContaining({
+      person1Id: expect.any(String), person2Id: expect.any(String),
+    }));
+    expect(store.graphs.get(tree.id)).toEqual(body.graph);
+  });
+
+  it('validates an edited person and all staged relationships before changing either', async () => {
+    const tree = await createTree();
+    const olderChild = (await createPerson(tree.id, { firstName: 'Odette', birthYear: 1921 })).json().person as Person;
+    const youngerParent = (await createPerson(tree.id, { firstName: 'Lucien', birthYear: 1925 })).json().person as Person;
+    const before = structuredClone(store.graphs.get(tree.id));
+    const response = await app.inject({
+      method: 'PUT',
+      url: `/trees/${tree.id}/people/${olderChild.id}/workspace`,
+      headers: bearer,
+      payload: {
+        person: {
+          firstName: 'Changed', lastName: olderChild.lastName, lifeStatus: olderChild.lifeStatus,
+          birthYear: olderChild.birthYear, deathYear: null, adopted: false, funFacts: [],
+          parentsComplete: false, partnersComplete: false, childrenComplete: false,
+        },
+        relationships: { parentIds: [youngerParent.id], partnerIds: [], childIds: [] },
+      },
+    });
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json().error).toMatchObject({ code: 'parent_younger_than_child' });
+    expect(store.graphs.get(tree.id)).toEqual(before);
+  });
+
+  it('replaces only the edited person relationships through the atomic workspace endpoint', async () => {
+    const tree = await createTree();
+    const first = (await createPerson(tree.id, { firstName: 'First', birthYear: 1950 })).json().person as Person;
+    const subject = (await createPerson(tree.id, { firstName: 'Subject', birthYear: 1975 })).json().person as Person;
+    const child = (await createPerson(tree.id, { firstName: 'Child', birthYear: 2000 })).json().person as Person;
+    const unrelated = (await createPerson(tree.id, { firstName: 'Unrelated', birthYear: 1940 })).json().person as Person;
+    store.addParent(tree.id, first.id, subject.id);
+    store.addParent(tree.id, unrelated.id, child.id);
+
+    const response = await app.inject({
+      method: 'PUT', url: `/trees/${tree.id}/people/${subject.id}/workspace`, headers: bearer,
+      payload: {
+        person: {
+          ...subject,
+          id: undefined,
+          treeId: undefined,
+          mainPhotoId: undefined,
+          firstName: 'Updated',
+          birthYear: 1940,
+        },
+        relationships: { parentIds: [], partnerIds: [first.id], childIds: [child.id] },
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().graph.parentChild).toEqual(expect.arrayContaining([
+      { parentId: unrelated.id, childId: child.id },
+      { parentId: subject.id, childId: child.id },
+    ]));
+    expect(response.json().graph.parentChild).not.toContainEqual({ parentId: first.id, childId: subject.id });
+    expect(response.json().graph.partnerships).toHaveLength(1);
+    expect(response.json().person).toMatchObject({ firstName: 'Updated', birthYear: 1940 });
   });
 
   it('adds and removes parents without inferring a partnership', async () => {

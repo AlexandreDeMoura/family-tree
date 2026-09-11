@@ -60,6 +60,20 @@ const personFields = {
 };
 
 export const createPersonBodySchema = z.strictObject(personFields);
+const uniquePersonIds = z.array(z.uuid()).superRefine((ids, context) => {
+  if (new Set(ids).size !== ids.length) {
+    context.addIssue({ code: 'custom', message: 'Each selected person may appear only once.' });
+  }
+});
+const personWorkspaceRelationshipsSchema = z.strictObject({
+  parentIds: uniquePersonIds.max(2),
+  partnerIds: uniquePersonIds,
+  childIds: uniquePersonIds,
+});
+export const personWorkspaceBodySchema = z.strictObject({
+  person: createPersonBodySchema,
+  relationships: personWorkspaceRelationshipsSchema,
+});
 export const editPersonBodySchema = z.strictObject({
   firstName: personFields.firstName.optional(),
   lastName: personFields.lastName.optional(),

@@ -43,7 +43,8 @@
     whether their parent, partner, and child lists are known to be complete. Invalid
     life data and edits that would break a connected parent or child are refused
     before anything is saved, and unknown values stay distinct from known absence.
-    Fields and validation messages are details of this task. Connecting people and
+    Add and edit use dedicated workspaces with a live viewer-facing preview, rule
+    summary, and non-blocking completion prompts. Fields and validation messages are details of this task. Connecting people and
     managing photos are separate abilities. Deleting a relative does not exist in the
     current product.
   code:
@@ -54,15 +55,16 @@
     - apps/api/src/features/people/
     - apps/api/src/features/organizer.routes.ts
     - apps/api/src/features/organizer.schemas.ts
-    - apps/web/src/features/people/PersonForm.tsx
     - apps/web/src/features/people/person-form.ts
-    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/people/person-workspace.ts
+    - apps/web/src/features/organizer/PersonWorkspacePage.tsx
     - apps/web/src/lib/api.ts
   verified_by:
     - packages/family-core/src/person.test.ts
     - apps/api/src/organizer-api.test.ts
     - apps/api/src/lib/database.db.test.ts
     - apps/web/src/features/people/person-form.test.ts
+    - apps/web/src/features/people/person-workspace.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions:
@@ -79,7 +81,8 @@
     with one known parent, and see the full and half siblings derived from shared
     parents. Links that would create an ancestry cycle, a third parent, a parent
     younger than the child, a duplicate, or a self-link are refused before anything
-    is saved. Siblings are never entered directly.
+    is saved. The dedicated person workspace stages all incident relationships with
+    person facts and saves the valid snapshot atomically. Siblings are never entered directly.
   code:
     - packages/family-core/src/graph.ts
     - packages/family-core/src/invariants.ts
@@ -88,9 +91,9 @@
     - apps/api/src/features/relationships/
     - apps/api/src/features/organizer.routes.ts
     - apps/api/src/features/organizer.schemas.ts
-    - apps/web/src/features/people/RelationshipPanel.tsx
     - apps/web/src/features/people/relationship-form.ts
-    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/people/person-workspace.ts
+    - apps/web/src/features/organizer/PersonWorkspacePage.tsx
     - apps/web/src/lib/api.ts
   verified_by:
     - packages/family-core/src/graph.test.ts
@@ -98,6 +101,7 @@
     - apps/api/src/lib/database.db.test.ts
     - apps/api/src/organizer-api.test.ts
     - apps/web/src/features/people/relationship-form.test.ts
+    - apps/web/src/features/people/person-workspace.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-organizer-family-api]
   open_questions:
@@ -158,7 +162,7 @@
   why: >-
     A family organizer can upload a JPEG, PNG, or WebP photo of a person in the open
     tree, assign it to exactly one life-stage bucket, choose which published photo is
-    the person's main portrait shown on the map, sidebar, and card, refresh expired
+    the person's main portrait shown on the map, editing preview, and card, refresh expired
     private links, retry cleanup of an unfinished upload, and remove a photo. Photos
     stay in one private bucket and become visible only after the server verifies the
     uploaded object. Browsing the gallery by life stage belongs to exploration; fun
@@ -171,7 +175,7 @@
     - apps/api/src/features/organizer.routes.ts
     - apps/api/src/features/organizer.schemas.ts
     - apps/web/src/features/photos/
-    - apps/web/src/features/organizer/FamilyEditorPage.tsx
+    - apps/web/src/features/organizer/PersonWorkspacePage.tsx
     - apps/web/src/lib/api.ts
   verified_by:
     - apps/api/src/photos-api.test.ts
