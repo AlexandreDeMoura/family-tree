@@ -23,14 +23,77 @@ pnpm exec supabase start
 pnpm dev
 ```
 
-The web shell runs at `http://localhost:5173`, the API at
-`http://localhost:3001`, and local Supabase Studio at `http://127.0.0.1:54323`.
 The shared package builds before the app watchers start.
 
 On a new clone, install dependencies yourself with `pnpm install --frozen-lockfile`.
 Follow setup steps 6–8 for local Supabase, environment files, an organizer, and
 the private bucket; do not rerun the earlier scaffold file-writing blocks.
 Hosted Supabase is optional and documented in setup steps 10–11.
+
+### Local URLs
+
+| Service | URL |
+| --- | --- |
+| Web app (Vite) | `http://localhost:5173` |
+| API (Fastify) | `http://localhost:3001` (liveness at `/health`) |
+| Supabase Studio (database dashboard) | `http://127.0.0.1:54323` |
+| Supabase API (Auth, Storage, REST) | `http://127.0.0.1:54321` |
+| PostgreSQL (direct connection) | `127.0.0.1:54322` |
+| Local email inbox (Mailpit) | `http://127.0.0.1:54324` |
+| Contour repository viewer | First free port in `4310`–`4319`; open the URL `pnpm view:repo` prints |
+
+`pnpm exec supabase status` prints the Supabase URLs together with the local keys
+and database URL used in `apps/api/.env` and `apps/web/.env.local`.
+
+### Essential commands
+
+Run these from the repository root. The Supabase CLI is a project dependency, so
+always call it through `pnpm exec supabase`, not a global install.
+
+| # | Command | Purpose |
+| --- | --- | --- |
+| 1 | `pnpm install --frozen-lockfile` | Install locked dependencies on a new clone or after pulling. |
+| 2 | `pnpm exec supabase start` | Start local Supabase (PostgreSQL, Auth, Storage, Studio). Docker must be running. |
+| 3 | `pnpm dev` | Build `family-core`, then run the web, API, and core watchers in parallel. |
+| 4 | `pnpm exec supabase status` | Show local Supabase URLs, keys, and the database connection string. |
+| 5 | `pnpm exec supabase stop` | Stop local Supabase and keep its data. |
+| 6 | `pnpm exec supabase migration new <name>` | Create a new SQL migration in `supabase/migrations/`. |
+| 7 | `pnpm exec supabase migration up --local` | Apply pending migrations to your everyday local database. |
+| 8 | `pnpm test` | Run domain, API, and layout tests (no Supabase needed). |
+| 9 | `pnpm test:db` | Run database tests against local Supabase in a disposable database. |
+| 10 | `pnpm validate` | Full gate: lint, typecheck, tests, builds, and the Contour manifest check. |
+
+### Contour manifest tooling
+
+[Contour](https://www.npmjs.com/package/@trompetteman/contour) validates and
+browses the project manifest in `.contour/manifest/`. It is a root dev
+dependency; use the installed binary through pnpm and never let validation
+download it.
+
+| Command | Purpose |
+| --- | --- |
+| `pnpm check:manifest` | Run `contour check`: read-only validation of manifests, references, and contracts. Exit code `1` means blocking findings. |
+| `pnpm view:repo` | Run `contour serve`: open the local repository companion (manifests, contracts, source, Git). |
+| `pnpm exec contour serve --port 4311` | Serve on a specific port when the default range is busy (`--port 0` picks any free port). |
+| `pnpm exec contour check --json` | Print findings as versioned JSON. |
+| `pnpm exec contour check --write` | Persist current findings into the generated section of `attention.yaml` only. Keep CI read-only. |
+| `pnpm exec contour init` | Create missing manifest slices and refresh Contour-owned agent instruction blocks. |
+| `pnpm exec contour prompt bootstrap` | Print the bootstrap prompt for describing an existing repository. |
+| `pnpm exec contour --version` | Show the installed version. |
+
+To update Contour, review its release changes, then:
+
+```sh
+pnpm outdated @trompetteman/contour               # compare installed and latest versions
+pnpm add -Dw @trompetteman/contour@<version>      # install the new version at the workspace root
+pnpm exec contour init                            # refresh Contour-owned instruction blocks
+pnpm validate                                     # rerun the full gate, including the manifest check
+```
+
+Pre-1.0 caret ranges do not cross minor versions, so `pnpm update` will not move
+`^0.4.0` to `0.5.x`; name the version explicitly. `init` only refreshes Contour's
+owned blocks, so review existing manifest entries against any new guidance.
+Commit the updated `package.json` and `pnpm-lock.yaml` together.
 
 ## Workspace
 
@@ -59,6 +122,11 @@ liveness, and configured CORS without requiring local Supabase. `pnpm test` fail
 if no tests are discovered.
 The manifest check validates repository references and metadata, not product behavior.
 
+Production uses a separately hosted HTTPS SPA, persistent Fastify API, and hosted
+Supabase project. Follow the [deployment and MVP operations runbook](docs/deployment-and-operations.md)
+for environment boundaries, migrations, private bucket provisioning, SPA fallback,
+CORS, release checks, link revocation, photo recovery, and rollback procedures.
+
 For database changes, also run `pnpm test:db` against local Supabase. It applies
 the migrations and tests constraints, browser-role denial, and transaction locks
 in a disposable database without resetting your existing data. Apply the schema
@@ -79,7 +147,7 @@ provision or reconcile the private `family-photos` bucket, use:
 node --env-file=apps/api/.env apps/api/scripts/setup-supabase.mjs
 ```
 
-That script creates or updates the bucket to private, JPEG-only, and 10 MiB per
+That script creates or updates the bucket to private, JPEG-only, and 5 MiB per
 file. It does not create family tables or an organizer. UI QA remains manual.
 
 ## Manual acceptance fixture
@@ -97,41 +165,3 @@ empty so the signed upload path is tested for real. Follow the complete
 [MVP manual acceptance checklist](docs/manual-acceptance.md) and record results
 before changing any product capability from in-progress to shipped.
 
-## Private viewer links
-
-The organizer sharing panel creates or replaces the tree's active private link.
-Links use `/view/:treeId#token`, keeping the bearer secret out of HTTP paths and
-referrers. The API stores only the SHA-256 token hash. Replacing a link immediately
-invalidates the previous tree and gallery reads; photo URLs already issued remain
-valid only until their five-minute expiry.
-
-Viewer reads use `Authorization: Share token` on dedicated GET-only endpoints:
-
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/viewer/trees/:treeId` | Load the shared tree and authoritative graph. |
-| `GET` | `/viewer/trees/:treeId/photos` | Issue short-lived URLs for the shared private gallery. |
-
-Anyone holding the link can view and forward it. Viewer tokens are never accepted
-by organizer mutation routes, and viewer responses disable storage and indexing.
-
-## Organizer relationship endpoints
-
-All organizer endpoints require a verified Bearer access token. Relationship
-creates return HTTP 201, removals return HTTP 200, and both return
-`{ "graph": ... }` with the updated authoritative family graph.
-
-| Method | Path | Input |
-| --- | --- | --- |
-| `POST` | `/trees/:treeId/relationships/parents` | `{ parentId, childId }` |
-| `DELETE` | `/trees/:treeId/relationships/parents/:parentId/:childId` | Path IDs |
-| `POST` | `/trees/:treeId/relationships/partners` | `{ person1Id, person2Id }` |
-| `DELETE` | `/trees/:treeId/relationships/partners/:person1Id/:person2Id` | Path IDs in either order |
-
-Every mutation acquires the tree lock before authorization, fresh graph loading,
-domain validation, persistence, and the response reload. Parent and partner edges
-remain independent; neither kind is inferred from the other.
-
-Stop the app with Ctrl-C and stop local Supabase while keeping data with
-`pnpm exec supabase stop`. Avoid database reset during routine development;
-resetting deletes locally provisioned users and bucket metadata.

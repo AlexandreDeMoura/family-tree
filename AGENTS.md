@@ -139,5 +139,5 @@ Use the repository's package-manager runner for the installed binary; do not dow
 
 Each contract file contains one `contract-*` entry bound to exactly one owner: either `part: part-*` or `capability: cap-*`, never both or neither. Keep its `accepts`, `guarantees`, and `rules` as sequences of non-empty statements; use an empty sequence instead of inventing a promise. When affected behavior changes, keep those statements and their `verified_by` evidence honest, and update `last_verified` only after verifying the complete entry at the current commit.
 
-When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`.
+When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`. An authored uncertainty in `attention.yaml` must reference the entry it concerns in `relies_on` using its stable id.
 <!-- contour:manifest:end -->

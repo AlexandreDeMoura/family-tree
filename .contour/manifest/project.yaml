@@ -10,7 +10,7 @@
 
 purpose: >-
   A private, shareable family tree for one organizer and read-only relatives.
-  Commits 01–11 provide the pnpm workspace, organizer web application, API health endpoint,
+  Commits 01–12 provide the pnpm workspace, organizer web application, API health endpoint,
   local Supabase setup, pure shared person schemas and family graph rules,
   private family SQL schema, tree-locking PostgreSQL transactions, organizer
   authentication, owned tree/person endpoints, atomic parent/partner mutations,
@@ -19,6 +19,8 @@ purpose: >-
   verified private portrait uploads with age-bucket galleries, and hash-only private
   viewer links for account-free read-only family browsing. A shared synthetic family,
   local-only additive seed, integrity CI, and PRD-mapped checklist prepare manual acceptance.
+  A provider-neutral deployment and operations runbook records the production trust boundaries,
+  release gates, hosted migration and private Storage setup, and MVP recovery procedures.
   The editing, tree, card, photo, and viewer screens still await organizer manual QA.
 
 tech:
