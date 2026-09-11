@@ -21,8 +21,8 @@ rules:
   - Relationship projections do not invent parents, infer partnerships from children, or infer parenthood from partners.
   - Persistence, authorization, transaction locking, and main-photo ownership checks are outside this implementation.
 code: [packages/family-core/src/, packages/family-core/README.md]
-verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
+verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts, packages/family-core/src/mvp-acceptance.fixture.test.ts]
 relies_on: []
 doors: []
 open_questions: []
-last_verified: e47793dcdfcd6efdaef58cce16d1ea4bd196eb7f
+last_verified: 8272bc25d5e436c69609f0375e6e8b61b537e569

@@ -204,17 +204,6 @@ describe('organizer tree and person API', () => {
     expect(malformed.statusCode).toBe(400);
     expect(malformed.json().error).toMatchObject({ code: 'invalid_request' });
 
-    const invalidLife = await createPerson(tree.id, {
-      lifeStatus: 'living',
-      birthYear: 1980,
-      deathYear: 2020,
-    });
-    expect(invalidLife.statusCode).toBe(422);
-    expect(invalidLife.json().error).toMatchObject({
-      code: 'living_death',
-      message: 'A living person cannot have a death year.',
-    });
-
     const invalidJson = await app.inject({
       method: 'POST',
       url: '/trees',
@@ -223,6 +212,19 @@ describe('organizer tree and person API', () => {
     });
     expect(invalidJson.statusCode).toBe(400);
     expect(invalidJson.json().error.code).toBe('invalid_request');
+  });
+
+  it.each([
+    ['death before birth', { birthYear: 1980, deathYear: 1979 }, 'death_before_birth'],
+    ['future death', { birthYear: 1980, deathYear: 2027 }, 'future_death'],
+    ['living person with a death year', { lifeStatus: 'living', birthYear: 1980, deathYear: 2020 }, 'living_death'],
+  ])('authoritatively blocks %s', async (_label, overrides, code) => {
+    const tree = await createTree();
+    const response = await createPerson(tree.id, overrides);
+
+    expect(response.statusCode).toBe(422);
+    expect(response.json().error.code).toBe(code);
+    expect(store.graphs.get(tree.id)?.people).toEqual([]);
   });
 
   it.each([

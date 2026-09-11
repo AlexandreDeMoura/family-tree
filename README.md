@@ -1,12 +1,13 @@
 # Family Tree
 
 A private, shareable family tree for one organizer and read-only relatives.
-This repository currently implements commits 01–10 of the
+This repository currently implements commits 01–11 of the
 [MVP plan](family_tree_constrained_mvp_prd.md#28-implementation-commit-plan):
 the development foundation, shared person schemas and graph rules, private SQL
 persistence, organizer editing, automatic tree layout, person cards, verified
-private photos, and account-free read-only viewer links. UI acceptance remains
-manual as required by the project workflow.
+private photos, account-free read-only viewer links, automated MVP integrity
+coverage, and synthetic manual-acceptance fixtures. UI acceptance remains manual
+as required by the project workflow.
 
 ## Local development
 
@@ -51,16 +52,19 @@ placeholders and local defaults; real `.env` files are ignored.
 pnpm validate
 ```
 
-Runs web lint, workspace typecheck, domain and API injection tests, ordered production
-builds, and the installed Contour manifest check. Tests cover person invariants,
-graph mutations, ancestry DFS, sibling derivation, API liveness, and configured
-CORS without requiring local Supabase. `pnpm test` fails if no tests are discovered.
+Runs web lint, workspace typecheck, domain/API/layout tests, ordered production
+builds, and the installed Contour manifest check. Tests cover every MVP invariant,
+graph mutations, ancestry DFS, sibling derivation, private access and photos, API
+liveness, and configured CORS without requiring local Supabase. `pnpm test` fails
+if no tests are discovered.
 The manifest check validates repository references and metadata, not product behavior.
 
 For database changes, also run `pnpm test:db` against local Supabase. It applies
 the migrations and tests constraints, browser-role denial, and transaction locks
 in a disposable database without resetting your existing data. Apply the schema
 to your everyday local instance with `pnpm exec supabase migration up --local`.
+CI runs these non-UI checks from a frozen lockfile and starts local Supabase for
+the disposable database suite.
 
 With the API running, check the actual HTTP endpoint separately:
 
@@ -77,6 +81,21 @@ node --env-file=apps/api/.env apps/api/scripts/setup-supabase.mjs
 
 That script creates or updates the bucket to private, JPEG-only, and 10 MiB per
 file. It does not create family tables or an organizer. UI QA remains manual.
+
+## Manual acceptance fixture
+
+After local Supabase, migrations, the organizer, and the private photo bucket are
+ready, create a new synthetic acceptance tree with:
+
+```sh
+pnpm seed:acceptance
+```
+
+The seed is local-only and additive. It covers the large and incomplete family
+structures that need human layout and interaction review, while leaving photos
+empty so the signed upload path is tested for real. Follow the complete
+[MVP manual acceptance checklist](docs/manual-acceptance.md) and record results
+before changing any product capability from in-progress to shipped.
 
 ## Private viewer links
 

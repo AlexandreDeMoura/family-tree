@@ -131,3 +131,23 @@
   doors: [door-private-family-view]
   open_questions: []
   last_verified: d1ca06e5a14c74d427ceeedd40b7f60271c0510d
+
+- id: decision-shared-acceptance-fixture
+  name: Share one synthetic family across automated checks and manual acceptance
+  status: shipped
+  why: A privacy-safe canonical graph keeps domain, layout, card, and human review focused on the same risky structures without adding demo data to migrations or resetting an organizer's existing trees.
+  code:
+    - packages/family-core/src/mvp-acceptance.fixture.ts
+    - apps/api/scripts/seed-acceptance.mjs
+    - docs/manual-acceptance.md
+    - .github/workflows/manifest-check.yml
+    - package.json
+  verified_by:
+    - packages/family-core/src/mvp-acceptance.fixture.test.ts
+    - apps/web/src/features/tree/layout-family-graph.test.ts
+    - apps/web/src/features/people/person-card.test.ts
+  relies_on: [part-family-core, part-web, part-api, part-supabase]
+  doors: []
+  open_questions:
+    - The organizer must record the PRD section 24 manual acceptance result before product capabilities can be marked shipped.
+  last_verified: 8272bc25d5e436c69609f0375e6e8b61b537e569

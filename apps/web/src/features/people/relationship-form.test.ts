@@ -11,7 +11,9 @@ function person(id: string, birthYear: number): Person {
 }
 
 const graph: FamilyGraph = {
-  treeId: 'tree', people: [person('older', 1950), person('younger', 2000), person('third', 1970)],
+  treeId: 'tree', people: [
+    person('older', 1950), person('younger', 2000), person('third', 1970), person('fourth', 1960),
+  ],
   parentChild: [{ parentId: 'older', childId: 'younger' }], partnerships: [],
 };
 
@@ -26,6 +28,15 @@ describe('relationship form domain validation', () => {
       .toBe('This parent relationship already exists.');
     expect(validateRelationshipDraft(graph, 'partner', 'older', 'older', 2026))
       .toBe('A person cannot be their own partner.');
+  });
+
+  it('blocks a third parent before relationship submission', () => {
+    const twoParentGraph = {
+      ...graph,
+      parentChild: [...graph.parentChild, { parentId: 'third', childId: 'younger' }],
+    };
+    expect(validateRelationshipDraft(twoParentGraph, 'parent', 'fourth', 'younger', 2026))
+      .toBe('A person can have at most two parents.');
   });
 
   it('requires both people and accepts a valid independent partnership', () => {

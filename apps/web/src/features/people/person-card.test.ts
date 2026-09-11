@@ -1,8 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import type { FamilyGraph, Person } from '@family-tree/family-core';
+import {
+  createMvpAcceptanceGraph,
+  mvpAcceptanceIds,
+  type FamilyGraph,
+  type Person,
+} from '@family-tree/family-core';
 import { projectFocusedFamilyGraph, projectPersonCard } from './person-card';
 
 describe('person card projections', () => {
+  it('projects the shared MVP fixture across full, half, multi-partner, and incomplete branches', () => {
+    const graph = createMvpAcceptanceGraph();
+    const card = projectPersonCard(graph, mvpAcceptanceIds.anne);
+    const focused = projectFocusedFamilyGraph(graph, mvpAcceptanceIds.anne);
+
+    expect(card?.siblings.people.filter(({ type }) => type === 'full')).toHaveLength(9);
+    expect(card?.siblings.people.filter(({ type }) => type === 'half').map(({ person }) => person.id))
+      .toEqual([mvpAcceptanceIds.theo]);
+    expect(card?.children.people.map(({ id }) => id)).toEqual([mvpAcceptanceIds.jules, mvpAcceptanceIds.mia]);
+    expect(focused?.people.some(({ id }) => id === mvpAcceptanceIds.isolated)).toBe(false);
+    expect(graph.people.find(({ id }) => id === mvpAcceptanceIds.marc)).toMatchObject({
+      adopted: true,
+      lifeStatus: 'unknown',
+    });
+  });
+
   it('projects clickable immediate family and derived full and half siblings', () => {
     const graph = familyGraph();
 

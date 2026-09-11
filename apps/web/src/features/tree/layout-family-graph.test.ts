@@ -1,8 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import type { FamilyGraph, Person } from '@family-tree/family-core';
+import {
+  createMvpAcceptanceGraph,
+  mvpAcceptanceIds,
+  mvpAcceptanceLargeSiblingIds,
+  type FamilyGraph,
+  type Person,
+} from '@family-tree/family-core';
 import { layoutFamilyGraph, type PositionedFamilyGraph } from './layout-family-graph';
 
 describe('layoutFamilyGraph', () => {
+  it('lays out the shared MVP acceptance fixture with complete, finite generation rows', async () => {
+    const graph = createMvpAcceptanceGraph();
+    const before = structuredClone(graph);
+
+    const layout = await layoutFamilyGraph(graph);
+
+    expect(graph).toEqual(before);
+    expectPersonCoverage(layout, graph);
+    expectFiniteLayout(layout);
+    for (const { parentId, childId } of graph.parentChild) {
+      expect(personNode(layout, parentId).position.y).toBeLessThan(personNode(layout, childId).position.y);
+    }
+    expect(new Set(mvpAcceptanceLargeSiblingIds.map((id) => personNode(layout, id).position.y)).size).toBe(1);
+    expect(personNode(layout, mvpAcceptanceIds.luc).position.y)
+      .toBe(personNode(layout, mvpAcceptanceIds.claire).position.y);
+    expect(personNode(layout, mvpAcceptanceIds.luc).position.y)
+      .toBe(personNode(layout, mvpAcceptanceIds.nadia).position.y);
+  });
+
   it('lays out realistic generations, multiple partners, and half-sibling branches without changing the source graph', async () => {
     const graph = familyGraph(
       [

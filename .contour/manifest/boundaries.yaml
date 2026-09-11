@@ -24,13 +24,13 @@
 - id: part-family-core
   name: Pure shared person and family graph domain
   status: shipped
-  why: Provides Zod schemas, person and graph invariant checks, and immediate-family projections through an ESM and declaration build consumed by both apps.
+  why: Provides Zod schemas, person and graph invariant checks, immediate-family projections, and the shared synthetic acceptance graph through an ESM and declaration build consumed by both apps and non-UI verification.
   code: [packages/family-core/, pnpm-workspace.yaml, tsconfig.base.json]
-  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts]
+  verified_by: [packages/family-core/src/person.test.ts, packages/family-core/src/graph.test.ts, packages/family-core/src/relationships.test.ts, packages/family-core/src/mvp-acceptance.fixture.test.ts]
   relies_on: []
   doors: []
   open_questions: []
-  last_verified: febbd912650dfdf2d8ebcde8dc95aad6627a7a28
+  last_verified: 8272bc25d5e436c69609f0375e6e8b61b537e569
 
 - id: part-supabase
   name: Supabase schema and private persistence

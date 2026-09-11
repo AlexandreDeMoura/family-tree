@@ -47,6 +47,17 @@ describe('person form domain validation', () => {
     expect(living.fieldErrors.deathYear).toBe('A living person cannot have a death year.');
   });
 
+  it.each([
+    ['death before birth', { birthYear: '1980', deathYear: '1979' }, 'Death year must be equal to or later than birth year.'],
+    ['future death', { birthYear: '1980', deathYear: '2027' }, 'Death year cannot be later than 2026.'],
+    ['living death', { lifeStatus: 'living' as const, deathYear: '2020' }, 'A living person cannot have a death year.'],
+  ])('blocks the %s invariant before person submission', (_label, overrides, message) => {
+    const result = validatePersonForm({
+      ...emptyPersonForm(), firstName: 'Anne', lastName: 'Martin', ...overrides,
+    }, graph, 2026);
+    expect(result.fieldErrors.deathYear).toBe(message);
+  });
+
   it('revalidates connected relatives when editing a birth year', () => {
     const result = validatePersonForm({ ...personToForm(parent), birthYear: '2010' }, graph, 2026, parent.id);
     expect(result.formError).toContain('cannot be a parent of Marie Martin');

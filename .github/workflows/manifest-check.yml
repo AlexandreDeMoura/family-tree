@@ -1,8 +1,5 @@
-# Repository manifest validation (Contour).
-# Kept independent of lint/typecheck/test jobs, with no path filters or skips:
-# source-only changes must run the check because references and freshness can
-# change without YAML edits.
-name: Repository manifests
+# Automated non-UI integrity checks. Visual and browser acceptance stays manual.
+name: MVP integrity
 
 on:
   push:
@@ -14,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  manifest-check:
-    name: manifest-check
+  quality:
+    name: lint, types, tests, build, manifests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -31,7 +28,41 @@ jobs:
           cache: pnpm
       - name: Install locked dependencies including the local CLI
         run: pnpm install --frozen-lockfile
-      - name: Report checked revision
-        run: git rev-parse HEAD
-      - name: Check manifests without writing
+      - name: Lint web source
+        run: pnpm run lint
+      - name: Typecheck workspaces
+        run: pnpm run typecheck
+      - name: Run domain, API, and layout tests
+        run: pnpm run test
+      - name: Build production artifacts
+        run: pnpm run build
+      - name: Check repository manifests without writing
         run: pnpm run check:manifest
+
+  database:
+    name: migrations and PostgreSQL integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Start local Supabase
+        run: pnpm exec supabase start
+      - name: Apply migrations in a disposable database and test integrity
+        run: pnpm run test:db:run
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      - name: Stop local Supabase
+        if: always()
+        continue-on-error: true
+        run: pnpm exec supabase stop --no-backup

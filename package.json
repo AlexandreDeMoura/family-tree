@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:db": "node --env-file=apps/api/.env node_modules/vitest/vitest.mjs run --config vitest.database.config.ts",
     "test:db:run": "vitest run --config vitest.database.config.ts",
+    "seed:acceptance": "pnpm --filter @family-tree/family-core build && node --env-file=apps/api/.env apps/api/scripts/seed-acceptance.mjs",
     "check:manifest": "contour check",
     "view:repo": "contour serve",
     "validate": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run check:manifest"

@@ -4,3 +4,4 @@ export * from './graph.js';
 export * from './invariants.js';
 export * from './relationships.js';
 export * from './photos.js';
+export * from './mvp-acceptance.fixture.js';
