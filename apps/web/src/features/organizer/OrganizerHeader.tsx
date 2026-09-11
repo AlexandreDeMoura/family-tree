@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './auth-context';
 
-export function OrganizerHeader({ treeName }: { treeName?: string }) {
+export function OrganizerHeader({ treeName, context, children }: { treeName?: string; context?: string; children?: ReactNode }) {
   const { session, signOut } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -25,10 +25,11 @@ export function OrganizerHeader({ treeName }: { treeName?: string }) {
       <header className="app-header">
         <Link className="brand" to="/organizer" aria-label="Family Tree organizer home">
           <span className="brand-mark">F</span>
-          <span><strong>Family Tree</strong><small>{treeName ?? 'Organizer workspace'}</small></span>
+          <span><h1>{treeName ?? 'Family Tree'}</h1><small>{context ?? 'Organizer workspace'}</small></span>
         </Link>
         <div className="header-account">
-          <span>{session?.user.email}</span>
+          {children}
+          {!treeName && <span>{session?.user.email}</span>}
           <button className="button button--quiet" type="button" onClick={leave}>Sign out</button>
         </div>
       </header>

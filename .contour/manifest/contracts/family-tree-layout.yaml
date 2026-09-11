@@ -12,15 +12,19 @@ guarantees:
   - The input graph remains unchanged, and all positions, junctions, and routing edges exist only in display output.
 rules:
   - ELK determines automatic branch ordering; organizers cannot persist or manually change node positions.
+  - Compact 132 by 126 display cards share dimensions across life statuses; leaf labels use completeness to distinguish unknown children from known absence without adding graph entities.
   - Partnership display edges come only from persisted partnerships, even when two parents share a family junction.
-  - Deceased nodes retain the same size, color, and prominence as living nodes and receive only a positive memory indicator.
+  - Deceased nodes retain the same size, color, and prominence as living nodes and receive only a terracotta portrait ring and their explicit year range as remembrance accents.
 code:
   - apps/web/src/features/tree/layout-family-graph.ts
   - apps/web/src/features/tree/FamilyTree.tsx
+  - apps/web/src/features/tree/tree-person.ts
   - apps/web/src/index.css
 verified_by:
   - apps/web/src/features/tree/layout-family-graph.test.ts
+  - apps/web/src/features/tree/tree-person.test.ts
 relies_on: [contract-family-graph]
 doors: [door-organizer-family-editor, door-private-family-view]
-open_questions: []
+open_questions:
+  - Manual QA must confirm compact card readability, equal remembrance prominence, and unknown-branch labels against mockup 01.
 last_verified: b68c5f17ab66d8c94573cfeda9e818c8dc9bb3cf

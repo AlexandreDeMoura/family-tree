@@ -3,9 +3,8 @@ import type { FamilyGraph, Person } from '@family-tree/family-core';
 import {
   Background,
   BackgroundVariant,
-  Controls,
   Handle,
-  MiniMap,
+  Panel,
   Position,
   ReactFlow,
   type Edge,
@@ -14,6 +13,7 @@ import {
   type NodeTypes,
   type ReactFlowInstance,
 } from '@xyflow/react';
+import { childBranchLabel, treePersonYears } from './tree-person';
 import { projectFocusedFamilyGraph } from '../people/person-card';
 import {
   layoutFamilyGraph,
@@ -32,6 +32,7 @@ interface PersonNodeData extends Record<string, unknown> {
   active: boolean;
   prominent: boolean;
   portraitUrl?: string;
+  hasChildren: boolean;
 }
 
 interface JunctionNodeData extends Record<string, unknown> {
@@ -54,6 +55,7 @@ const nodeTypes: NodeTypes = {
 
 export function FamilyTree({ graph, portraitUrls, selectedPersonId, onSelectPerson }: FamilyTreeProps) {
   const [resolvedLayout, setResolvedLayout] = useState<LayoutState | null>(null);
+  const parentsWithChildren = useMemo(() => new Set(graph.parentChild.map(({ parentId }) => parentId)), [graph]);
   const focusedGraph = useMemo(
     () => selectedPersonId ? projectFocusedFamilyGraph(graph, selectedPersonId) : null,
     [graph, selectedPersonId],
@@ -97,6 +99,7 @@ export function FamilyTree({ graph, portraitUrls, selectedPersonId, onSelectPers
   return (
     <FamilyTreeCanvas
       layout={layoutState.layout}
+      parentsWithChildren={parentsWithChildren}
       selectedPersonId={selectedPersonId}
       prominentPersonIds={prominentPersonIds}
       portraitUrls={portraitUrls}
@@ -107,21 +110,24 @@ export function FamilyTree({ graph, portraitUrls, selectedPersonId, onSelectPers
 
 function FamilyTreeCanvas({
   layout,
+  parentsWithChildren,
   selectedPersonId,
   prominentPersonIds,
   portraitUrls,
   onSelectPerson,
 }: {
   layout: PositionedFamilyGraph;
+  parentsWithChildren: ReadonlySet<string>;
   selectedPersonId?: string | null;
   prominentPersonIds: Set<string> | null;
   portraitUrls?: ReadonlyMap<string, string>;
   onSelectPerson?: (personId: string) => void;
 }) {
   const [flow, setFlow] = useState<ReactFlowInstance<FamilyFlowNode, Edge> | null>(null);
+  const [zoom, setZoom] = useState(1);
   const { nodes, edges } = useMemo(
-    () => toReactFlowGraph(layout, selectedPersonId, prominentPersonIds, portraitUrls),
-    [layout, portraitUrls, prominentPersonIds, selectedPersonId],
+    () => toReactFlowGraph(layout, parentsWithChildren, selectedPersonId, prominentPersonIds, portraitUrls),
+    [layout, parentsWithChildren, portraitUrls, prominentPersonIds, selectedPersonId],
   );
 
   useEffect(() => {
@@ -153,19 +159,26 @@ function FamilyTreeCanvas({
         fitView
         fitViewOptions={{ padding: 0.18, maxZoom: 1 }}
         onlyRenderVisibleElements
-        onInit={setFlow}
+        onInit={(instance) => { setFlow(instance); setZoom(instance.getZoom()); }}
+        onMove={(_, viewport) => setZoom(viewport.zoom)}
         onNodeClick={(_, node) => {
           if (node.type === 'person') onSelectPerson?.(node.id);
         }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#c7d0c8" />
-        <MiniMap
-          pannable
-          zoomable
-          nodeColor={(node) => node.type === 'person' ? '#56796c' : '#c9954e'}
-          nodeStrokeWidth={2}
-        />
-        <Controls showInteractive={false} />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#ded4c4" />
+        <Panel position="top-right" className="tree-zoom-controls" aria-label="Tree zoom controls">
+          <button type="button" aria-label="Zoom out" disabled={!flow || zoom <= 0.15} onClick={() => void flow?.zoomOut()}>−</button>
+          <output aria-label="Zoom percentage">{Math.round(zoom * 100)}%</output>
+          <button type="button" aria-label="Zoom in" disabled={!flow || zoom >= 1.5} onClick={() => void flow?.zoomIn()}>+</button>
+          <button className="tree-zoom-controls__fit" type="button" disabled={!flow} onClick={() => void flow?.fitView({ padding: 0.18, maxZoom: 1 })}>Fit tree</button>
+        </Panel>
+        <Panel position="bottom-left" className="tree-legend" aria-label="Tree legend">
+          <span><i className="tree-legend__memory" aria-hidden="true" />Remembered</span>
+          <span><i className="tree-legend__adopted" aria-hidden="true">A</i>Adopted</span>
+          <span><i className="tree-legend__unknown" aria-hidden="true" />Not yet known</span>
+          <span><i className="discovery-dot" aria-hidden="true" />More to discover</span>
+        </Panel>
+        <Panel position="bottom-right" className="tree-navigation-hint">Drag to pan · scroll to zoom · select anyone to focus</Panel>
       </ReactFlow>
     </div>
   );
@@ -173,6 +186,7 @@ function FamilyTreeCanvas({
 
 function toReactFlowGraph(
   layout: PositionedFamilyGraph,
+  parentsWithChildren: ReadonlySet<string>,
   selectedPersonId?: string | null,
   prominentPersonIds?: Set<string> | null,
   portraitUrls?: ReadonlyMap<string, string>,
@@ -198,8 +212,8 @@ function toReactFlowGraph(
         selectable: true,
         selected: active,
         className: prominent ? 'family-flow-node family-flow-node--prominent' : 'family-flow-node family-flow-node--distant',
-        ariaLabel: `${node.person.firstName} ${node.person.lastName}, ${birthYearLabel(node.person)}`,
-        data: { person: node.person, active, prominent, portraitUrl: portraitUrls?.get(node.id) },
+        ariaLabel: `${node.person.firstName} ${node.person.lastName}, ${treePersonYears(node.person)}, ${node.person.lifeStatus === 'deceased' ? 'remembered' : node.person.lifeStatus}${node.person.adopted ? ', adopted' : ''}`,
+        data: { person: node.person, active, prominent, portraitUrl: portraitUrls?.get(node.id), hasChildren: parentsWithChildren.has(node.id) },
       };
     }
     const prominent = !prominentPersonIds || prominentJunctionIds.has(node.id);
@@ -259,7 +273,9 @@ function toReactFlowGraph(
 }
 
 function PersonTreeNode({ data }: NodeProps<PersonFlowNode>) {
-  const { person, active, portraitUrl } = data;
+  const { person, active, portraitUrl, hasChildren } = data;
+  const [failedPortraitUrl, setFailedPortraitUrl] = useState<string | null>(null);
+  const branchLabel = childBranchLabel(person.childrenComplete, hasChildren);
   const incomplete = isIncomplete(person);
   return (
     <article className={active ? 'tree-person is-active' : 'tree-person'}>
@@ -270,21 +286,17 @@ function PersonTreeNode({ data }: NodeProps<PersonFlowNode>) {
       <Handle className="tree-handle" id="partner-source-right" type="source" position={Position.Right} />
       <Handle className="tree-handle" id="partner-target-right" type="target" position={Position.Right} />
 
-      <div className="tree-person__portrait" aria-hidden="true">
-        {portraitUrl ? <img src={portraitUrl} alt="" /> : <span>{initials(person)}</span>}
+      <div className={person.lifeStatus === 'deceased' ? 'tree-person__portrait is-remembered' : 'tree-person__portrait'} aria-hidden="true">
+        {portraitUrl && portraitUrl !== failedPortraitUrl ? <img src={portraitUrl} alt="" onError={() => setFailedPortraitUrl(portraitUrl)} /> : <span>{initials(person)}</span>}
       </div>
       <div className="tree-person__identity">
         <strong>{person.firstName}</strong>
         <span>{person.lastName}</span>
-        <small>{birthYearLabel(person)}</small>
+        <small>{treePersonYears(person)}</small>
       </div>
-      {(person.adopted || person.lifeStatus === 'deceased' || incomplete) && (
-        <div className="tree-person__badges" aria-label="Person details">
-          {person.lifeStatus === 'deceased' && <span className="tree-badge tree-badge--memory" title="Remembered family member">✦ Remembered</span>}
-          {person.adopted && <span className="tree-badge">Adopted</span>}
-          {incomplete && <span className="tree-badge tree-badge--discovery" title="Some information is still unknown">◌ Discover</span>}
-        </div>
-      )}
+      {person.adopted && <span className="tree-badge tree-person__adoption">Adopted</span>}
+      {incomplete && <span className="discovery-dot tree-person__discovery" role="img" aria-label="More to discover" title="Some information is still unknown" />}
+      {branchLabel && <div className={person.childrenComplete ? 'tree-person__branch' : 'tree-person__branch is-unknown'}>{branchLabel}</div>}
     </article>
   );
 }
@@ -312,10 +324,6 @@ function JunctionTreeNode({ data }: NodeProps<JunctionFlowNode>) {
 
 function initials(person: Person) {
   return `${person.firstName.charAt(0)}${person.lastName.charAt(0)}`.toUpperCase();
-}
-
-function birthYearLabel(person: Person) {
-  return person.birthYear === null ? 'Birth year unknown' : `Born ${person.birthYear}`;
 }
 
 function isIncomplete(person: Person) {

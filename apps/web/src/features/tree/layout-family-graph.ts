@@ -2,12 +2,12 @@ import type { FamilyGraph, ParentChild, Partnership, Person } from '@family-tree
 import ELK from 'elkjs/lib/elk.bundled.js';
 import type { ElkExtendedEdge, ElkNode } from 'elkjs/lib/elk-api.js';
 
-export const PERSON_NODE_WIDTH = 184;
-export const PERSON_NODE_HEIGHT = 224;
+export const PERSON_NODE_WIDTH = 132;
+export const PERSON_NODE_HEIGHT = 126;
 export const JUNCTION_NODE_SIZE = 12;
 
 const CANVAS_PADDING = 32;
-const GENERATION_GAP = 152;
+const GENERATION_GAP = 100;
 
 export interface Point {
   x: number;

@@ -13,6 +13,8 @@ guarantees:
   - Deceased people retain the same portrait, card, and node prominence as living people; only graph distance from the selected person may fade a node.
   - Available main portraits appear consistently in the sidebar, family map, and person card, while unavailable images fall back without fading the person.
 rules:
+  - The tree fills the workspace below its compact header; zoom-out, percentage, zoom-in, and fit controls stay in the canvas chrome.
+  - Unknown relationship lists use neutral dashed placeholders while known absence stays plain copy.
   - Parents, siblings, partners, and children remain expandable and every listed person can become the next focus.
   - Closing focus returns to the broader tree without changing the organizer's selected editing record.
   - Signed photo access and publication rules belong to the private-photo contract; this contract only consumes authorized short-lived URLs.
@@ -28,5 +30,5 @@ verified_by:
 relies_on: [contract-family-graph, contract-family-tree-layout]
 doors: [door-organizer-family-editor, door-private-family-view]
 open_questions:
-  - Manual UI QA must confirm that the overlaid card leaves enough tree context visible across supported screen sizes on both pages.
+  - Manual UI QA must confirm that the adjacent card leaves enough tree context visible across supported screen sizes on both pages.
 last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

@@ -44,25 +44,20 @@ export function ViewerPage() {
   const focusedPerson = graph.people.find(({ id }) => id === focusedId);
 
   return (
-    <div className="app-shell viewer-shell">
+    <div className="app-shell viewer-shell tree-workspace">
       <header className="app-header viewer-header">
         <span className="brand">
           <span className="brand-mark">F</span>
-          <span><strong>{tree.data.name}</strong><small>Private family view</small></span>
+          <span><h1>{tree.data.name}</h1><small>{focusedPerson ? `${focusedPerson.firstName} ${focusedPerson.lastName}` : `${graph.people.length} people · Whole tree`}</small></span>
         </span>
-        <span className="viewer-badge">Read only</span>
+        <div className="header-account">
+          {focusedPerson && <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Back to whole tree</button>}
+          <span className="viewer-badge">Private link · view only</span>
+        </div>
       </header>
-      <main className="viewer-workspace">
-        <section className="viewer-intro">
-          <span className="eyebrow">Shared with you privately</span>
-          <h1>{focusedPerson ? `Exploring ${focusedPerson.firstName}'s family` : tree.data.name}</h1>
-          <p>{focusedPerson
-            ? 'Immediate family stays prominent. Select another relative to keep exploring, or return to the whole tree.'
-            : 'Select a person to discover their relationships, photos, and family stories. You can pan, zoom, and browse without an account.'}</p>
-          {focusedPerson && <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Show whole tree</button>}
-        </section>
+      <main className="tree-workspace__body" aria-label="Family tree workspace">
         {graph.people.length ? (
-          <section className="panel family-map-panel">
+          <section className="family-map-panel" aria-label="Family map">
             <div className={focusedPerson ? 'family-map-body has-person-card' : 'family-map-body'}>
               <FamilyTree
                 graph={graph}
@@ -84,9 +79,9 @@ export function ViewerPage() {
               )}
             </div>
           </section>
-        ) : <ViewerStatus title="This family tree is still taking root" message="The organizer has not added anyone yet." />}
-        <p className="viewer-privacy-note">This is an unlisted private link. Anyone who receives it can view this tree.</p>
+        ) : <div className="family-tree-state"><p>The organizer has not added anyone to this family album yet.</p></div>}
       </main>
+      <footer className="viewer-privacy-note">Unlisted family tree · Anyone who receives this link can view it.</footer>
     </div>
   );
 }

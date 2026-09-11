@@ -115,7 +115,11 @@
     fun facts, adoption and remembrance indicators, and life-stage photos by age
     bucket, and step to any listed parent, sibling, partner, or child. Unknown
     information reads as incomplete rather than broken, half siblings are marked,
-    and deceased relatives keep equal prominence. Pan, zoom, focus, and the card
+    and deceased relatives keep equal prominence. The organizer and viewer use a
+    full-height album workspace with compact portrait cards, a visible zoom percentage,
+    zoom and fit controls, and a tree-name and focus header. Unknown leaf branches
+    use neutral dashed cues; confirmed childlessness reads as plain No children copy.
+    Pan, zoom, focus, and the card
     are details of this one exploration task; obtaining the link belongs to
     sharing, and adding photos or facts belongs to the organizer editing abilities.
   code:
@@ -131,12 +135,14 @@
     - apps/api/src/features/sharing/sharing.service.ts
   verified_by:
     - apps/web/src/features/tree/layout-family-graph.test.ts
+    - apps/web/src/features/tree/tree-person.test.ts
     - apps/web/src/features/people/person-card.test.ts
     - packages/family-core/src/relationships.test.ts
     - packages/family-core/src/mvp-acceptance.fixture.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-private-family-view]
   open_questions:
+    - Manual QA must compare whole-tree and focused-person album workspaces with mockups 01 and 02, including compact nodes, remembrance rings, discovery cues, visible zoom controls, and responsive behavior.
     - Manual QA must confirm that multiple-partner, half-sibling, ten-sibling, and disconnected branches stay readable with pan, zoom, and fit-to-view on desktop and narrow screens.
     - Manual QA must confirm that focus and the overlaid card leave enough tree context for an unfamiliar relative to understand a branch on both the organizer and viewer pages.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea

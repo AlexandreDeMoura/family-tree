@@ -895,9 +895,11 @@ These should not expand MVP scope unless user testing exposes a blocking need.
 
 ## 28. Implementation Commit Plan
 
-Implement these commits in order. Each commit should build independently and include meaningful domain/API tests where applicable. The organizer performs all UI QA manually; do not run browser or screenshot verification. Installation commands are provided for the user to run, and the user stages and commits changes.
+Commits 01–12 are the implemented MVP baseline. Do not repeat or rebuild them. Commits 13–15 are the remaining follow-up work identified by comparing the current web app with the four desktop interfaces in `ui-mockups/Family Tree - Mockups.dc.html`.
 
-Initialization commands are documented in [SETUP.md](SETUP.md). They establish the development foundation; the remaining commits implement the product.
+Implement only the remaining commits in order. Each commit should build independently and include meaningful non-UI tests where applicable. The organizer performs all UI QA manually; do not run browser or screenshot verification. Installation commands are provided for the user to run, and the user stages and commits changes.
+
+Initialization commands are documented in [SETUP.md](SETUP.md); they and commits 01–12 already established the development and MVP foundation.
 
 ### 01 — `chore: initialize pnpm workspace and local Supabase`
 
@@ -997,6 +999,34 @@ Initialization commands are documented in [SETUP.md](SETUP.md). They establish t
 - Document frontend SPA route fallback and API CORS for the chosen deployment origins; keep server credentials entirely out of Vite variables.
 - Record development commands, schema/type regeneration, synthetic seed usage, share-link replacement, and photo cleanup/retry procedures.
 - Validation: configuration and release checklist review, passing non-UI checks, and user completion of manual acceptance before release.
+
+### 13 — `feat(ui): align the family tree workspace with the album mockups`
+
+- Replace the current forest/green visual theme with the mockup's family-album system on /ui-mockups: Newsreader headings and names, Public Sans interface copy, warm paper and ink surfaces, terracotta actions and remembered-person accents, sage discovery cues, compact radii, and quieter borders and shadows.
+- Make the organizer and viewer tree surfaces full-height workspaces beneath a compact header instead of placing the tree inside a long content page. Keep the tree name and context in the header and move zoom-out, zoom percentage, zoom-in, and fit controls into the visible workspace chrome.
+- Restyle tree nodes to the compact portrait/name/year cards in the mockup so larger families fit at a useful initial scale. Show deceased people with the same size, contrast, and color as living people, using only the terracotta portrait ring and year range; retain the subtle adoption badge and sage incomplete-information cue.
+- Render unknown and known-absent family information using the established semantics: dashed, neutral placeholders for unknown people or branches; plain copy for known absence such as `No children`; and no persisted placeholder people, routing nodes, or coordinates.
+- Preserve the existing React Flow/ELK behavior, automatic layout, accessibility, focus-distance logic, pan/zoom, read-only permissions, and all API contracts. This is a presentation and workspace-composition change, not a new family-graph feature.
+- Validation: typecheck, production build, and existing layout/person-card unit tests. The user manually compares the whole-tree and focused-person states with mockups 01 and 02 at desktop sizes and checks the existing responsive layouts separately.
+
+### 14 — `feat(photos): add the dedicated life-stage photo viewer`
+
+- Move the viewer's expanded photo experience out of the narrow person card into a dedicated, route-backed page for the selected person while keeping the card's compact photo preview as the entry point.
+- Match mockup 03 with a warm brown-black gallery surface, person identity and photo-count context in the header, a large selected image, bucket-local thumbnails and position, and a persistent life-order list of all eleven age buckets. Filled buckets show counts; empty buckets remain visible as quiet `none yet` states.
+- Provide explicit `Back to card` and close-to-tree navigation. Preserve the private viewer bearer-token fragment across internal route changes, browser refreshes, and back/forward navigation; an invalid or replaced token must continue to fail through the existing read-only API boundary.
+- Reuse the existing signed-photo reads, expiration refresh behavior, age-bucket metadata, and missing-image states. Do not add exact dates, inferred ages, automatic ordering guesses, or new photo metadata.
+- Keep organizer upload, replacement, main-portrait, bucket assignment, cleanup retry, and deletion controls out of the read-only viewer page; they remain available only in authenticated organizer editing.
+- Validation: add route/navigation and gallery-state unit tests for token preservation, bucket selection, counts, empty buckets, missing images, and returning to the originating card/tree. Run typecheck, production build, and existing photo/share tests; the user manually checks mockup 03 and real image fitting.
+
+### 15 — `feat(organizer): move person editing into a dedicated workspace`
+
+- Replace the current stacked editor—people sidebar, share panel, tree, person form, and generic relationship panel on one long page—with explicit tree-overview and dedicated add/edit-person routes. Selecting edit or add opens a full-height workspace; save or discard returns to the tree without losing the relevant person focus.
+- Compose the dedicated page from the already implemented person, relationship, completeness, and photo capabilities: identity, manual life status, optional years, adoption, up to three facts, main portrait, additional photos with required age buckets, parents, partners, and children. Siblings remain derived and non-editable.
+- Present parents and partners as person-specific selections and children with an explicit known / no children / unknown control backed by the existing completeness data. Keep the two-parent limit, graph locking, and authoritative server validation unchanged; never persist an invalid intermediate relationship.
+- Validate the edited person and staged relationship choices together as early as practical. Show the specific conflicting people, years, and rule in a terracotta fact-conflict banner, keep entered values intact, and disable the save action until the draft is valid; the server must still repeat every check.
+- Add the mockup's read-only right rail with the resulting tree-node preview, a live summary of checked invariants, and non-blocking `Still to discover` prompts for incomplete facts, photo buckets, or relationships. Missing information remains an invitation and never becomes a validation error.
+- Reuse the current API operations and storage flows unless an atomic coordinator is required to prevent partial person/relationship saves; any such coordinator must stay within the existing `route -> service -> queries` architecture and tree-locking discipline rather than introduce a new domain model.
+- Validation: add route, draft-validation, return-focus, and view-model tests for create/edit, relationship conflicts, known absence, discovery prompts, and failed-save value preservation. Run typecheck, production build, and existing person/relationship/photo tests; the user manually compares the result with mockup 04 and checks add-person, discard, and narrow-screen behavior.
 
 ### Completion rule
 

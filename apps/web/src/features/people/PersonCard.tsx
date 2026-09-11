@@ -12,6 +12,7 @@ interface PersonCardProps {
   personId: string;
   onNavigate: (personId: string) => void;
   onClose: () => void;
+  onEdit?: () => void;
   photos: PhotoView[];
   photosLoading: boolean;
   photosError: unknown;
@@ -26,6 +27,7 @@ export function PersonCard({
   personId,
   onNavigate,
   onClose,
+  onEdit,
   photos,
   photosLoading,
   photosError,
@@ -44,7 +46,7 @@ export function PersonCard({
     <aside className="person-card" aria-label={`${person.firstName} ${person.lastName}'s person card`}>
       <header className="person-card__header">
         <button className="person-card__close" type="button" onClick={onClose} aria-label="Close person card and show the whole tree">×</button>
-        <div className="person-card__portrait">
+        <div className={person.lifeStatus === 'deceased' ? 'person-card__portrait is-remembered' : 'person-card__portrait'}>
           {portrait
             ? <img src={portrait} alt={`${person.firstName} ${person.lastName}'s main portrait`} onError={onRefreshPhotos} />
             : <span aria-hidden="true">{initials(person)}</span>}
@@ -59,6 +61,7 @@ export function PersonCard({
           {person.adopted && <span className="person-card-badge">Adopted</span>}
           {person.lifeStatus === 'unknown' && <span className="person-card-badge person-card-badge--unknown">Life status unknown</span>}
         </div>
+        {onEdit && <button className="button button--quiet person-card__edit" type="button" onClick={onEdit}>Edit person</button>}
       </header>
 
       <PhotoGallery
@@ -127,6 +130,7 @@ function RelationshipSection({ title, section, unknownLabel, noneLabel, onNaviga
         {section.people.length
           ? section.people.map((person) => <FamilyLink key={person.id} person={person} onNavigate={onNavigate} />)
           : <EmptyRelationship knowledge={section.knowledge} unknownLabel={unknownLabel} noneLabel={noneLabel} />}
+        {section.knowledge === 'partial' && <p className="person-card-section__empty is-unknown">More family information is still to discover.</p>}
       </div>
     </details>
   );
@@ -176,7 +180,7 @@ function EmptyRelationship({ knowledge, unknownLabel, noneLabel }: {
   const unknown = knowledge === 'unknown';
   return (
     <p className={unknown ? 'person-card-section__empty is-unknown' : 'person-card-section__empty'}>
-      <span aria-hidden="true">{unknown ? '◌' : '—'}</span>
+      {unknown && <span className="unknown-portrait" aria-hidden="true" />}
       {unknown ? `${unknownLabel}. There may be more to discover.` : `${noneLabel}.`}
     </p>
   );

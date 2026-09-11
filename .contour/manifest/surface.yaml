@@ -37,7 +37,7 @@
 - id: door-organizer-family-editor
   name: Family editor page (/organizer/trees/:treeId)
   status: in-progress
-  why: Hosts the people sidebar, person form, connections panel, automatic family map with the contextual person card and editable private gallery, and the private-link panel for one owned tree.
+  why: Hosts a full-height album family map beneath a compact tree-name and focus header, with contextual person cards and editable private galleries. People and editing tools and private-link sharing open in independently scrolling side panels for one owned tree; dedicated editing routes remain follow-up work.
   code:
     - apps/web/src/features/organizer/FamilyEditorPage.tsx
     - apps/web/src/features/people/
@@ -61,7 +61,7 @@
 - id: door-private-family-view
   name: Private read-only viewer page (/view/:treeId#token)
   status: in-progress
-  why: Opens a tree for a relative holding an unlisted link, reading the bearer token from the URL fragment, and shows the same family map, person cards, and life-stage galleries without editing or upload controls.
+  why: Opens a tree for a relative holding an unlisted link, reading the bearer token from the URL fragment, and shows the same full-height album family map, compact header, person cards, and life-stage galleries without editing or upload controls.
   code:
     - apps/web/src/App.tsx
     - apps/web/index.html

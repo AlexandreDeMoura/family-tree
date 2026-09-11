@@ -30,6 +30,7 @@ export function FamilyEditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  const [panel, setPanel] = useState<'people' | 'share' | null>(null);
   const tree = useQuery({
     queryKey: treeKeys.detail(userId, treeId),
     queryFn: () => familyApi.loadTree(accessToken, treeId),
@@ -164,6 +165,7 @@ export function FamilyEditorPage() {
   const selectedPerson = graph.people.find(({ id }) => id === effectiveSelectedId);
   const focusedPerson = graph.people.find(({ id }) => id === focusedId);
   const showCreate = creating || graph.people.length === 0;
+  const activePanel = panel ?? (graph.people.length === 0 ? 'people' : null);
 
   function openPerson(personId: string) {
     setSelectedId(personId);
@@ -174,89 +176,80 @@ export function FamilyEditorPage() {
   function startCreating() {
     setFocusedId(null);
     setCreating(true);
+    setPanel('people');
   }
 
   return (
-    <div className="app-shell">
-      <OrganizerHeader treeName={tree.data.name} />
-      <main className="editor-layout">
-        <aside className="people-sidebar">
-          <div className="sidebar-heading">
-            <div><Link className="back-link" to="/organizer">← All trees</Link><h1>{tree.data.name}</h1><p>{graph.people.length} {graph.people.length === 1 ? 'person' : 'people'}</p></div>
-            <button className="icon-button" type="button" title="Add person" aria-label="Add person" onClick={startCreating}>+</button>
+    <div className="app-shell tree-workspace">
+      <OrganizerHeader treeName={tree.data.name} context={focusedPerson ? `${focusedPerson.firstName} ${focusedPerson.lastName}` : `${graph.people.length} people · Whole tree`}>
+        {focusedPerson && <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Back to whole tree</button>}
+        <button className="button button--quiet" type="button" aria-expanded={activePanel === 'people'} aria-controls="people-tools" onClick={() => setPanel(panel === 'people' ? null : 'people')}>People & editing</button>
+        <button className="button button--quiet" type="button" aria-expanded={activePanel === 'share'} aria-controls="share-tools" onClick={() => setPanel(panel === 'share' ? null : 'share')}>Share tree</button>
+        <button className="button button--primary" type="button" onClick={startCreating}>+ Add person</button>
+      </OrganizerHeader>
+      <main className="tree-workspace__body" aria-label="Family tree workspace">
+        <section className="family-map-panel" aria-label="Family map">
+          <div className={focusedPerson && !showCreate && !activePanel ? 'family-map-body has-person-card' : 'family-map-body'}>
+            <FamilyTree
+              graph={graph}
+              portraitUrls={portraitUrls}
+              selectedPersonId={showCreate ? null : focusedPerson?.id}
+              onSelectPerson={openPerson}
+            />
+            {focusedPerson && !showCreate && !activePanel && (
+              <PersonCard
+                graph={graph}
+                personId={focusedPerson.id}
+                onNavigate={openPerson}
+                onClose={() => setFocusedId(null)}
+                onEdit={() => setPanel('people')}
+                photos={photoList}
+                photosLoading={photos.isPending}
+                photosError={photos.error}
+                onRefreshPhotos={() => void photos.refetch()}
+                onUploadPhoto={(file, ageBucket, makeMain) => uploadPhoto(focusedPerson.id, file, ageBucket, makeMain)}
+                onSetMainPhoto={(photoId) => setMainPhoto(focusedPerson.id, photoId)}
+                onDeletePhoto={(photoId) => deletePhoto(focusedPerson.id, photoId)}
+              />
+            )}
           </div>
-          {graph.people.length === 0 ? (
-            <div className="sidebar-empty"><span aria-hidden="true">✦</span><strong>No people yet</strong><p>Add the first person to begin this family story.</p></div>
-          ) : (
-            <nav className="people-list" aria-label="People in this tree">
-              {graph.people.map((person) => (
-                <button
-                  key={person.id}
-                  className={person.id === effectiveSelectedId && !showCreate ? 'person-list-item is-active' : 'person-list-item'}
-                  type="button"
-                  onClick={() => openPerson(person.id)}
-                >
-                  <span className="person-avatar">{portraitUrls.get(person.id)
-                    ? <img src={portraitUrls.get(person.id)} alt="" onError={() => void photos.refetch()} />
-                    : <>{person.firstName.charAt(0)}{person.lastName.charAt(0)}</>}</span>
-                  <span><strong>{person.firstName} {person.lastName}</strong><small>{person.birthYear ?? 'Year unknown'} · {lifeLabel(person)}</small></span>
-                  {isIncomplete(person) && <span className="discovery-dot" title="Some family information is still unknown">✦</span>}
-                </button>
-              ))}
-            </nav>
-          )}
-          {graph.people.length > 0 && <button className="button button--secondary button--wide sidebar-add" type="button" onClick={startCreating}>+ Add another person</button>}
-        </aside>
-
-        <div className="editor-main">
-          <SharePanel accessToken={accessToken} treeId={treeId} userId={userId} />
-          {graph.people.length > 0 && (
-            <section className="panel family-map-panel">
-              <div className="family-map-heading">
-                <div>
-                  <span className="eyebrow">{focusedPerson ? 'Person focus' : 'Family map'}</span>
-                  <h2>{focusedPerson ? `Exploring ${focusedPerson.firstName}'s family` : 'See the whole family at a glance'}</h2>
-                  <p>{focusedPerson
-                    ? 'Immediate family stays prominent while the broader tree remains in view. Select anyone nearby to continue exploring.'
-                    : 'Select a person to open their story. Use the map controls to pan, zoom, or fit everyone into view.'}</p>
-                </div>
-                {focusedPerson ? (
-                  <button className="button button--quiet" type="button" onClick={() => setFocusedId(null)}>Show whole tree</button>
-                ) : <span className="count-pill">Automatic layout</span>}
-              </div>
-              <div className={focusedPerson && !showCreate ? 'family-map-body has-person-card' : 'family-map-body'}>
-                <FamilyTree
-                  graph={graph}
-                  portraitUrls={portraitUrls}
-                  selectedPersonId={showCreate ? null : focusedPerson?.id}
-                  onSelectPerson={openPerson}
-                />
-                {focusedPerson && !showCreate && (
-                  <PersonCard
-                    graph={graph}
-                    personId={focusedPerson.id}
-                    onNavigate={openPerson}
-                    onClose={() => setFocusedId(null)}
-                    photos={photoList}
-                    photosLoading={photos.isPending}
-                    photosError={photos.error}
-                    onRefreshPhotos={() => void photos.refetch()}
-                    onUploadPhoto={(file, ageBucket, makeMain) => uploadPhoto(focusedPerson.id, file, ageBucket, makeMain)}
-                    onSetMainPhoto={(photoId) => setMainPhoto(focusedPerson.id, photoId)}
-                    onDeletePhoto={(photoId) => deletePhoto(focusedPerson.id, photoId)}
-                  />
-                )}
-              </div>
-            </section>
-          )}
+        </section>
+        <aside className="workspace-tools" id="people-tools" aria-label="People and editing" hidden={activePanel !== 'people'}>
+          <div className="workspace-tools__heading">
+            <h2>{showCreate ? 'Add to the family' : 'People & editing'}</h2>
+            {graph.people.length > 0 && <button className="button button--quiet" type="button" onClick={() => { setCreating(false); setPanel(null); }}>Close</button>}
+          </div>
+          <div className="people-sidebar">
+            {graph.people.length === 0 ? (
+              <div className="sidebar-empty"><span aria-hidden="true">✦</span><strong>No people yet</strong><p>Add the first person to begin this family story.</p></div>
+            ) : (
+              <nav className="people-list" aria-label="People in this tree">
+                {graph.people.map((person) => (
+                  <button
+                    key={person.id}
+                    className={person.id === effectiveSelectedId && !showCreate ? 'person-list-item is-active' : 'person-list-item'}
+                    type="button"
+                    onClick={() => openPerson(person.id)}
+                  >
+                    <span className="person-avatar">{portraitUrls.get(person.id)
+                      ? <img src={portraitUrls.get(person.id)} alt="" onError={() => void photos.refetch()} />
+                      : <>{person.firstName.charAt(0)}{person.lastName.charAt(0)}</>}</span>
+                    <span><strong>{person.firstName} {person.lastName}</strong><small>{person.birthYear ?? 'Year unknown'} · {lifeLabel(person)}</small></span>
+                    {isIncomplete(person) && <span className="discovery-dot" role="img" aria-label="More to discover" title="Some family information is still unknown" />}
+                  </button>
+                ))}
+              </nav>
+            )}
+            {graph.people.length > 0 && <button className="button button--secondary button--wide sidebar-add" type="button" onClick={startCreating}>+ Add another person</button>}
+          </div>
           <section className="panel">
             <PersonForm
               key={showCreate ? 'new-person' : selectedPerson?.id}
               graph={graph}
               person={showCreate ? undefined : selectedPerson}
               onSave={(input) => savePerson(input, showCreate ? undefined : selectedPerson)}
-              onSaved={(person) => { setSelectedId(person.id); setFocusedId(person.id); setCreating(false); }}
-              onCancel={creating && graph.people.length ? () => setCreating(false) : undefined}
+              onSaved={(person) => { setSelectedId(person.id); setFocusedId(person.id); setCreating(false); setPanel(null); }}
+              onCancel={graph.people.length ? () => { setCreating(false); setPanel(null); } : undefined}
             />
           </section>
           <RelationshipPanel
@@ -266,7 +259,11 @@ export function FamilyEditorPage() {
             onRemoveParent={removeParent}
             onRemovePartner={removePartner}
           />
-        </div>
+        </aside>
+        <aside className="workspace-tools" id="share-tools" aria-label="Private sharing" hidden={activePanel !== 'share'}>
+          <div className="workspace-tools__heading"><h2>Share the family</h2><button className="button button--quiet" type="button" onClick={() => setPanel(null)}>Close</button></div>
+          <SharePanel accessToken={accessToken} treeId={treeId} userId={userId} />
+        </aside>
       </main>
     </div>
   );
