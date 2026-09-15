@@ -6,4 +6,4 @@ You may correct review instructions, implementation declarations, automated resu
 
 If a product decision is needed, describe the options and ask before changing the intended behavior. Read-only investigation does not require editing a manifest; when making changes, follow the maintenance and validation procedures.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=d1bc7a8a0a8384b30b129692a7bdc70ede982ef5e8a542f9642afe9751e5cec6 -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=8391716b79d253a0316defc1048e66d3dff5e98bd9548ad8e40f78967f7510f0 -->

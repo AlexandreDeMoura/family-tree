@@ -85,7 +85,7 @@ To update Contour, review its release changes, then:
 
 ```sh
 pnpm outdated @trompetteman/contour               # compare installed and latest versions
-pnpm add -Dw @trompetteman/contour@<version>      # install the new version at the workspace root
+pnpm add -Dw @trompetteman/contour@latest     # install the new version at the workspace root
 pnpm install --frozen-lockfile                    # synchronizes the whole workspace with the updated lockfile
 pnpm exec contour init                            # refresh Contour-owned instruction blocks
 pnpm validate                                     # rerun the full gate, including the manifest check

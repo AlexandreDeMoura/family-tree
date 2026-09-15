@@ -4,4 +4,4 @@ For one distinct, bounded task, add one honest `status: planned` entry, choose a
 
 Preserve the file’s authored ordering and formatting conventions. Never add `acceptance_history` or accept the new capability for the builder. Edit only `.contour/manifest/capabilities.yaml`; avoid unrelated manifest or product-code changes.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=57ebcd78100da72997d321334ba3c7ae507d6b24d43ad9a44e2f2b2b54168fb2 -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=2e310b41bd7dd9c5a1e76c55f9653554f7a0dccf4128a3b7ddebb3a2283bfa23 -->

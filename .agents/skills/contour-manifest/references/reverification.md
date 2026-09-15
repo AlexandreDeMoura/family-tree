@@ -4,4 +4,4 @@ Re-verification is evidence maintenance, not human acceptance. Never add, edit, 
 
 For a capability, compare its scope with the other capabilities before confirming it. Keep the same ID for the same task. If correcting scope requires a split or merge and changes to other entries or contract ownership, record the proposed correction in an attention item linked to this entry; do not partially migrate references during an entry-scoped verification.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=e5057166314e61d3bc9912275a82b680ad3978ab90a64d47061ad4dfc9d95c17 -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=b4a05081179679d348cd2d833c6d8b00bf84e354afacb545941f7200672b5e3b -->

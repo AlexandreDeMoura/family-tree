@@ -8,10 +8,10 @@ Follow the project manifest standing rule in the root agent instruction files: a
 
 Keep stable ids stable, record durable architectural choices in `decisions.yaml`, and do not edit marker-owned generated sections in `attention.yaml` by hand.
 
-Human acceptance is not agent-authored manifest maintenance. Never create, edit, backfill, or remove `acceptance_history`; never call Contour's acceptance endpoint or accept/reopen for the builder. Acceptance and reopening never change delivery status, implementation declarations, automated evidence, `verified_by`, or `last_verified`. Preserve existing lifecycle events byte-for-byte unless the local Contour server appends one after an explicit human action.
+Human acceptance is not agent-authored manifest maintenance. Never create, edit, backfill, or remove `acceptance_history`; never call Contour's acceptance endpoint or accept/reopen for the builder. The human builder clicking Accept in the web view atomically records acceptance and sets `status: shipped`; no manual capabilities-file edit is needed. Reopen returns review to `Needs review` and preserves delivery status. Neither action changes implementation declarations, automated evidence, `verified_by`, or `last_verified`. Preserve existing lifecycle events byte-for-byte unless the local Contour server appends one after an explicit human action.
 
 Each contract file contains one `contract-*` entry bound to exactly one owner: either `part: part-*` or `capability: cap-*`, never both or neither. Keep its `accepts`, `guarantees`, and `rules` as sequences of non-empty statements; use an empty sequence instead of inventing a promise. When affected behavior changes, keep those statements and their `verified_by` evidence honest, and update `last_verified` only after verifying the complete entry at the current commit.
 
 When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`. An authored uncertainty in `attention.yaml` must reference the entry it concerns in `relies_on` using its stable id. Broken optional review sources and invalid release groups are authoring problems to repair, not acceptance blockers or reasons to invent history.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=a2cff5fe39cd010cd0f3f447d7bbf9fa8e93cb5ffcea720e6a53c4c6104f3abb -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=bb6444b4c0e277d5da08a7cd2cbba2cd81b9a650ada53589cb88ffb69c7c66a7 -->

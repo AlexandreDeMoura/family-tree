@@ -44,7 +44,7 @@ review_instructions:
 
 Each `review_instructions` item requires a concise nonempty `summary`. Its optional `source` has a repository-relative `path` and optional nonempty `section`. The summary must remain useful if the source cannot be resolved. Keep full procedures in the linked document; do not add checklist state. Capability-owned `review_instructions` are authoritative for “What to check.” A capability also inherits explicitly authored `review_instructions` from its directly bound and supporting-part contracts, with capability-owned summaries first and exact duplicate summaries once. Contract `rules` remain contract evidence and never become manual review instructions.
 
-`acceptance_history` is not an authoring field. It is server-owned lifecycle history written only after the human builder chooses Accept or Reopen in Contour's local web view. Never create, edit, backfill, or delete those events and never call the acceptance endpoint. Acceptance is independent from `status`, implementation and verification evidence, `verified_by`, and `last_verified`; do not change any of them on the builder's behalf.
+`acceptance_history` is not an authoring field. It is server-owned lifecycle history written only after the human builder chooses Accept or Reopen in Contour's local web view. Never create, edit, backfill, or delete those events and never call the acceptance endpoint. Accept atomically appends the event and sets `status: shipped`. Reopen appends its event and preserves delivery status. Neither action changes implementation or verification evidence, `verified_by`, or `last_verified`. Agents must not imitate these human actions by editing status or history.
 
 `project.yaml` may define explicit release membership:
 
@@ -75,4 +75,4 @@ Example of unbuilt intent:
 
 Preserve authored ordering, comments, unknown fields, and stable IDs. Existing manifests require no migration: do not backfill review fields, acceptance history, or release groups. Do not hand-edit the block between `# contour:generated-attention:start` and `# contour:generated-attention:end`. Plain `contour check` is read-only; only explicit `contour check --write` refreshes generated findings. Mechanical checks cover YAML, fields, references, paths, and freshness, not semantic correctness or manual acceptance.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=9cb80cfedc8427dc6a5bd5552fc89c85f26b128804c93564a70f91360b002bbc -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=d125127628035b23774072ae110fd105b9ac4b3d55cb49c9c7676b34e37fb752 -->

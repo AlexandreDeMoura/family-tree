@@ -37,4 +37,4 @@ Never add or edit `acceptance_history`, invoke the acceptance endpoint, accept o
 
 Use stable lowercase kebab-case ids with the prefixes shown in the scaffold examples. Reference repository-relative paths, verify every claim against the code, and do not modify product code during this bootstrap.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=02508c95c35f3b2a4821d7d200c07e38c741aa7d4b373a348793e98f5f890390 -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=85ff2471b0b7ee847d46ba7f7692227b8855d4404dca4e8e36c019ed412b1c98 -->

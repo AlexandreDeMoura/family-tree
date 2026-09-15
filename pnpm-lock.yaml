@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@trompetteman/contour':
-        specifier: ^0.7.1
-        version: 0.7.1
+        specifier: ^0.8.0
+        version: 0.8.0
       supabase:
         specifier: 2.117.0
         version: 2.117.0
@@ -738,8 +738,8 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
-  '@trompetteman/contour@0.7.1':
-    resolution: {integrity: sha512-Vz7FCmkcpaPyQWqxfRefs213UvwghdF1/fc5xTZCQ8ddZAXBwWiLlCiOlykJMHnDxMs+QQpTvnQDEqxP96lSFw==}
+  '@trompetteman/contour@0.8.0':
+    resolution: {integrity: sha512-2Ju0PBrYYVsKagbm5ZMpA9kZPG+KSBEJIOaq64CDfaJDZKhNMGJHEm9w/MnpyUZWKO2M0XWIqlu71PIT8wOYUQ==}
     engines: {node: '>=22.15.1 <23'}
     hasBin: true
 
@@ -1929,7 +1929,7 @@ snapshots:
       '@tanstack/query-core': 5.102.8
       react: 19.2.8
 
-  '@trompetteman/contour@0.7.1':
+  '@trompetteman/contour@0.8.0':
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

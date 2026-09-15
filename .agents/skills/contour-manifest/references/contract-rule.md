@@ -8,4 +8,4 @@ Make the rule true in product code and focused tests before claiming it in the c
 
 If the rule needs a distinct human exercise, add or update a concise `review_instructions` summary on the target capability, with an optional repository-relative source document and section. Only put the instruction on the contract when the same manual exercise genuinely applies to every capability that inherits it. Contract `rules` stay in evidence and never enter “What to check” by themselves, so do not copy a rule into review guidance unless it describes a real human exercise. Do not create an acceptance event or invoke the acceptance endpoint after implementing or documenting the rule; the builder owns that decision.
 
-<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=d4d03d47cfee551eae08d2190b2704cd6440a9520af3712890953d6d6d9e48c9 -->
+<!-- contour:skill version=0.8.0-2378d3b4632e2902 sha256=f305fb601a20c6949cb9d1271915c01eb4ed7ea339ad0c31ed31f81d0071c456 -->
