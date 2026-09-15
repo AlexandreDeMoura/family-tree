@@ -2,6 +2,8 @@ Read the manifest and the relevant implementation and tests. Confirm whether the
 
 Explain the evidence, resolve the mismatch if appropriate, and re-verify only the entries you actually checked. Preserve stable IDs and unrelated authored content.
 
+You may correct review instructions, implementation declarations, automated results, or release-group membership when the evidence establishes the authored value. Never resolve a finding by creating or editing `acceptance_history`, calling the acceptance endpoint, accepting/reopening for the builder, or changing delivery status to mirror review state.
+
 If a product decision is needed, describe the options and ask before changing the intended behavior. Read-only investigation does not require editing a manifest; when making changes, follow the maintenance and validation procedures.
 
-<!-- contour:skill version=0.6.0-19bf337432393f8d sha256=040192b02d0ac32c72062b18b688713d23bb20c088b63b8e2abae2e29861fbd0 -->
+<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=d1bc7a8a0a8384b30b129692a7bdc70ede982ef5e8a542f9642afe9751e5cec6 -->

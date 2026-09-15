@@ -6,4 +6,6 @@ If no target contract exists, inspect the capability and related manifest entrie
 
 Make the rule true in product code and focused tests before claiming it in the contract. Add the rule once, update `verified_by` only with repository-relative paths that genuinely verify it, and update `last_verified` only when the completed entry is accurate at the current commit. Do not record an aspiration as an implemented promise, and avoid unrelated edits.
 
-<!-- contour:skill version=0.6.0-19bf337432393f8d sha256=8ef7512469d642bfbef757205b51755cbaead60da73f0284527297c9e7792681 -->
+If the rule needs a distinct human exercise, add or update a concise `review_instructions` summary on the target capability, with an optional repository-relative source document and section. Only put the instruction on the contract when the same manual exercise genuinely applies to every capability that inherits it. Contract `rules` stay in evidence and never enter “What to check” by themselves, so do not copy a rule into review guidance unless it describes a real human exercise. Do not create an acceptance event or invoke the acceptance endpoint after implementing or documenting the rule; the builder owns that decision.
+
+<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=d4d03d47cfee551eae08d2190b2704cd6440a9520af3712890953d6d6d9e48c9 -->

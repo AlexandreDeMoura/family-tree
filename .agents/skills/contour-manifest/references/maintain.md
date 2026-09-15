@@ -2,14 +2,16 @@ Use this procedure for ordinary feature work, bug fixes, and ongoing manifest ma
 
 Before broad codebase exploration, read `.contour/manifest/project.yaml`, the manifest slices relevant to the task, and any relevant files under `.contour/manifest/contracts/`. Treat them as a map, then verify affected claims against the code.
 
-After changing code, update the affected manifest YAML files.
+After changing code, update the affected manifest YAML files. Keep `implementation`, actual `automated_verification` results, concise `review_instructions`, and explicitly requested `release_groups` current when the change affects them. Preserve failing, mixed, and incomplete results instead of converting them into a broad pass. Do not infer release membership from dependencies.
 
 Follow the project manifest standing rule in the root agent instruction files: after your final edit, run the repository's required validation, including the locally installed `contour check`. Resolve failures and rerun affected checks before reporting completion. Use the repository's package-manager runner for the installed binary. Report commands and results or an explicit setup blocker; do not download a missing tool, bypass checks, weaken validation, or invent verification stamps.
 
 Keep stable ids stable, record durable architectural choices in `decisions.yaml`, and do not edit marker-owned generated sections in `attention.yaml` by hand.
 
+Human acceptance is not agent-authored manifest maintenance. Never create, edit, backfill, or remove `acceptance_history`; never call Contour's acceptance endpoint or accept/reopen for the builder. Acceptance and reopening never change delivery status, implementation declarations, automated evidence, `verified_by`, or `last_verified`. Preserve existing lifecycle events byte-for-byte unless the local Contour server appends one after an explicit human action.
+
 Each contract file contains one `contract-*` entry bound to exactly one owner: either `part: part-*` or `capability: cap-*`, never both or neither. Keep its `accepts`, `guarantees`, and `rules` as sequences of non-empty statements; use an empty sequence instead of inventing a promise. When affected behavior changes, keep those statements and their `verified_by` evidence honest, and update `last_verified` only after verifying the complete entry at the current commit.
 
-When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`. An authored uncertainty in `attention.yaml` must reference the entry it concerns in `relies_on` using its stable id.
+When code and manifest disagree, update the manifest to describe the implemented truth or call out the unresolved mismatch in `attention.yaml`. An authored uncertainty in `attention.yaml` must reference the entry it concerns in `relies_on` using its stable id. Broken optional review sources and invalid release groups are authoring problems to repair, not acceptance blockers or reasons to invent history.
 
-<!-- contour:skill version=0.6.0-19bf337432393f8d sha256=0a8efbf3f9e89e792f360b2207f5f14a2bfb3a580d643cddcb78c616bd74ce83 -->
+<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=a2cff5fe39cd010cd0f3f447d7bbf9fa8e93cb5ffcea720e6a53c4c6104f3abb -->

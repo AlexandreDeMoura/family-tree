@@ -5,7 +5,7 @@ Read `.contour/manifest/project.yaml` first, then inspect the repository economi
 3. Capabilities: derive bounded user tasks from current product behavior, compare the whole list for umbrellas, duplicates, and interaction details, then describe them in `.contour/manifest/capabilities.yaml`, linking them to the relevant parts and doors. Do not translate the folder structure, feature plan, or commit history into one entry per item.
 4. Contracts: add one YAML file per important capability or part under `.contour/manifest/contracts/` when its promises and rules are evident from code and focused tests.
 
-Fill `project.yaml` with the repository purpose, technologies, entry points, and the default staleness threshold. Leave `decisions.yaml` empty: do not infer historical decisions that the repository cannot prove. Keep `attention.yaml` for concrete uncertainties or contradictions that need human review.
+Fill `project.yaml` with the repository purpose, technologies, entry points, and the default staleness threshold. Add `release_groups` only when the repository or builder identifies real release membership; do not create an empty or speculative group. Leave `decisions.yaml` empty: do not infer historical decisions that the repository cannot prove. Keep `attention.yaml` for concrete uncertainties or contradictions that need human review.
 
 Every contract file contains exactly one contract. A contract binds to exactly one owner: use either `capability: cap-*` or `part: part-*`, never both and never neither. Use this complete capability-owned shape:
 
@@ -31,6 +31,10 @@ last_verified: abc1234
 
 For a part-owned contract, replace the `capability` line with a single `part: part-*` binding and keep the same remaining fields. `accepts`, `guarantees`, and `rules` are sequences whose authored statements must be non-empty. Use `[]` when no evidenced statement is known rather than inventing a promise. Record only behavior supported by the current code and focused tests, cite genuine repository-relative evidence in `verified_by`, and set `last_verified` only when the entire entry is accurate at that commit. Put uncertainty in `attention.yaml` instead of presenting it as a contract.
 
+For each capability, add an honest `implementation` declaration and actual `automated_verification` results only when the repository supports them. Add concise capability `review_instructions` for the human-visible behavior that needs exercising, with an optional repository-relative document and section link. These are the authoritative “What to check” items. If one manual exercise genuinely applies to several capabilities, place an explicit reusable `review_instructions` item on the directly bound or supporting-part contract. Contract `rules` remain evidence and never become checklist items. Missing review preparation is preferable to invented evidence.
+
+Never add or edit `acceptance_history`, invoke the acceptance endpoint, accept or reopen a capability, or change its delivery status to represent review. The human builder owns acceptance through Contour's local web action. Bootstrap and later guidance refreshes must preserve any existing lifecycle history and must not backfill acceptance or release groups.
+
 Use stable lowercase kebab-case ids with the prefixes shown in the scaffold examples. Reference repository-relative paths, verify every claim against the code, and do not modify product code during this bootstrap.
 
-<!-- contour:skill version=0.6.0-19bf337432393f8d sha256=cf3ae9063b5b46e651ad8836cd7fcb0529480ffce31ead90050ff77ab84691a2 -->
+<!-- contour:skill version=0.7.1-34753fb6f4b3209f sha256=02508c95c35f3b2a4821d7d200c07e38c741aa7d4b373a348793e98f5f890390 -->
