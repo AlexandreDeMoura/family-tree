@@ -30,6 +30,22 @@
     - apps/api/src/lib/database.db.test.ts
   relies_on: [part-web, part-api, part-supabase]
   doors: [door-organizer-sign-in, door-organizer-home, door-organizer-family-editor, door-organizer-family-api]
+  review_instructions:
+    - summary: >-
+        Open an organizer tree URL while signed out, sign in with the configured
+        organizer, and confirm you return to that tree; refresh to confirm the session is restored.
+    - summary: >-
+        From the organizer home, create a named tree and confirm its empty editor opens;
+        return home and switch between it and an existing tree, checking the correct name and people.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Try a blank tree name and a failed tree request; confirm blank creation is
+        blocked, failures show feedback, and retrying the tree list restores access.
+    - summary: >-
+        Sign out, then revisit the organizer home and a saved editor URL; both must
+        require sign-in before showing private family data.
   open_questions:
     - Organizer manual QA must confirm sign-in, redirect back to the requested page, the tree list, tree creation, and sign-out.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
@@ -67,6 +83,43 @@
     - apps/web/src/features/people/person-workspace.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-organizer-family-api]
+  review_instructions:
+    - summary: >-
+        Add a relative, then edit their names, life status, optional years, adoption,
+        and up to three facts; save and refresh to confirm the card retains the changes.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
+    - summary: >-
+        Try death before birth, a future death year, and switching a deceased person
+        with a death year to Living; confirm invalid combinations cannot be saved and unknown years remain valid.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Edit a connected person's birth year to conflict with a parent or child;
+        confirm a specific rule blocks save, retains the draft, and leaves persisted facts unchanged after reload.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Save unknown and complete parent/partner lists, plus known children, No children,
+        and Unknown; reopen the person and confirm each state survives with distinct tree/card wording.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
+    - summary: >-
+        Confirm the live preview follows fact edits and missing-information prompts
+        allow save; save should focus the person, while discard leaves facts and relationships unchanged.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
+    - summary: >-
+        Simulate a failed save and confirm all draft values remain available; compare
+        the editor with mockup 04 and check that fields, actions, and the preview remain reachable at narrow widths.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
   open_questions:
     - Organizer manual QA must confirm creation, editing, specific blocked-rule messages, retained values after a failed save, and the unknown-versus-known-absence controls.
     - Whether removing a relative belongs to the MVP is unresolved; see attention-relative-deletion-scope.
@@ -104,6 +157,37 @@
     - apps/web/src/features/people/person-workspace.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-organizer-family-api]
+  review_instructions:
+    - summary: >-
+        Add and remove parent, child, and partner selections in a person's workspace;
+        save and reload to confirm the links change together with person facts and unrelated branches stay unchanged.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
+    - summary: >-
+        In the synthetic acceptance tree, confirm Luc has both Claire and Nadia as
+        partners, Mia remains valid with one known parent, and Sam remains valid while disconnected.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Confirm Anne has nine full siblings and Theo is marked as a half-sibling;
+        changing shared parents must update the derived summary without offering direct sibling editing.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Try an ancestry loop, a third parent, and a parent born after their child;
+        each must show a specific conflict and block save, while equal or unknown birth years remain valid.
+      source:
+        path: docs/manual-acceptance.md
+        section: Creation and integrity — PRD §24 Creation and Data integrity
+    - summary: >-
+        Confirm relationship choices prevent self-links and duplicates; simulate a
+        failed save and verify selections remain in the draft while reloading shows no partial relationship changes.
+      source:
+        path: docs/manual-acceptance.md
+        section: Dedicated person workspace follow-up — PRD commit 15 (manual QA pending)
   open_questions:
     - Organizer manual QA must confirm adding and removing links, the derived sibling summary, and actionable conflict messages for each invariant.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
@@ -149,6 +233,49 @@
     - packages/family-core/src/mvp-acceptance.fixture.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-private-family-view]
+  review_instructions:
+    - summary: >-
+        Open the synthetic acceptance tree in both organizer and private viewer;
+        confirm every person appears once, generations run top-to-bottom, and Luc's two partner branches remain understandable.
+      source:
+        path: docs/manual-acceptance.md
+        section: Visual design — PRD §24 Visual design
+    - summary: >-
+        Pan, zoom, and fit the tree on desktop and narrow screens; reach the ten-sibling
+        branch and disconnected Sam, with the tree name, focus header, and live zoom controls still usable.
+      source:
+        path: docs/manual-acceptance.md
+        section: Album workspace follow-up — PRD commit 13 (manual QA pending)
+    - summary: >-
+        Focus Anne, follow each parent, sibling, partner, and child from her card,
+        then choose Show whole tree; confirm each correct person opens and enough tree context remains visible.
+      source:
+        path: docs/manual-acceptance.md
+        section: Browsing — PRD §24 Browsing
+    - summary: >-
+        Check names, life details, adoption, three facts, Half labels, and missing-photo
+        placeholders; unknown relationships must look incomplete and confirmed childlessness must say No children.
+      source:
+        path: docs/manual-acceptance.md
+        section: Album workspace follow-up — PRD commit 13 (manual QA pending)
+    - summary: >-
+        Compare whole-tree and focused views with mockups 01 and 02; deceased relatives
+        must retain equal card size and prominence, with a subtle remembrance ring and fading based only on focus distance.
+      source:
+        path: docs/manual-acceptance.md
+        section: Album workspace follow-up — PRD commit 13 (manual QA pending)
+    - summary: >-
+        From a private viewer card, open the photo preview and browse all eleven life
+        stages in order; verify bucket counts, thumbnail selection, quiet empty stages, and unavailable-image refresh.
+      source:
+        path: docs/manual-acceptance.md
+        section: Life-stage photo viewer follow-up — PRD commit 14 (manual QA pending)
+    - summary: >-
+        Compare the photo page with mockup 03 using portrait, landscape, and square
+        images at desktop and narrow widths; Back to card must restore the same person and close must return to the whole tree.
+      source:
+        path: docs/manual-acceptance.md
+        section: Life-stage photo viewer follow-up — PRD commit 14 (manual QA pending)
   open_questions:
     - Manual QA must compare whole-tree and focused-person album workspaces with mockups 01 and 02, including compact nodes, remembrance rings, discovery cues, visible zoom controls, and responsive behavior.
     - Manual QA must confirm that multiple-partner, half-sibling, ten-sibling, and disconnected branches stay readable with pan, zoom, and fit-to-view on desktop and narrow screens.
@@ -183,6 +310,28 @@
     - apps/web/src/features/photos/photo-upload.test.ts
   relies_on: [part-web, part-api, part-family-core, part-supabase]
   doors: [door-organizer-family-editor, door-organizer-family-api]
+  review_instructions:
+    - summary: >-
+        Save a person before adding photos, then upload JPEG, PNG, and WebP examples
+        across all eleven life stages; reload and confirm each published photo appears only in its chosen bucket.
+      source:
+        path: docs/manual-acceptance.md
+        section: Browsing — PRD §24 Browsing
+    - summary: >-
+        Choose a published photo as the main portrait, refresh, then remove it;
+        confirm the map, editing preview, and person card update and use a clean fallback after deletion.
+      source:
+        path: docs/manual-acceptance.md
+        section: Browsing — PRD §24 Browsing
+    - summary: >-
+        Let a private photo URL expire and use Refresh links to restore the image;
+        a missing object must show Photo unavailable and leave refresh or removal accessible.
+    - summary: >-
+        Try an unsupported file and a source larger than 20 MiB; confirm useful
+        feedback and no published photo, then retry with a valid image and confirm it appears once.
+    - summary: >-
+        Interrupt an upload or deletion in the local acceptance tree; confirm the
+        failure is visible and, when cleanup remains pending, its retry control clears it without publishing an unfinished upload.
   open_questions:
     - Organizer manual QA must confirm browser conversion, signed upload for every bucket, portrait selection and fallback, expired-link refresh, missing-image treatment, and deletion retry.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
@@ -212,6 +361,34 @@
     - apps/web/src/features/sharing/share-link.test.ts
   relies_on: [part-web, part-api, part-supabase, cap-browse-family-tree]
   doors: [door-organizer-family-editor, door-organizer-family-api, door-private-family-view, door-viewer-family-api]
+  review_instructions:
+    - summary: >-
+        Create and copy a private link from Share tree; confirm the privacy copy
+        explains that anyone holding the link can view the tree and forward it.
+      source:
+        path: docs/manual-acceptance.md
+        section: Browsing — PRD §24 Browsing
+    - summary: >-
+        Open the copied link in a signed-out window; confirm the correct tree,
+        cards, facts, and private photos load without an account and no editing, upload, or sharing controls appear.
+      source:
+        path: docs/manual-acceptance.md
+        section: Browsing — PRD §24 Browsing
+    - summary: >-
+        Navigate between the private tree, card, and photo page, then refresh and
+        use browser back/forward; access must survive with the token kept in the URL fragment.
+      source:
+        path: docs/manual-acceptance.md
+        section: Life-stage photo viewer follow-up — PRD commit 14 (manual QA pending)
+    - summary: >-
+        Replace the link, then reload the old tree and photo-page URLs; both must
+        refuse access while the new link works. Previously issued image URLs may remain usable until their five-minute expiry.
+      source:
+        path: docs/manual-acceptance.md
+        section: Life-stage photo viewer follow-up — PRD commit 14 (manual QA pending)
+    - summary: >-
+        Open a link with its token missing or altered, and try the token with a
+        different tree ID; confirm an unavailable-link state without exposing family data.
   open_questions:
     - Organizer manual QA must confirm link creation, copying, replacement, the privacy caveat, and account-free read-only loading in a signed-out window.
   last_verified: 332c68d3c627499807c461534c2628b3a51b45ea
